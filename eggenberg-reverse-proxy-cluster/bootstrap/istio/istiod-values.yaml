@@ -1,9 +1,0 @@
-profile: ambient
-meshConfig:
-  accessLogFile: /dev/stdout
-
-telemetry:
-  enabled: true
-  v2:
-    prometheus:
-      enabled: true
