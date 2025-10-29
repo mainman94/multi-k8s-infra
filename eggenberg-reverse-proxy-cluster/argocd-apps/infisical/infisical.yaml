@@ -13,6 +13,8 @@ spec:
         valueFiles:
           - $values/eggenberg-reverse-proxy-cluster/bootstrap/infisical/values.yaml
     - repoURL: https://github.com/mainman94/multi-k8s-infra
+      targetRevision: HEAD
+      ref: values
   destination:
     server: https://kubernetes.default.svc
     namespace: infisical-secrets-operator
