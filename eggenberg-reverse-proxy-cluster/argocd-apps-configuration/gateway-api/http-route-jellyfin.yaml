@@ -1,7 +1,7 @@
 apiVersion: networking.istio.io/v1beta1
 kind: ServiceEntry
 metadata:
-  name: jellyfin-service-entry
+  name: jellyfin-service
 spec:
   hosts:
     - jellyfin-rp.philippmhauptmann.me
@@ -17,6 +17,21 @@ spec:
     - address: 192.168.0.129
       ports:
         my-http-port: 30013
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jellyfin-service
+  namespace: default
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http
+  type: ClusterIP
+  selector: {}
+
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -53,5 +68,5 @@ spec:
               - name: Content-Security-Policy
                 value: "default-src 'self'; script-src 'none'; object-src 'none'; base-uri 'none';"
       backendRefs:
-        - name: jellyfin-rp.philippmhauptmann.me
+        - name: jellyfin-service
           port: 80
