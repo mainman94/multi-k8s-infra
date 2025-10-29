@@ -4,19 +4,19 @@ metadata:
   name: jellyfin-service
 spec:
   hosts:
-    - jellyfin-rp.philippmhauptmann.me
+    - jellyfin-service.default.svc.cluster.local
   addresses:
     - 192.168.0.129
   ports:
     - number: 80
-      name: my-http-port
+      name: http
       protocol: HTTP
   location: MESH_EXTERNAL
   resolution: STATIC
   endpoints:
     - address: 192.168.0.129
       ports:
-        my-http-port: 30013
+        http: 30013
 ---
 apiVersion: v1
 kind: Service
@@ -31,7 +31,6 @@ spec:
       name: http
   type: ClusterIP
   selector: {}
-
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
