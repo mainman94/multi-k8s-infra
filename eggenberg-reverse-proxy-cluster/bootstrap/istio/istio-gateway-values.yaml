@@ -1,44 +1,43 @@
-gateways:
-  - enabled: true
-    name: ingressgateway
-    gatewayApi:
-      create: true
-      listeners:
-        - name: https
-          protocol: HTTPS
-          port: 443
-          hostname: "*.philippmhauptmann.me"
-          tls:
-            mode: Terminate
-            certificateRefs:
-              - name: wildcard-philippmhauptmann-tls
-                kind: Secret
-                group: ""
-          allowedRoutes:
-            namespaces:
-              from: Selector
-              selector:
-                matchExpressions:
-                  - key: kubernetes.io/metadata.name
-                    operator: In
-                    values:
-                      - argocd
-                      - monitoring
-    service:
-      ports:
-        - name: status-port
-          port: 15021
-          protocol: TCP
-          targetPort: 15021
-        - name: http2
-          port: 80
-          protocol: TCP
-          targetPort: 80
-        - name: https
-          port: 443
-          protocol: TCP
-          targetPort: 443
-        - name: http-prometheus
-          port: 15020
-          protocol: TCP
-          targetPort: 15020
+enabled: true
+name: ingressgateway
+gatewayApi:
+  create: true
+  listeners:
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: "*.philippmhauptmann.me"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: wildcard-philippmhauptmann-tls
+            kind: Secret
+            group: ""
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchExpressions:
+              - key: kubernetes.io/metadata.name
+                operator: In
+                values:
+                  - argocd
+                  - monitoring
+service:
+  ports:
+    - name: status-port
+      port: 15021
+      protocol: TCP
+      targetPort: 15021
+    - name: http2
+      port: 80
+      protocol: TCP
+      targetPort: 80
+    - name: https
+      port: 443
+      protocol: TCP
+      targetPort: 443
+    - name: http-prometheus
+      port: 15020
+      protocol: TCP
+      targetPort: 15020
