@@ -21,6 +21,3 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-
-
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZGVudGl0eUlkIjoiMDllYmNiZjMtMDgwZC00ODlkLWFjYzMtYzJhNzQwYTkxYzVjIiwiaWRlbnRpdHlBY2Nlc3NUb2tlbklkIjoiODkyZjhiZGMtMWJlYS00YWMwLWFhMWQtYmMwN2IyOTliZjUxIiwiYXV0aFRva2VuVHlwZSI6ImlkZW50aXR5QWNjZXNzVG9rZW4iLCJpYXQiOjE3NjE3Mjk1MTgsImV4cCI6MTc2NDMyMTUxOH0.QEFri0g91kLv3X8XovKEeY_npOaeZUOIZ8mhA6-JUmc
