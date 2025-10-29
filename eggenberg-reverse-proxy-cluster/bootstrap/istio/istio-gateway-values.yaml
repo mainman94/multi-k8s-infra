@@ -1,6 +1,7 @@
 gateways:
   - enabled: true
     name: ingressgateway
+
     gatewayApi:
       create: true
       listeners:
@@ -24,9 +25,14 @@ gateways:
                     values:
                       - argocd
                       - monitoring
+
     service:
+      type: LoadBalancer
       ports:
         status: 15021
         http2: 80
         https: 443
         http-prometheus: 15020
+      annotations: {}
+      loadBalancerSourceRanges: []
+      externalTrafficPolicy: Local  # optional: preserve source IP
