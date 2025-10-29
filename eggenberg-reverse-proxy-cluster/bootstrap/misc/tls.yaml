@@ -1,7 +1,0 @@
-apiVersion: traefik.io/v1alpha1
-kind: TLSStore
-metadata:
-  name: kube-system
-spec:
-  defaultCertificate:
-    secretName: wildcard-philippmhauptmann-tls
