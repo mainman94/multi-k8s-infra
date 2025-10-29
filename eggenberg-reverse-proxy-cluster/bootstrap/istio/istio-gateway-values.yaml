@@ -1,96 +1,19 @@
-# values.yaml – FÜR istio/gateway (NICHT bitnami/istio-gateway!)
-# Helm Chart: istio/gateway
-
-# ─────────────────────────────────────────────────────────────
-# 1. Global & Basis
-# ─────────────────────────────────────────────────────────────
-global:
-  istioNamespace: istio-system
-
-replicaCount: 1
-revision: ""
-
-# ─────────────────────────────────────────────────────────────
-# 2. Autoscaling & PDB
-# ─────────────────────────────────────────────────────────────
-autoscaling:
-  enabled: true
-  minReplicas: 1
-  maxReplicas: 3
-  targetCPUUtilizationPercentage: 80
-
-podDisruptionBudget:
-  enabled: true
-  minAvailable: 1
-
-# ─────────────────────────────────────────────────────────────
-# 3. ServiceAccount (istio/gateway nutzt standardmäßig die istio ServiceAccounts)
-# ─────────────────────────────────────────────────────────────
-# rbac:
-#   create: true
-
-# serviceAccount:
-#   create: true
-#   name: ingressgateway-sa
-#   automountServiceAccountToken: false
-
-# ─────────────────────────────────────────────────────────────
-# 4. Metrics (Prometheus)
-# ─────────────────────────────────────────────────────────────
-# metrics:
-#   enabled: true
-#   serviceMonitor:
-#     enabled: true
-#     namespace: monitoring
-#     interval: 30s
-#     scrapeTimeout: 10s
-#     selector: {}
-#     relabelings: []
-#     metricRelabelings: []
-#     path: /stats/prometheus
-#     port: http-envoy-prom
-
-# ─────────────────────────────────────────────────────────────
-# 5. Gateway
-# ─────────────────────────────────────────────────────────────
 service:
   type: LoadBalancer
   ports:
-    - port: 15021
-      name: status-port
+    - name: status-port
+      port: 15021
+      protocol: TCP
       targetPort: 15021
-    - port: 80
-      name: http2
+    - name: http2
+      port: 80
+      protocol: TCP
       targetPort: 80
-    - port: 443
-      name: https
+    - name: https
+      port: 443
+      protocol: TCP
       targetPort: 443
-    - port: 15020
-      name: http-prometheus
+    - name: http-prometheus
+      port: 15020
+      protocol: TCP
       targetPort: 15020
-  externalTrafficPolicy: Local
-
-podAnnotations:
-  prometheus.io/scrape: "true"
-  prometheus.io/port: "15020"
-  prometheus.io/path: "/stats/prometheus"
-
-# Listener-Konfiguration via Gateway API erfolgt separat (nicht im values.yaml)
-# TLS-Zertifikate werden über Gateway API Ressourcen referenziert
-
-gateways:
-  - enabled: true
-    name: ingressgateway
-    gatewayApi:
-      create: true
-      listeners:
-        - name: https
-          protocol: HTTPS
-          port: 443
-          hostname: "argo-rp.philippmhauptmann.me"
-          tls:
-            mode: Terminate
-            certificateRefs:
-              - name: wildcard-philippmhauptmann-tls
-                kind: Secret
-                group: ""
