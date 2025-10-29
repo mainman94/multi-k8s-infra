@@ -9,7 +9,7 @@ spec:
     - name: ingress-gateway
       namespace: istio-system
   hostnames:
-    - "argo-reverse-proxy.philippmhauptmann.me"
+    - "argo-rp.philippmhauptmann.me"
   rules:
     - matches:
         - path:

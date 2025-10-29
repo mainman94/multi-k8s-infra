@@ -22,7 +22,7 @@ server:
     enabled: false
 
 global:
-  domain: argo-reverse-proxy.philippmhauptmann.me
+  domain: argo-rp.philippmhauptmann.me
 
 # yamllint disable rule:line-length
 configs:
