@@ -6,7 +6,7 @@ metadata:
   namespace: argocd
 spec:
   parentRefs:
-    - name: ingress-gateway
+    - name: ingressgateway
       namespace: istio-system
   hostnames:
     - "argo-rp.philippmhauptmann.me"
