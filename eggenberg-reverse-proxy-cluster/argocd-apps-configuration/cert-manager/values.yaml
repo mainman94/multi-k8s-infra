@@ -1,19 +1,19 @@
 installCRDs: true
 
-# prometheus:
-#   enabled: true
-#   servicemonitor:
-#     enabled: true
-#     interval: 30s
-#     scrapeTimeout: 30s
-#     labels:
-#       release: kube-prometheus-stack
-#     honorLabels: true
-#     endpointAdditionalProperties:
-#       relabelings:
-#         - sourceLabels: [__meta_kubernetes_pod_node_name]
-#           separator: ;
-#           regex: ^(.*)$
-#           targetLabel: nodename
-#           replacement: $1
-#           action: replace
+prometheus:
+  enabled: true
+  servicemonitor:
+    enabled: true
+    interval: 30s
+    scrapeTimeout: 30s
+    labels:
+      release: kube-prometheus-stack
+    honorLabels: true
+    endpointAdditionalProperties:
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_node_name]
+          separator: ;
+          regex: ^(.*)$
+          targetLabel: nodename
+          replacement: $1
+          action: replace
