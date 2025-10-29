@@ -1,38 +1,34 @@
-gateways:
-  - enabled: true
-    name: ingressgateway
+name: ingressgateway
 
-    gatewayApi:
-      create: true
-      listeners:
-        - name: https
-          protocol: HTTPS
-          port: 443
-          hostname: "*.philippmhauptmann.me"
-          tls:
-            mode: Terminate
-            certificateRefs:
-              - name: wildcard-philippmhauptmann-tls
-                kind: Secret
-                group: ""
-          allowedRoutes:
-            namespaces:
-              from: Selector
-              selector:
-                matchExpressions:
-                  - key: kubernetes.io/metadata.name
-                    operator: In
-                    values:
-                      - argocd
-                      - monitoring
+gatewayApi:
+  create: true
+  listeners:
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: "*.philippmhauptmann.me"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: wildcard-philippmhauptmann-tls
+            kind: Secret
+            group: ""
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchExpressions:
+              - key: kubernetes.io/metadata.name
+                operator: In
+                values:
+                  - argocd
+                  - monitoring
 
-    service:
-      type: LoadBalancer
-      ports:
-        status: 15021
-        http2: 80
-        https: 443
-        http-prometheus: 15020
-      annotations: {}
-      loadBalancerSourceRanges: []
-      externalTrafficPolicy: Local  # optional: preserve source IP
+service:
+  type: LoadBalancer
+  ports:
+    status: 15021
+    http2: 80
+    https: 443
+    http-prometheus: 15020
+  externalTrafficPolicy: Local
