@@ -1,91 +1,129 @@
+# values.yaml – FÜR bitnami/istio-gateway (NICHT istio/gateway!)
+# Helm Chart: bitnami/istio-gateway
+
+# ─────────────────────────────────────────────────────────────
+# 1. Global & Basis
+# ─────────────────────────────────────────────────────────────
+global:
+  istioNamespace: istio-system
+
+gatewayClassName: istio
 replicaCount: 1
+revision: ""
+
+# ─────────────────────────────────────────────────────────────
+# 2. Autoscaling & PDB
+# ─────────────────────────────────────────────────────────────
 autoscaling:
   enabled: true
   minReplicas: 1
   maxReplicas: 3
-  targetCPUUtilizationPercentage: 80
+  targetCPU: 80
 
-service:
-  type: LoadBalancer
-  ports:
-    - name: status-port
-      port: 15021
-      targetPort: 15021
-      protocol: TCP
-    - name: http2
-      port: 80
-      targetPort: 80
-      protocol: TCP
-    - name: https
-      port: 443
-      targetPort: 443
-      protocol: TCP
-    - name: http-prometheus
-      port: 15020
-      targetPort: 15020
-      protocol: TCP
+pdb:
+  create: true
+  minAvailable: 1
 
-gateway:
-  apiVersion: gateway.networking.k8s.io/v1beta1
-  kind: Gateway
-  metadata:
-    name: ingressgateway
-    namespace: istio-system
-  spec:
-    gatewayClassName: istio
-    listeners:
-      - name: https
-        protocol: HTTPS
-        port: 443
-        hostname: "*.philippmhauptmann.me"
-        tls:
-          mode: Terminate
-          certificateRefs:
-            - kind: Secret
-              name: wildcard-philippmhauptmann-tls
-              namespace: istio-system
-        allowedRoutes:
-          namespaces:
-            from: Selector
-            selector:
-              matchExpressions:
-                - key: kubernetes.io/metadata.name
-                  operator: In
-                  values:
-                    - argocd
-                    - monitoring
+# ─────────────────────────────────────────────────────────────
+# 3. RBAC & ServiceAccount
+# ─────────────────────────────────────────────────────────────
+rbac:
+  create: true
 
-# Optional: Prometheus Scrape
-podAnnotations:
-  prometheus.io/scrape: "true"
-  prometheus.io/port: "15020"
-  prometheus.io/path: "/stats/prometheus"
-
-# Optional: Secret mounten
-volumes:
-  - name: wildcard-tls
-    secret:
-      secretName: wildcard-philippmhauptmann-tls
-volumeMounts:
-  - name: wildcard-tls
-    mountPath: /etc/istio/wildcard-tls
-    readOnly: true
-
-# Optional: ServiceAccount
 serviceAccount:
   create: true
   name: ingressgateway-sa
-  automountToken: false
+  automountServiceAccountToken: false
 
-# Optional: Pod Disruption Budget
-pdb:
-  minAvailable: 1
+# ─────────────────────────────────────────────────────────────
+# 4. Metrics (Prometheus PodMonitor)
+# ─────────────────────────────────────────────────────────────
+metrics:
+  enabled: true
+  podMonitor:
+    enabled: true
+    port: http-envoy-prom
+    path: /stats/prometheus
+    namespace: monitoring
+    jobLabel: ingressgateway
+    interval: 30s
 
-# Optional: Resources
-resources:
-  requests:
-    cpu: 100m
-    memory: 128Mi
-  limits:
-    cpu: 500m
-    memory: 512Mi
+# ─────────────────────────────────────────────────────────────
+# 5. Gateways (nur 1, aktiviert)
+# ─────────────────────────────────────────────────────────────
+gateways:
+  - enabled: true
+    name: ingressgateway
+
+    # ── Gateway API Listener ───────────────────────────────
+    gatewayApi:
+      create: true
+      listeners:
+        - name: https
+          protocol: HTTPS
+          port: 443
+          hostname: "*.philippmhauptmann.me"
+          tls:
+            mode: Terminate
+            certificateRefs:
+              - name: wildcard-philippmhauptmann-tls
+                kind: Secret
+                group: ""
+          allowedRoutes:
+            namespaces:
+              from: Selector
+              selector:
+                matchExpressions:
+                  - key: kubernetes.io/metadata.name
+                    operator: In
+                    values:
+                      - argocd
+                      - monitoring
+
+    # ── Service Ports (MUSS ARRAY SEIN!) ───────────────────
+    service:
+      type: LoadBalancer
+      ports:
+        - port: 15021
+          name: status
+          targetPort: 15021
+        - port: 80
+          name: http2
+          targetPort: 80
+        - port: 443
+          name: https
+          targetPort: 443
+        - port: 15020
+          name: http-prometheus
+          targetPort: 15020
+      externalTrafficPolicy: Local
+
+    # ── Container Ports ────────────────────────────────────
+    containerPorts:
+      status: 15021
+      http2: 80
+      https: 443
+      metrics: 15090
+      metricsMerge: 15020
+
+    # ── Prometheus Annotations ─────────────────────────────
+    podAnnotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "15020"
+      prometheus.io/path: "/stats/prometheus"
+
+    # ── Secret mounten (optional, da certificateRefs genutzt) ──
+    secretVolumes:
+      - name: wildcard-tls
+        secretName: wildcard-philippmhauptmann-tls
+        mountPath: /etc/istio/wildcard-tls
+        readOnly: true
+
+    # ── RBAC & SA pro Gateway ──────────────────────────────
+    serviceAccount:
+      create: true
+      name: ingressgateway-sa
+      automountServiceAccountToken: false
+
+    rbac:
+      create: true
