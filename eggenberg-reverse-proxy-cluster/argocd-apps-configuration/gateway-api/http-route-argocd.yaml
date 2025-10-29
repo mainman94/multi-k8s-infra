@@ -3,10 +3,10 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: argocd-http-route
-  namespace: istio-system
+  namespace: argocd
 spec:
   parentRefs:
-    - name: argocd-gateway
+    - name: ingress-gateway
       namespace: istio-system
   hostnames:
     - "argo-reverse-proxy.philippmhauptmann.me"
