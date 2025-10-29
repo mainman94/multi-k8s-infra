@@ -7,7 +7,7 @@ spec:
   project: default
   sources:
     - repoURL: https://dl.cloudsmith.io/public/infisical/helm-charts/helm/charts/
-      chart: infisical/secrets-operator
+      chart: infisical-helm-charts/secrets-operator
       targetRevision: 0.10.10
       helm:
         valueFiles:
