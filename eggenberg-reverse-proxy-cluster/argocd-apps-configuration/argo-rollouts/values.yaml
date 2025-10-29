@@ -1,7 +1,7 @@
 dashboard:
-  enabled: true
+  enabled: false
   ingress:
-    enabled: true
+    enabled: false
     ingressClassName: traefik
     hosts:
       - rollouts-reverse-proxy.philippmhauptmann.me
