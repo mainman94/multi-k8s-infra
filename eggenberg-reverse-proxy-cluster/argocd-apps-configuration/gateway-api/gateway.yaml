@@ -16,3 +16,13 @@ spec:
           - name: wildcard-philippmhauptmann-tls
             kind: Secret
             group: ""
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchExpressions:
+              - key: kubernetes.io/metadata.name
+                operator: In
+                values:
+                  - argocd
+                  - monitoring
