@@ -77,3 +77,20 @@ podAnnotations:
 
 # Listener-Konfiguration via Gateway API erfolgt separat (nicht im values.yaml)
 # TLS-Zertifikate werden über Gateway API Ressourcen referenziert
+
+gateways:
+  - enabled: true
+    name: ingressgateway
+    gatewayApi:
+      create: true
+      listeners:
+        - name: https
+          protocol: HTTPS
+          port: 443
+          hostname: "argo-rp.philippmhauptmann.me"
+          tls:
+            mode: Terminate
+            certificateRefs:
+              - name: wildcard-philippmhauptmann-tls
+                kind: Secret
+                group: ""
