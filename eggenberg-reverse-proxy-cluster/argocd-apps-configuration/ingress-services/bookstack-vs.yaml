@@ -1,0 +1,44 @@
+# ServiceEntry fpr Bookstack
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: bookstack-service-entry
+spec:
+  hosts:
+    - bookstack.philippmhauptmann.me
+  addresses:
+    - 192.168.0.129
+  ports:
+    - number: 80
+      name: my-http-port
+      protocol: HTTPS
+  location: MESH_EXTERNAL
+  resolution: STATIC
+  endpoints:
+    - address: 192.168.0.129
+      ports:
+        my-http-port: 30214
+---
+# VirtualService fpr Bookstack
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: bookstack-virtual-service
+spec:
+  hosts:
+    - "bookstack.philippmhauptmann.me"
+  gateways:
+    - unified-ingress-gateway
+  http:
+    - route:
+        - destination:
+            host: bookstack.philippmhauptmann.me
+            port:
+              number: 80
+      headers:
+        response:
+          set:
+            Strict-Transport-Security: "max-age=31536000; includeSubDomains"
+            X-Frame-Options: "DENY"
+            X-Content-Type-Options: "nosniff"
+            X-XSS-Protection: "1; mode=block"

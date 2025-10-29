@@ -1,0 +1,5 @@
+profile: ambient
+ambient:
+  enabled: true
+
+platform: k3s

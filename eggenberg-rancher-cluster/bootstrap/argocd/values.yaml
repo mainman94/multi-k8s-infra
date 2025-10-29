@@ -1,0 +1,23 @@
+server:
+  ingress:
+    enabled: true
+
+global:
+  domain: argo-rancher.philippmhauptmann.me
+
+# yamllint disable rule:line-length
+configs:
+  params:
+    server.insecure: true
+    timeout.reconciliation: 30s
+  cm:
+    resource.customizations.ignoreDifferences.apiextensions.k8s.io_CustomResourceDefinition: |
+      jsonPointers:
+      - /spec/preserveUnknownFields
+# yamllint enable rule:line-length
+
+dex:
+  enabled: false
+
+notifications:
+  enabled: false

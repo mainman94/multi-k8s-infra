@@ -1,0 +1,43 @@
+# ServiceEntry for Immich
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: immich-service-entry
+spec:
+  hosts:
+    - immich.philippmhauptmann.me
+  addresses:
+    - 192.168.0.129
+  ports:
+    - number: 80
+      name: my-http-port
+      protocol: HTTP
+  location: MESH_EXTERNAL
+  resolution: STATIC
+  endpoints:
+    - address: 192.168.0.129
+      ports:
+        my-http-port: 30041
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: immich-virtual-service
+spec:
+  hosts:
+    - "immich.philippmhauptmann.me"
+  gateways:
+    - unified-ingress-gateway
+  http:
+    - route:
+        - destination:
+            host: immich.philippmhauptmann.me
+            port:
+              number: 80
+      headers:
+        response:
+          set:
+            Strict-Transport-Security: "max-age=31536000; includeSubDomains"
+            X-Frame-Options: "DENY"
+            X-Content-Type-Options: "nosniff"
+            X-XSS-Protection: "1; mode=block"

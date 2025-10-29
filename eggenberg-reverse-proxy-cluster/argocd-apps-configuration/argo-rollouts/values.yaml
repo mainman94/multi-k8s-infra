@@ -1,0 +1,18 @@
+dashboard:
+  enabled: true
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    hosts:
+      - rollouts-lb.philippmhauptmann.me
+
+controller:
+  replicas: 1
+  metrics:
+    enabled: true
+    service:
+      portName: http-metrics
+    serviceMonitor:
+      enabled: true
+      additionalLabels:
+        release: kube-prometheus-stack

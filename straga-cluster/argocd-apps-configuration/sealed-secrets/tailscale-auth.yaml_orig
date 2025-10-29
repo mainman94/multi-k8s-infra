@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tailscale-auth
+  namespace: tailscale
+stringData:
+  TS_AUTHKEY: tskey-auth-kvBP8karL411CNTRL-Nuu77QgdeiKAQZAaV5cUjKz3HndM8HSNA

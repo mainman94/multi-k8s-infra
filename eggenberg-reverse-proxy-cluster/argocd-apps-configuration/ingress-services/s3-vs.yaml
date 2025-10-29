@@ -1,0 +1,52 @@
+---
+# ServiceEntry for s3 External Access
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: s3-external
+  namespace: istio-system
+spec:
+  hosts:
+    - "s3.philippmhauptmann.me"
+  addresses:
+    - 100.101.108.127
+  ports:
+    - number: 443
+      name: https
+      protocol: HTTPS
+  location: MESH_EXTERNAL
+  resolution: STATIC
+  endpoints:
+    - address: 100.101.108.127
+---
+# VirtualService for s3
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: s3-external-vs
+  namespace: istio-system
+spec:
+  hosts:
+    - "s3.philippmhauptmann.me"
+  gateways:
+    - unified-ingress-gateway
+  http:
+    - route:
+        - destination:
+            host: s3.philippmhauptmann.me
+            port:
+              number: 443
+---
+# DestinationRule for s3
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: s3-external-dr
+  namespace: istio-system
+spec:
+  host: s3.philippmhauptmann.me
+  trafficPolicy:
+    tls:
+      mode: SIMPLE
+      insecureSkipVerify: true
+      sni: s3.lyrebird-sunfish.ts.net

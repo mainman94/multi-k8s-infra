@@ -1,0 +1,35 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: uptime-kuma-gateway
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 443
+        name: https
+        protocol: HTTPS
+      hosts:
+        - "uptime.philippmhauptmann.me"
+      tls:
+        mode: SIMPLE
+        credentialName: wildcard-philippmhauptmann-tls
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: uptime-kuma-virtual-service
+  namespace: istio-system
+spec:
+  hosts:
+    - "uptime.philippmhauptmann.me"
+  gateways:
+    - uptime-kuma-gateway
+  http:
+    - route:
+        - destination:
+            host: uptime-kuma.uptime-kuma.svc.cluster.local
+            port:
+              number: 3001

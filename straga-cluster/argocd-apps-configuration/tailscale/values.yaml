@@ -1,0 +1,11 @@
+operator:
+  enabled: true
+  allowIncomingConnections: ["minio"]
+  name: tailscale-operator-straga-clsuter-1
+
+logLevel: info
+
+proxyConfig:
+  enabled: false
+
+namespace: tailscale

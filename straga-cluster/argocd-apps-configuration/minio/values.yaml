@@ -1,0 +1,19 @@
+replicaCount: 1
+
+persistence:
+  enabled: true
+  size: 200Gi
+  storageClass: "longhorn"
+
+auth:
+  existingSecret: my-minio-secret
+  existingSecretUserKey: "rootUser"
+  existingSecretPasswordKey: "rootPassword"
+
+resources:
+  requests:
+    memory: 512Mi
+    cpu: 250m
+  limits:
+    memory: 4Gi
+    cpu: 2000m

@@ -1,0 +1,50 @@
+---
+# ServiceEntry for Rancher External Access
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: rancher-external
+  namespace: istio-system
+spec:
+  hosts:
+    - "rancher.philippmhauptmann.me"
+  addresses:
+    - 100.85.101.36
+  ports:
+    - number: 443
+      name: https
+      protocol: HTTPS
+  location: MESH_EXTERNAL
+  resolution: STATIC
+  endpoints:
+    - address: 100.85.101.36
+---
+# VirtualService for Rancher
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: rancher-external-vs
+  namespace: istio-system
+spec:
+  hosts:
+    - "rancher.philippmhauptmann.me"
+  gateways:
+    - unified-ingress-gateway
+  http:
+    - route:
+        - destination:
+            host: rancher.philippmhauptmann.me
+            port:
+              number: 443
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: rancher-external-dr
+  namespace: istio-system
+spec:
+  host: rancher.philippmhauptmann.me
+  trafficPolicy:
+    tls:
+      mode: SIMPLE
+      insecureSkipVerify: true

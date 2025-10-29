@@ -1,0 +1,13 @@
+configuration:
+  period: "1h"
+  rebootDays: ["mon", "tue", "wed", "thu", "fri"]
+  startTime: "02:00"
+  endTime: "05:00"
+  timeZone: "Europe/Vienna"
+  drainTimeout: "3m"
+  forceReboot: true
+
+metrics:
+  create: true
+  labels:
+    release: kube-prometheus-stack

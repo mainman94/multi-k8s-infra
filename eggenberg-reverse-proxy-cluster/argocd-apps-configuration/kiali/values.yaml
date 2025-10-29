@@ -1,0 +1,9 @@
+deployment:
+  service_type: NodePort
+external_services:
+  prometheus:
+    url: "http://kube-prometheus-stack-prometheus.monitoring.svc:9090"
+  grafana:
+    enabled: true
+    url: "https://grafana.philippmhauptmann.me"
+    in_cluster_url: "http://kube-prometheus-stack-grafana.monitoring.svc:80"
