@@ -20,7 +20,7 @@ prometheus:
     type: ClusterIP
 
   ingress:
-    enabled: true
+    enabled: false
     ingressClassName: traefik
     hosts:
       - monitoring.philippmhauptmann.me
@@ -70,19 +70,19 @@ serviceMonitor:
 
 # Grafana configuration
 grafana:
-  enabled: true
+  enabled: false
   ingress:
     enabled: true
     ingressClassName: traefik
     hosts:
-      - grafana.philippmhauptmann.me
+      - grafana-new.philippmhauptmann.me
     paths:
       - /
     pathType: Prefix
     tls:
       - secretName: wildcard-philippmhauptmann-tls
         hosts:
-          - grafana.philippmhauptmann.me
+          - grafana-new.philippmhauptmann.me
   persistence:
     enabled: true
     size: 10Gi
