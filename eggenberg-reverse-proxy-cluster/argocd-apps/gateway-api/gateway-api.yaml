@@ -5,12 +5,15 @@ metadata:
   namespace: argocd
 spec:
   project: default
-  source:
-    repoURL: https://github.com/kubernetes-sigs/gateway-api
-    targetRevision: v1.4.0
-    path: "config/crd/standard"
-    directory:
-      recurse: true
+  sources:
+    - repoURL: https://github.com/kubernetes-sigs/gateway-api
+      targetRevision: v1.4.0
+      path: "config/crd/standard"
+      directory:
+        recurse: true
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
+      targetRevision: HEAD
+      path: "eggenberg-reverse-proxy-cluster/argocd-apps-configuration/gateway-api"
   destination:
     server: https://kubernetes.default.svc
     namespace: kube-system
