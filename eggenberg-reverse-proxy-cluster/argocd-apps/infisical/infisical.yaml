@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: istio-base
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://dl.cloudsmith.io/public/infisical/helm-charts/helm/charts/
+      chart: infisical/secrets-operator
+      helm:
+        valueFiles:
+          - $values/eggenberg-reverse-proxy-cluster/bootstrap/infisical/values.yaml
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: infisical-secrets-operator
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZGVudGl0eUlkIjoiMDllYmNiZjMtMDgwZC00ODlkLWFjYzMtYzJhNzQwYTkxYzVjIiwiaWRlbnRpdHlBY2Nlc3NUb2tlbklkIjoiODkyZjhiZGMtMWJlYS00YWMwLWFhMWQtYmMwN2IyOTliZjUxIiwiYXV0aFRva2VuVHlwZSI6ImlkZW50aXR5QWNjZXNzVG9rZW4iLCJpYXQiOjE3NjE3Mjk1MTgsImV4cCI6MTc2NDMyMTUxOH0.QEFri0g91kLv3X8XovKEeY_npOaeZUOIZ8mhA6-JUmc

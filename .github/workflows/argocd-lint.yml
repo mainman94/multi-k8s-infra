@@ -1,0 +1,77 @@
+name: Validate YAML Files
+
+permissions: read-all
+
+on:
+  pull_request:
+    paths:
+      - '**/*.yaml'
+      - '**/*.yml'
+  push:
+    branches: [main]
+    paths:
+      - '**/*.yaml'
+      - '**/*.yml'
+  workflow_dispatch:
+
+jobs:
+  yaml-linting:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Find YAML files for kubeconform
+        id: yaml_files
+        run: |
+          YAML_FILES=$(find . -type f \( -name '*.yaml' -o -name '*.yml' \) \
+            -not -path './.github/*' -print0 | tr '\0' ' ')
+          echo "YAML_FILES=$YAML_FILES" >> $GITHUB_ENV
+          echo "Files to check: $YAML_FILES"
+
+# yamllint disable rule:line-length
+      - name: Run kubeconform
+        if: ${{ env.YAML_FILES != '' }}
+        run: |
+          for file in ${{ env.YAML_FILES }}; do
+            echo "Validating $file"
+            docker run --rm -v $(pwd):/workdir ghcr.io/yannh/kubeconform:latest \
+              -verbose \
+              -ignore-missing-schemas \
+              -ignore-filename-pattern 'values.yaml' \
+              -schema-location default \
+              "/workdir/$file" || exit 1
+          done
+# yamllint enable rule:line-length
+      - name: Install yamllint
+        run: pip install yamllint
+
+      - name: Run yamllint
+        run: |
+          find . -name '*.yaml' -o -name '*.yml' | xargs yamllint
+      - name: Report to Discord
+        if: always()
+        run: |
+          STATUS="✅ Success"
+          COLOR="3066993"  # green
+          if [ "${{ job.status }}" != "success" ]; then
+            STATUS="❌ Failed"
+            COLOR="15158332"  # red
+          fi
+
+          BRANCH=$(echo "${GITHUB_REF}" | sed 's|refs/heads/||')
+          COMMIT_URL="https://github.com/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}"
+
+          MESSAGE="**Workflow:** ${GITHUB_WORKFLOW}
+          **Status:** $STATUS
+          **Branch:** $BRANCH
+          **Commit:** <$COMMIT_URL>
+          **Actor:** ${GITHUB_ACTOR}"
+
+          JSON=$(jq -n --arg content "$MESSAGE" '{content: $content}')
+
+          curl -X POST -H "Content-Type: application/json" \
+            -d "$JSON" \
+            ${{ secrets.DISCORD_WEBHOOK_URL }}
+# yamllint enable rule:line-length
