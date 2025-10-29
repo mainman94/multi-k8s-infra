@@ -6,7 +6,7 @@ metadata:
   namespace: argocd
 spec:
   parentRefs:
-    - name: ingressgateway
+    - name: ingress-gateway
       namespace: istio-system
       group: gateway.networking.k8s.io
       kind: Gateway
