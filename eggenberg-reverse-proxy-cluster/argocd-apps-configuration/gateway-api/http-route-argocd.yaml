@@ -8,6 +8,8 @@ spec:
   parentRefs:
     - name: ingressgateway
       namespace: istio-system
+      group: gateway.networking.k8s.io
+      kind: Gateway
   hostnames:
     - "argo-rp.philippmhauptmann.me"
   rules:
