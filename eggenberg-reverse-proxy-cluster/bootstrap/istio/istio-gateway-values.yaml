@@ -1,5 +1,5 @@
-# values.yaml – FÜR bitnami/istio-gateway (NICHT istio/gateway!)
-# Helm Chart: bitnami/istio-gateway
+# values.yaml – FÜR istio/gateway (NICHT bitnami/istio-gateway!)
+# Helm Chart: istio/gateway
 
 # ─────────────────────────────────────────────────────────────
 # 1. Global & Basis
@@ -7,7 +7,6 @@
 global:
   istioNamespace: istio-system
 
-gatewayClassName: istio
 replicaCount: 1
 revision: ""
 
@@ -18,112 +17,63 @@ autoscaling:
   enabled: true
   minReplicas: 1
   maxReplicas: 3
-  targetCPU: 80
+  targetCPUUtilizationPercentage: 80
 
-pdb:
-  create: true
+podDisruptionBudget:
+  enabled: true
   minAvailable: 1
 
 # ─────────────────────────────────────────────────────────────
-# 3. RBAC & ServiceAccount
+# 3. ServiceAccount (istio/gateway nutzt standardmäßig die istio ServiceAccounts)
 # ─────────────────────────────────────────────────────────────
-rbac:
-  create: true
+# rbac:
+#   create: true
 
-serviceAccount:
-  create: true
-  name: ingressgateway-sa
-  automountServiceAccountToken: false
+# serviceAccount:
+#   create: true
+#   name: ingressgateway-sa
+#   automountServiceAccountToken: false
 
 # ─────────────────────────────────────────────────────────────
-# 4. Metrics (Prometheus PodMonitor)
+# 4. Metrics (Prometheus)
 # ─────────────────────────────────────────────────────────────
 metrics:
   enabled: true
-  podMonitor:
+  serviceMonitor:
     enabled: true
-    port: http-envoy-prom
-    path: /stats/prometheus
     namespace: monitoring
-    jobLabel: ingressgateway
     interval: 30s
+    scrapeTimeout: 10s
+    selector: {}
+    relabelings: []
+    metricRelabelings: []
+    path: /stats/prometheus
+    port: http-envoy-prom
 
 # ─────────────────────────────────────────────────────────────
-# 5. Gateways (nur 1, aktiviert)
+# 5. Gateway
 # ─────────────────────────────────────────────────────────────
-gateways:
-  - enabled: true
-    name: ingressgateway
+service:
+  type: LoadBalancer
+  ports:
+    - port: 15021
+      name: status-port
+      targetPort: 15021
+    - port: 80
+      name: http2
+      targetPort: 80
+    - port: 443
+      name: https
+      targetPort: 443
+    - port: 15020
+      name: http-prometheus
+      targetPort: 15020
+  externalTrafficPolicy: Local
 
-    # ── Gateway API Listener ───────────────────────────────
-    gatewayApi:
-      create: true
-      listeners:
-        - name: https
-          protocol: HTTPS
-          port: 443
-          hostname: "*.philippmhauptmann.me"
-          tls:
-            mode: Terminate
-            certificateRefs:
-              - name: wildcard-philippmhauptmann-tls
-                kind: Secret
-                group: ""
-          allowedRoutes:
-            namespaces:
-              from: Selector
-              selector:
-                matchExpressions:
-                  - key: kubernetes.io/metadata.name
-                    operator: In
-                    values:
-                      - argocd
-                      - monitoring
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "15020"
+  prometheus.io/path: "/stats/prometheus"
 
-    # ── Service Ports (MUSS ARRAY SEIN!) ───────────────────
-    service:
-      type: LoadBalancer
-      ports:
-        - port: 15021
-          name: status
-          targetPort: 15021
-        - port: 80
-          name: http2
-          targetPort: 80
-        - port: 443
-          name: https
-          targetPort: 443
-        - port: 15020
-          name: http-prometheus
-          targetPort: 15020
-      externalTrafficPolicy: Local
-
-    # ── Container Ports ────────────────────────────────────
-    containerPorts:
-      status: 15021
-      http2: 80
-      https: 443
-      metrics: 15090
-      metricsMerge: 15020
-
-    # ── Prometheus Annotations ─────────────────────────────
-    podAnnotations:
-      prometheus.io/scrape: "true"
-      prometheus.io/port: "15020"
-      prometheus.io/path: "/stats/prometheus"
-
-    # ── Secret mounten (optional, da certificateRefs genutzt) ──
-    secretVolumes:
-      - name: wildcard-tls
-        secretName: wildcard-philippmhauptmann-tls
-        mountPath: /etc/istio/wildcard-tls
-        readOnly: true
-
-    # ── RBAC & SA pro Gateway ──────────────────────────────
-    serviceAccount:
-      create: true
-      name: ingressgateway-sa
-      automountServiceAccountToken: false
-
-    rbac:
-      create: true
+# Listener-Konfiguration via Gateway API erfolgt separat (nicht im values.yaml)
+# TLS-Zertifikate werden über Gateway API Ressourcen referenziert
