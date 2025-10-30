@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nextcloud-external
+  namespace: traefik
+  labels:
+    app.kubernetes.io/name: nextcloud
+spec:
+  type: ExternalName
+  externalName: 192.168.0.129
+  ports:
+    - port: 30056
+      targetPort: 30056
+      protocol: TCP
+      name: http
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: nextcloud-route
+  namespace: traefik
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`nc.philippmhauptmann.me`)
+      kind: Rule
+      services:
+        - name: nextcloud-external
+          port: 30056
+          passHostHeader: true
+  tls:
+    certResolver: cloudflare

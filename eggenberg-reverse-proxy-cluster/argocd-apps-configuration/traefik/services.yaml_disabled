@@ -39,14 +39,106 @@
 # Service: IMMICH
 #-------------------------------------------------------------------------------
 
-
+# Immich Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: truenas-immich
+  namespace: traefik
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+---
+# Immich Endpoints
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: truenas-immich
+  namespace: traefik
+subsets:
+  - addresses:
+      - ip: 192.168.0.129
+    ports:
+      - port: 30041
+---
+# Immich IngressRoute
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: truenas-immich
+  namespace: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`immich.philippmhauptmann.me`)
+      kind: Rule
+      middlewares:
+        - name: secure-headers
+        - name: ratelimit
+        - name: cloudflare-ip-whitelist
+      services:
+        - name: truenas-immich
+          port: 8080
+---
 
 #-------------------------------------------------------------------------------
 # Service: JELLYSEERR
 #-------------------------------------------------------------------------------
 
 # Jellyseerr Service
-
+apiVersion: v1
+kind: Service
+metadata:
+  name: truenas-jellyseerr
+  namespace: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
+spec:
+  ports:
+    - port: 8080
+      targetPort: 30042
+      protocol: TCP
+  type: ClusterIP
+---
+# Jellyseerr Endpoints
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: truenas-jellyseerr
+  namespace: traefik
+subsets:
+  - addresses:
+      - ip: 192.168.0.129
+    ports:
+      - port: 30042
+        protocol: TCP
+---
+# Jellyseerr IngressRoute
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: truenas-jellyseerr
+  namespace: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`jellyseerr.philippmhauptmann.me`)
+      middlewares:
+        - name: secure-headers
+        - name: ratelimit
+        - name: cloudflare-ip-whitelist
+      services:
+        - name: truenas-jellyseerr
+          port: 8080
+---
 
 #-------------------------------------------------------------------------------
 # Service: RADARR

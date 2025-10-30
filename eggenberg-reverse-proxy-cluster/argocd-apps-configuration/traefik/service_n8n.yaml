@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: n8n-external
+  namespace: traefik
+  labels:
+    app.kubernetes.io/name: n8n
+spec:
+  type: ExternalName
+  externalName: 192.168.0.129
+  ports:
+    - port: 30109
+      targetPort: 30109
+      protocol: TCP
+      name: http
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: n8n-route
+  namespace: traefik
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`n8n.philippmhauptmann.me`)
+      kind: Rule
+      services:
+        - name: n8n-external
+          port: 30109
+          passHostHeader: true
+  tls:
+    certResolver: cloudflare
