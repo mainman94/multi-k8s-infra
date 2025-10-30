@@ -6,6 +6,7 @@ metadata:
 spec:
   project: default
   sources:
+# yamllint disable rule:line-length
     - repoURL: https://dl.cloudsmith.io/public/infisical/helm-charts/helm/charts/
       chart: secrets-operator
       targetRevision: 0.10.10
@@ -18,6 +19,7 @@ spec:
     - repoURL: https://github.com/mainman94/multi-k8s-infra/
       path: "eggenberg-reverse-proxy-cluster/argocd-apps-configuration/infisical"
       targetRevision: HEAD
+  # yamllint enable rule:line-length
   destination:
     server: https://kubernetes.default.svc
     namespace: infisical-secrets-operator

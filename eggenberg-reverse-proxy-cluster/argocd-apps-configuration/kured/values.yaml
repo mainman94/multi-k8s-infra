@@ -7,7 +7,7 @@ configuration:
   drainTimeout: "3m"
   forceReboot: true
 
- metrics:
-   create: true
-   labels:
-     release: kube-prometheus-stack
+metrics:
+  create: true
+  labels:
+    release: kube-prometheus-stack

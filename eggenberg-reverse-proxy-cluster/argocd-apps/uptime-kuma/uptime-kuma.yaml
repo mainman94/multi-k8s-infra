@@ -6,6 +6,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "2"
 spec:
+# yamllint disable rule:line-length
   project: default
   sources:
     - repoURL: https://helm.irsigler.cloud
@@ -29,3 +30,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+# yamllint enable rule:line-length
