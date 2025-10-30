@@ -1,12 +1,19 @@
-apiVersion: traefik.io/v1alpha1
-kind: TraefikService
+---
+apiVersion: v1
+kind: Service
 metadata:
   name: jellyfin-external
   namespace: traefik
+  labels:
+    app.kubernetes.io/name: jellyfin
 spec:
-  servers:
-    - url: "http://192.168.0.129:30013"
-  passHostHeader: true
+  type: ExternalName
+  externalName: 192.168.0.129
+  ports:
+    - port: 30013
+      targetPort: 30013
+      protocol: TCP
+      name: http
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
@@ -17,10 +24,11 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`jellyfin.meinheim.de`)
+    - match: Host(`jellyfin.deine-domain.de`)
       kind: Rule
       services:
         - name: jellyfin-external
-          kind: TraefikService
+          port: 30013
+          passHostHeader: true
   tls:
     certResolver: cloudflare
