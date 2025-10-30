@@ -29,4 +29,8 @@ hubble:
 nodeinit:
   enabled: true
 
+envoy:
+  enabled: true
+l7Proxy: true
+
 rollOutCiliumPods: true
