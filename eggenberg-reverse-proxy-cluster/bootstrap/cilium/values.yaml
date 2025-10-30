@@ -41,17 +41,6 @@ envoy:
   enabled: true
 l7Proxy: true
 
-# --- mTLS (IPsec) ---
-identityAllocationMode: crd
-encryption:
-  enabled: true
-  type: ipsec
-  nodeEncryption: false
-
-# --- Kein Cilium Ingress ---
-ingressController:
-  enabled: false
-
 
 nodeinit:
   enabled: true
