@@ -7,7 +7,7 @@ tunnelProtocol: vxlan
 
 loadBalancer:
   enabled: true
-  mode: shared
+  mode: dsr
   acceleration: native
   ipPool:
     - start: 192.168.0.65
