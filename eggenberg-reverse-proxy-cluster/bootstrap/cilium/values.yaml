@@ -41,15 +41,15 @@ hubble:
 
 ingressController:
   enabled: false
--
+
 gatewayAPI:
-  enabled: true
+  enabled: false
 
-encryption:
-  enabled: true
-  type: ipsec
-  nodeEncryption: false
+# encryption:
+#   enabled: true
+#   type: ipsec
+#   nodeEncryption: false
 
-ipsec:
-  ikePort: 500
-  ikePortNatT: 4500
+# ipsec:
+#   ikePort: 500
+#   ikePortNatT: 4500
