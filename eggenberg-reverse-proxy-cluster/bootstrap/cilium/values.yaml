@@ -5,6 +5,10 @@ k8sServicePort: 6443
 
 loadBalancer:
   enabled: true
+  mode: dsr
+  ipPool:
+    - start: 192.168.0.65
+      end: 192.168.0.65
 
 ipam:
   mode: kubernetes
