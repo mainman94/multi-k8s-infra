@@ -19,7 +19,7 @@ server:
       additionalLabels:
         release: kube-prometheus-stack
   ingress:
-    enabled: false
+    enabled: true
 
 global:
   domain: argo-rp.philippmhauptmann.me
