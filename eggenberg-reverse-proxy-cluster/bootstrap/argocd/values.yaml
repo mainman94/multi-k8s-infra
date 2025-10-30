@@ -46,7 +46,7 @@ configs:
         - ""
         kinds:
         - Endpoints
-        clusters: [
+        clusters: []
 # yamllint enable rule:line-length
 
 redis:
