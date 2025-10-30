@@ -6,10 +6,9 @@ metadata:
 spec:
   project: default
   sources:
-    # 1️⃣ Traefik CRDs (wichtig, zuerst installieren)
     - repoURL: https://traefik.github.io/charts
       chart: traefik-crds
-      targetRevision: 37.2.0
+      targetRevision: 1.11.1
       helm:
         valueFiles: []
       annotations:
