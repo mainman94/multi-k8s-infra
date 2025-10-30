@@ -24,7 +24,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`jellyfin.deine-domain.de`)
+    - match: Host(`jellyfin.philippmhauptmann.me`)
       kind: Rule
       services:
         - name: jellyfin-external
