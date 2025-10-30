@@ -32,5 +32,4 @@ hubble:
 
 nodeinit:
   enabled: true
-  
 rollOutCiliumPods: true
