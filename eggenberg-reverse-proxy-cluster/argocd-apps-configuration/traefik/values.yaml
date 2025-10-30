@@ -1,3 +1,10 @@
+env:
+  - name: CF_DNS_API_TOKEN
+    valueFrom:
+      secretKeyRef:
+        name: cloudflare-api-token
+        key: CF_DNS_API_TOKEN
+
 certificatesResolvers:
   cloudflare:
     acme:
@@ -10,7 +17,6 @@ certificatesResolvers:
         resolvers:
           - "1.1.1.1:53"
           - "8.8.8.8:53"
-        secretName: cloudflare-api-token
       domains:
         - main: "philippmhauptmann.me"
           sans:
