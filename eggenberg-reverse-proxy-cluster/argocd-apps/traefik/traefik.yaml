@@ -7,20 +7,11 @@ spec:
   project: default
   sources:
     - repoURL: https://traefik.github.io/charts
-      chart: traefik-crds
-      targetRevision: 1.11.1
-      helm:
-        valueFiles: []
-      annotations:
-        argocd.argoproj.io/sync-wave: "-3"
-    - repoURL: https://traefik.github.io/charts
       chart: traefik
       targetRevision: 37.2.0
       helm:
         valueFiles:
           - $values/eggenberg-reverse-proxy-cluster/argocd-apps-configuration/traefik/values.yaml
-      annotations:
-        argocd.argoproj.io/sync-wave: "-2"
     - repoURL: https://github.com/mainman94/multi-k8s-infra
       targetRevision: HEAD
       ref: values
