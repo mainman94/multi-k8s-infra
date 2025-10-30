@@ -17,7 +17,7 @@ spec:
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: bookstack-route
+  name: gitea-route
   namespace: traefik
 spec:
   entryPoints:
@@ -26,7 +26,7 @@ spec:
     - match: Host(`git.philippmhauptmann.me`)
       kind: Rule
       services:
-        - name: bookstack-external
+        - name: gitea-external
           port: 30008
           passHostHeader: true
   tls:
