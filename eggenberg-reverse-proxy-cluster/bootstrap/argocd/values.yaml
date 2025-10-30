@@ -42,7 +42,11 @@ configs:
       jsonPointers:
       - /spec/preserveUnknownFields
     resource.exclusions: |
-      []
+      - apiGroups:
+        - ""
+        kinds:
+        - Endpoints
+        clusters: [
 # yamllint enable rule:line-length
 
 redis:
