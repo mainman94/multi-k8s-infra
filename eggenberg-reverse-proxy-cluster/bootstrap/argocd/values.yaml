@@ -41,6 +41,8 @@ configs:
     resource.customizations.ignoreDifferences.apiextensions.k8s.io_CustomResourceDefinition: |
       jsonPointers:
       - /spec/preserveUnknownFields
+    resource.exclusions: |
+      []
 # yamllint enable rule:line-length
 
 redis:
