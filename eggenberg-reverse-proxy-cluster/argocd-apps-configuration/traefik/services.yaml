@@ -3,11 +3,13 @@
 #-------------------------------------------------------------------------------
 
 ---
-apiVersion: traefik.io/v1alpha1
+aapiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: truenas-jellyfin
   namespace: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
 spec:
   entryPoints:
     - websecure
