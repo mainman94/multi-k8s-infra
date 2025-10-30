@@ -2,30 +2,7 @@
 # Service: JELLYFIN
 #-------------------------------------------------------------------------------
 
-# Jellyfin Service
-apiVersion: v1
-kind: Service
-metadata:
-  name: truenas-jellyfin
-  namespace: traefik
-spec:
-  ports:
-    - port: 8080
-      targetPort: 8080
 ---
-# Jellyfin Endpoints
-apiVersion: v1
-kind: Endpoints
-metadata:
-  name: truenas-jellyfin
-  namespace: traefik
-subsets:
-  - addresses:
-      - ip: 192.168.0.129
-    ports:
-      - port: 30013
----
-# Jellyfin IngressRoute
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
@@ -42,8 +19,18 @@ spec:
         - name: ratelimit
         - name: cloudflare-ip-whitelist
       services:
-        - name: truenas-jellyfin
-          port: 8080
+        - name: jellyfin-external
+          kind: TraefikService
+---
+apiVersion: traefik.io/v1alpha1
+kind: TraefikService
+metadata:
+  name: jellyfin-external
+  namespace: traefik
+spec:
+  serversLoadBalancer:
+    servers:
+      - url: http://192.168.0.129:30013
 ---
 
 #-------------------------------------------------------------------------------
@@ -79,6 +66,8 @@ kind: IngressRoute
 metadata:
   name: truenas-immich
   namespace: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
 spec:
   entryPoints:
     - websecure
@@ -104,6 +93,8 @@ kind: Service
 metadata:
   name: truenas-jellyseerr
   namespace: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
 spec:
   ports:
     - port: 8080
@@ -130,6 +121,8 @@ kind: IngressRoute
 metadata:
   name: truenas-jellyseerr
   namespace: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
 spec:
   entryPoints:
     - websecure
@@ -181,6 +174,8 @@ kind: IngressRoute
 metadata:
   name: truenas-radarr
   namespace: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
 spec:
   entryPoints:
     - websecure
@@ -232,6 +227,8 @@ kind: IngressRoute
 metadata:
   name: truenas-paperless
   namespace: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
 spec:
   entryPoints:
     - websecure
@@ -284,6 +281,8 @@ kind: IngressRoute
 metadata:
   name: truenas-authentik
   namespace: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
 spec:
   entryPoints:
     - websecure
@@ -335,6 +334,8 @@ kind: IngressRoute
 metadata:
   name: truenas-n8n
   namespace: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
 spec:
   entryPoints:
     - websecure
@@ -386,6 +387,8 @@ kind: IngressRoute
 metadata:
   name: truenas-nextcloud
   namespace: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
 spec:
   entryPoints:
     - websecure
@@ -411,6 +414,8 @@ kind: Service
 metadata:
   name: truenas-sonarr
   namespace: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
 spec:
   ports:
     - port: 8093
@@ -437,6 +442,8 @@ kind: IngressRoute
 metadata:
   name: truenas-sonarr
   namespace: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
 spec:
   entryPoints:
     - websecure
@@ -488,6 +495,8 @@ kind: IngressRoute
 metadata:
   name: truenas-bookstack
   namespace: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
 spec:
   entryPoints:
     - websecure
@@ -539,6 +548,8 @@ kind: IngressRoute
 metadata:
   name: truenas-gitea
   namespace: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
 spec:
   entryPoints:
     - websecure
