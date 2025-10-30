@@ -25,6 +25,9 @@ server:
       - host: argo-rp.philippmhauptmann.me
         paths:
           - /
+    annotations:
+      traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
+    tls: true
 
 global:
   domain: argo-rp.philippmhauptmann.me
