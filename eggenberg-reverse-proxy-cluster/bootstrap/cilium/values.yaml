@@ -30,18 +30,6 @@ hubble:
   ui:
     enabled: true
 
-# --- XDP DEAKTIVIEREN (WICHTIG!) ---
-bpf:
-  xdp:
-    enabled: false        # ← EXPLIZIT AUS!
-    mode: ""              # Kein Mode → TC wird genutzt
-
-# --- Service Mesh (L7) ---
-envoy:
-  enabled: true
-l7Proxy: true
-
-
 nodeinit:
   enabled: true
   
