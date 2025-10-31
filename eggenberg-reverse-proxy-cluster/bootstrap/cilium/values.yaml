@@ -8,8 +8,8 @@ ipv4NativeRoutingCIDR: 10.42.0.0/16
 
 loadBalancer:
   enabled: true
+  acceleration: disabled
   mode: dsr
-  acceleration: native
   ipPool: []
 
 ipam:
