@@ -58,18 +58,18 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.middlewares: traefik-ratelimit@kubernetescrd,traefik-secure-headers@kubernetescrd,traefik-cloudflare-ip-whitelist@kubernetescrd
   spec:
-  rules:
-    - host: portfolio.local
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: portfolio-service
-                port:
-                  number: 80
-  tls:
-    - hosts:
-        - philippmhauptmann.me
+    rules:
+      - host: portfolio.local
+        http:
+          paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: portfolio-service
+                  port:
+                    number: 80
+    tls:
+      - hosts:
+          - philippmhauptmann.me
 # yamllint enable rule:line-length
