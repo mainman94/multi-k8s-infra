@@ -48,45 +48,49 @@ spec:
       targetPort: 3000
   type: ClusterIP
 ---
-apiVersion: networking.istio.io/v1beta1
-kind: Gateway
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
-  name: portfolio-gateway
-  namespace: istio-system
+  name: portfolio-ingress
+  namespace: kube-system
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+    traefik.ingress.kubernetes.io/router.middlewares: portfolio-secure-headers@traefik,portfolio-ratelimit@traefik,portfolio-cloudflare-ip-whitelist@traefik
 spec:
-  selector:
-    istio: ingressgateway
-  servers:
-    - port:
-        number: 443
-        name: https
-        protocol: HTTPS
-      hosts:
-        - "philippmhauptmann.me"
-      tls:
-        mode: SIMPLE
-        credentialName: wildcard-philippmhauptmann-tls
+  rules:
+    - host: portfolio.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: portfolio-service
+                port:
+                  number: 80
 ---
-apiVersion: networking.istio.io/v1beta1
-kind: VirtualService
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
-  name: portfolio-virtual-service
-  namespace: istio-system
+  name: portfolio-ingress
+  namespace: kube-system
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
+    traefik.ingress.kubernetes.io/router.middlewares: portfolio-secure-headers@traefik,portfolio-ratelimit@traefik,portfolio-cloudflare-ip-whitelist@traefik
 spec:
-  hosts:
-    - "philippmhauptmann.me"
-  gateways:
-    - portfolio-gateway
-  http:
-    - route:
-        - destination:
-            host: portfolio-service.kube-system.svc.cluster.local
-            port:
-              number: 80
-      headers:
-        response:
-          set:
-            Strict-Transport-Security: "max-age=31536000; includeSubDomains"
-            X-Frame-Options: "DENY"
-            X-Content-Type-Options: "nosniff"
-            X-XSS-Protection: "1; mode=block"
+  ingressClassName: traefik
+  rules:
+    - host: argo-rp.philippmhauptmann.me
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: portfolio-service
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - argo-rp.philippmhauptmann.me

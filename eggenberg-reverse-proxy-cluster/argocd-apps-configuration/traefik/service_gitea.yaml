@@ -24,6 +24,10 @@ spec:
     - websecure
   routes:
     - match: Host(`git.philippmhauptmann.me`)
+      middlewares:
+        - name: ratelimit
+        - name: cloudflare-ip-whitelist
+        - name: secure-headers
       kind: Rule
       services:
         - name: gitea-external

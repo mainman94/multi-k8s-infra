@@ -24,6 +24,10 @@ spec:
     - websecure
   routes:
     - match: Host(`n8n.philippmhauptmann.me`)
+      middlewares:
+        - name: ratelimit
+        - name: cloudflare-ip-whitelist
+        - name: secure-headers
       kind: Rule
       services:
         - name: n8n-external
