@@ -21,6 +21,7 @@ certificatesResolvers:
 providers:
   kubernetesCRD:
     allowExternalNameServices: true
+    allowCrossNamespace: true
 
 entryPoints:
   web:
