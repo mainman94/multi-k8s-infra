@@ -1,3 +1,7 @@
+ipv4NativeRoutingCIDR: "10.42.0.0/16"
+
+ipMasqAgent:
+  enabled: false
 kubeProxyReplacement: true
 
 loadBalancer:
@@ -6,7 +10,7 @@ loadBalancer:
   ipPool:
     - []
 
-tunnel: disabled
+#tunnel: disabled
 routingMode: native
 
 ipam:
