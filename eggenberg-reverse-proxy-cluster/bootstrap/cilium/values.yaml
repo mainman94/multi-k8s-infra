@@ -6,6 +6,9 @@ loadBalancer:
   ipPool:
     - []
 
+tunnel: disabled
+routingMode: native
+
 ipam:
   mode: kubernetes
 
