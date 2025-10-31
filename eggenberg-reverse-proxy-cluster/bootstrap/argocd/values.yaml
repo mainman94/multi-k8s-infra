@@ -30,6 +30,7 @@ server:
     tls:
       - hosts:
           - argo-rp.philippmhauptmann.me
+        secretName: ""
 
 global:
   domain: argo-rp.philippmhauptmann.me
