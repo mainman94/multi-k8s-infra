@@ -55,8 +55,8 @@ metadata:
   name: portfolio-ingress
   namespace: portfolio
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web
-    traefik.ingress.kubernetes.io/router.middlewares: portfolio-secure-headers@traefik,portfolio-ratelimit@traefik,portfolio-cloudflare-ip-whitelist@traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.middlewares: ratelimit@traefik,secure-headers@traefik,cloudflare-ip-whitelist@traefik
 spec:
   rules:
     - host: portfolio.local
