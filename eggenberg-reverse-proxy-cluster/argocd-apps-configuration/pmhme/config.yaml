@@ -48,6 +48,7 @@ spec:
       targetPort: 3000
   type: ClusterIP
 ---
+# yamllint disable rule:line-length
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -71,3 +72,4 @@ spec:
   tls:
     - hosts:
         - philippmhauptmann.me
+# yamllint enable rule:line-length
