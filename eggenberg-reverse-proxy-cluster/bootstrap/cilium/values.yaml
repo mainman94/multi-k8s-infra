@@ -1,20 +1,10 @@
-ipv4NativeRoutingCIDR: "10.42.0.0/16"
-
-ipMasqAgent:
-  enabled: false
 kubeProxyReplacement: true
+ipam:
+  operator.clusterPoolIPv4PodCIDRList: "10.42.0.0/16"
+  mode: kubernetes
 
 loadBalancer:
   enabled: true
-  mode: dsr
-  ipPool:
-    - []
-
-#tunnel: disabled
-routingMode: native
-
-ipam:
-  mode: kubernetes
 
 operator:
   replicas: 1
