@@ -21,16 +21,12 @@ server:
   ingress:
     enabled: true
     ingressClassName: traefik
-    hosts:
-      - host: argo-rp.philippmhauptmann.me
-        paths:
-          - /
+    hostname: argo-rp.philippmhauptmann.me
+    path: /
+    pathType: Prefix
     annotations:
       traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
-    tls:
-      - hosts:
-          - argo-rp.philippmhauptmann.me
-        secretName: ""
+    tls: true
 
 global:
   domain: argo-rp.philippmhauptmann.me
