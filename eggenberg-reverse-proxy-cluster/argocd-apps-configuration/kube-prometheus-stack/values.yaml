@@ -82,7 +82,9 @@ grafana:
   persistence:
     enabled: true
     size: 10Gi
-#    storageClassName: longhorn
+  initChownData:
+    securityContext:
+      runAsUser: 0
 
 # Node Exporter configuration
 nodeExporter:
