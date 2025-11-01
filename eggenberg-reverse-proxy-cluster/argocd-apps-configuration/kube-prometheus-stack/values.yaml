@@ -83,8 +83,11 @@ grafana:
     enabled: true
     size: 10Gi
   initChownData:
+    enabled: true
     securityContext:
       runAsUser: 0
+  podSecurityContext:
+    fsGroup: 472
 
 # Node Exporter configuration
 nodeExporter:
