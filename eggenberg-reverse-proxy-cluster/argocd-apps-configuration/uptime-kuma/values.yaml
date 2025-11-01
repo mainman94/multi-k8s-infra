@@ -1,8 +1,8 @@
 ingress:
   enabled: true
-  ingressClassName: traefik
+  className: traefik
   hosts:
-    - uptime.philippmhauptmann.me
-  paths:
-    - /
-  pathType: Prefix
+    - host: uptime.philippmhauptmann.me
+      paths:
+        - path: /
+          pathType: Prefix
