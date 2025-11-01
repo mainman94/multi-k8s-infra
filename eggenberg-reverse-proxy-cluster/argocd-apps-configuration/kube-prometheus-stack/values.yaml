@@ -70,19 +70,15 @@ serviceMonitor:
 
 # Grafana configuration
 grafana:
-  enabled: false
+  enabled: true
   ingress:
     enabled: true
     ingressClassName: traefik
     hosts:
-      - grafana-new.philippmhauptmann.me
+      - grafana.philippmhauptmann.me
     paths:
       - /
     pathType: Prefix
-    tls:
-      - secretName: wildcard-philippmhauptmann-tls
-        hosts:
-          - grafana-new.philippmhauptmann.me
   persistence:
     enabled: true
     size: 10Gi
