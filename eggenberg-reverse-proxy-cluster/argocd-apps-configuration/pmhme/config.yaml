@@ -58,6 +58,7 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: web
     traefik.ingress.kubernetes.io/router.middlewares: traefik-ratelimit@kubernetescrd,traefik-secure-headers@kubernetescrd,traefik-cloudflare-ip-whitelist@kubernetescrd
 spec:
+  ingressClassName: traefik
   rules:
     - host: philippmhauptmann.me
       http:
