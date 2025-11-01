@@ -52,6 +52,16 @@ entryPoints:
             - CurveP521
             - CurveP384
 
+tls:
+  stores:
+    default:
+      defaultGeneratedCert:
+        resolver: cloudflare
+        domain:
+          main: philippmhauptmann.me
+          sans:
+            - '*.philippmhauptmann.me'
+
 logs:
   general:
     format: json
