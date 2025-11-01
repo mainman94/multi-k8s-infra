@@ -96,3 +96,10 @@ metrics:
     headerLabels:
       user_id: X-User-Id
       tenant: X-Tenant
+
+persistence:
+  enabled: true
+  name: data
+  accessMode: ReadWriteOnce
+  size: 128Mi
+  path: /data
