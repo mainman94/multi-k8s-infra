@@ -59,7 +59,7 @@ metadata:
     traefik.ingress.kubernetes.io/router.middlewares: traefik-ratelimit@kubernetescrd,traefik-secure-headers@kubernetescrd,traefik-cloudflare-ip-whitelist@kubernetescrd
 spec:
   rules:
-    - host: portfolio.local
+    - host: philippmhauptmann.me
       http:
         paths:
           - path: /
