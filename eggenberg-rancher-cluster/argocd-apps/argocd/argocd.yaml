@@ -13,7 +13,7 @@ spec:
       targetRevision: 9.0.5
       helm:
         valueFiles:
-          - $values/eggenberg-reverse-proxy-cluster/bootstrap/argocd/values.yaml
+          - $values/eggenberg-rancher-cluster/bootstrap/argocd/values.yaml
     - repoURL: https://github.com/mainman94/multi-k8s-infra
       targetRevision: HEAD
       ref: values

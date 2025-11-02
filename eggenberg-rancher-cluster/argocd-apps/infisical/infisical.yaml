@@ -13,12 +13,12 @@ spec:
       targetRevision: 0.10.11
       helm:
         valueFiles:
-          - $values/eggenberg-reverse-proxy-cluster/argocd-apps-configuration/infisical/values.yaml
+          - $values/eggenberg-rancher-cluster/argocd-apps-configuration/infisical/values.yaml
     - repoURL: https://github.com/mainman94/multi-k8s-infra
       targetRevision: HEAD
       ref: values
     - repoURL: https://github.com/mainman94/multi-k8s-infra/
-      path: "eggenberg-reverse-proxy-cluster/argocd-apps-configuration/infisical"
+      path: "eggenberg-rancher-cluster/argocd-apps-configuration/infisical"
       targetRevision: HEAD
   # yamllint enable rule:line-length
   destination:

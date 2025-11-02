@@ -1,19 +1,25 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: pmhme-portfolio
+  name: rancher
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "2"
 spec:
   project: default
   sources:
+# yamllint disable rule:line-length
+    - repoURL: https://releases.rancher.com/server-charts/stable
+      chart: rancher
+      targetRevision: 2.12.3
+      helm:
+        valueFiles:
+          - $values/eggenberg-rancher-cluster/argocd-apps-configuration/rancher/values.yaml
     - repoURL: https://github.com/mainman94/multi-k8s-infra
       targetRevision: HEAD
-      path: "eggenberg-reverse-proxy-cluster/argocd-apps-configuration/pmhme"
+      ref: values
+  # yamllint enable rule:line-length
   destination:
     server: https://kubernetes.default.svc
-    namespace: portfolio
+    namespace: cattle-system
   syncPolicy:
     automated:
       prune: true

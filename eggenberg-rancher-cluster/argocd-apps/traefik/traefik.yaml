@@ -11,12 +11,12 @@ spec:
       targetRevision: 37.2.0
       helm:
         valueFiles:
-          - $values/eggenberg-reverse-proxy-cluster/argocd-apps-configuration/traefik/values.yaml
+          - $values/eggenberg-rancher-cluster/argocd-apps-configuration/traefik/values.yaml
     - repoURL: https://github.com/mainman94/multi-k8s-infra
       targetRevision: HEAD
       ref: values
     - repoURL: https://github.com/mainman94/multi-k8s-infra
-      path: "eggenberg-reverse-proxy-cluster/argocd-apps-configuration/traefik"
+      path: "eggenberg-rancher-cluster/argocd-apps-configuration/traefik"
       targetRevision: HEAD
   destination:
     server: https://kubernetes.default.svc

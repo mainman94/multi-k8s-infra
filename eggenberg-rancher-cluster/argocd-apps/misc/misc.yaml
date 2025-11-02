@@ -8,7 +8,7 @@ spec:
   sources:
     - repoURL: https://github.com/mainman94/multi-k8s-infra
       targetRevision: HEAD
-      path: "eggenberg-reverse-proxy-cluster/bootstrap/misc"
+      path: "eggenberg-rancher-cluster/bootstrap/misc"
   destination:
     server: https://kubernetes.default.svc
     namespace: kube-system
