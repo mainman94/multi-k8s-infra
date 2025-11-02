@@ -7,9 +7,10 @@ spec:
   project: default
   sources:
 # yamllint disable rule:line-length
-    - repoURL: https://dl.cloudsmith.io/public/infisical/helm-charts/helm/charts/
+    - repoURL: 
+        https://dl.cloudsmith.io/public/infisical/helm-charts/helm/charts/
       chart: secrets-operator
-      targetRevision: 0.10.10
+      targetRevision: 0.10.11
       helm:
         valueFiles:
           - $values/eggenberg-reverse-proxy-cluster/argocd-apps-configuration/infisical/values.yaml
