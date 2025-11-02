@@ -1,9 +1,34 @@
+applicationSet:
+  metrics:
+    enabled: true
+    service:
+      portName: http-metrics
+    serviceMonitor:
+      enabled: true
+      additionalLabels:
+        release: kube-prometheus-stack
+
 server:
+  metrics:
+    enabled: true
+    service:
+      portName: http-metrics
+    serviceMonitor:
+      enabled: true
+      interval: 30s
+      additionalLabels:
+        release: kube-prometheus-stack
   ingress:
     enabled: true
+    ingressClassName: traefik
+    hostname: argo-rp.philippmhauptmann.me
+    path: /
+    pathType: Prefix
+    annotations:
+      traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
 
 global:
-  domain: argo-rancher.philippmhauptmann.me
+  domain: argo-rp.philippmhauptmann.me
 
 # yamllint disable rule:line-length
 configs:
@@ -15,6 +40,36 @@ configs:
       jsonPointers:
       - /spec/preserveUnknownFields
 # yamllint enable rule:line-length
+
+redis:
+  metrics:
+    enabled: true
+    service:
+      portName: http-metrics
+    serviceMonitor:
+      enabled: true
+      additionalLabels:
+        release: kube-prometheus-stack
+
+controller:
+  metrics:
+    enabled: true
+    service:
+      portName: http-metrics
+    serviceMonitor:
+      enabled: true
+      additionalLabels:
+        release: kube-prometheus-stack
+
+repoServer:
+  metrics:
+    enabled: true
+    service:
+      portName: http-metrics
+    serviceMonitor:
+      enabled: true
+      additionalLabels:
+        release: kube-prometheus-stack
 
 dex:
   enabled: false

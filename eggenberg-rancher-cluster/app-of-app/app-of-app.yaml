@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: 'https://github.com/mainman94/multi-k8s-infra'
     targetRevision: HEAD
-    path: eggenberg-rancher-cluster/argocd-apps
+    path: eggenberg-reverse-proxy-cluster/argocd-apps
     directory:
       recurse: true
   destination:

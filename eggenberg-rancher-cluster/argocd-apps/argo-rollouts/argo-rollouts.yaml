@@ -1,25 +1,25 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: kured
+  name: argocd-rollouts
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-wave: "-2"
 spec:
   project: default
   sources:
-    - repoURL: https://kubereboot.github.io/charts
-      targetRevision: 5.10.0
-      chart: kured
+    - repoURL: https://argoproj.github.io/argo-helm
+      chart: argo-rollouts
+      targetRevision: 2.40.5
       helm:
         valueFiles:
-          - $values/eggenberg-reverse-proxy-cluster/argocd-apps-configuration/kured/values.yaml
+          - $values/eggenberg-reverse-proxy-cluster/argocd-apps-configuration/argo-rollouts/values.yaml
     - repoURL: https://github.com/mainman94/multi-k8s-infra
       targetRevision: HEAD
       ref: values
   destination:
     server: https://kubernetes.default.svc
-    namespace: kured
+    namespace: argocd
   syncPolicy:
     automated:
       prune: true

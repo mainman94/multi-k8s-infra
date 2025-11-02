@@ -3,21 +3,19 @@ kind: Application
 metadata:
   name: traefik
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "-2"
 spec:
   project: default
   sources:
     - repoURL: https://traefik.github.io/charts
       chart: traefik
-      targetRevision: 37.0.0
+      targetRevision: 37.2.0
       helm:
         valueFiles:
-          - $values/eggenberg-reverse-proxy-cluster/bootstrap/traefik/values.yaml
+          - $values/eggenberg-reverse-proxy-cluster/argocd-apps-configuration/traefik/values.yaml
     - repoURL: https://github.com/mainman94/multi-k8s-infra
       targetRevision: HEAD
       ref: values
-    - repoURL: https://github.com/mainman94/multi-k8s-infra/
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
       path: "eggenberg-reverse-proxy-cluster/argocd-apps-configuration/traefik"
       targetRevision: HEAD
   destination:

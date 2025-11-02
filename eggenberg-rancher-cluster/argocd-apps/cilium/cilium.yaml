@@ -1,25 +1,26 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: kured
+  name: cilium
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "2"
 spec:
   project: default
   sources:
-    - repoURL: https://kubereboot.github.io/charts
-      targetRevision: 5.10.0
-      chart: kured
+    - repoURL: https://helm.cilium.io/
+      chart: cilium
+      targetRevision: 1.18.3
       helm:
         valueFiles:
-          - $values/eggenberg-reverse-proxy-cluster/argocd-apps-configuration/kured/values.yaml
+          - $values/eggenberg-reverse-proxy-cluster/bootstrap/cilium/values.yaml
     - repoURL: https://github.com/mainman94/multi-k8s-infra
       targetRevision: HEAD
       ref: values
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
+      targetRevision: HEAD
+      path: "eggenberg-reverse-proxy-cluster/bootstrap/cilium"
   destination:
     server: https://kubernetes.default.svc
-    namespace: kured
+    namespace: kube-system
   syncPolicy:
     automated:
       prune: true

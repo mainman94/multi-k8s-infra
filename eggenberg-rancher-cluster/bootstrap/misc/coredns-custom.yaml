@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns-custom
+  namespace: kube-system
+data:
+  lyrebird-sunfish.server: |
+    lyrebird-sunfish.ts.net {
+        hosts {
+            100.85.101.36 straga-rancher.lyrebird-sunfish.ts.net
+            100.93.45.8 minio.lyrebird-sunfish.ts.net
+            100.101.108.127 s3.lyrebird-sunfish.ts.net
+            fallthrough
+        }
+    }
