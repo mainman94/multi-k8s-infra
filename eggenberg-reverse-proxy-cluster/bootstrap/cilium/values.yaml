@@ -18,3 +18,12 @@ hubble:
     enabled: true
   ui:
     enabled: true
+
+prometheus:
+  metricsService: false
+  enabled: true
+  port: 9962
+  serviceMonitor:
+    enabled: true
+    labels: 
+      release: kube-prometheus-stack
