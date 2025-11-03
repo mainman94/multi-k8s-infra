@@ -14,8 +14,7 @@ spec:
         valueFiles:
           - $values/eggenberg-rancher-cluster/argocd-apps-configuration/rancher/values.yaml
     - repoURL: https://github.com/mainman94/multi-k8s-infra
-      targetRevision: HEAD
-      ref: values
+      targetRevision: main
   # yamllint enable rule:line-length
   destination:
     server: https://kubernetes.default.svc
