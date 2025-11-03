@@ -1,13 +1,15 @@
-hostname: rancher.philippmhauptmann.me
+hostname: rancher-internal.philippmhauptmann.me
 
 replicas: 1
 
 ingress:
-  enabled: false
+  enabled: true
+  includeDefaultExtraAnnotations: true
+  #extraAnnotations: {}
+  ingressClassName: "traefik"
+  annotations: {}
+  pathType: ImplementationSpecific
+  path: "/"
+
 
 tls: external
-
-service:
-  type: NodePort
-  httpNodePort: 30080
-  httpsNodePort: 30443
