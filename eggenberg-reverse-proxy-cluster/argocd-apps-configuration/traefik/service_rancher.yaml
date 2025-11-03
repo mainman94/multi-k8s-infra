@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/name: rancher
 spec:
   type: ExternalName
-  externalName:   
+  externalName: 192.168.0.53
   ports:
     - port: 31453
       targetPort: 31453
