@@ -7,12 +7,12 @@ metadata:
     app.kubernetes.io/name: rancher
 spec:
   type: ExternalName
-  externalName: rancher-internal.philippmhauptmann.me
+  externalName:   
   ports:
-    - port: 443
-      targetPort: 443
+    - port: 31453
+      targetPort: 31453
       protocol: TCP
-      name: http
+      name: https
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
@@ -31,7 +31,7 @@ spec:
       kind: Rule
       services:
         - name: rancher-external
-          port: 443
+          port: 31453
           passHostHeader: true
   tls:
     certResolver: cloudflare
