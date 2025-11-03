@@ -1,0 +1,8 @@
+replicas: 1
+
+service:
+  type: nodename
+  nodePort: 30003
+
+ingress:
+  enabled: false
