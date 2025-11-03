@@ -1,4 +1,11 @@
+hostname: rancher.philippmhauptmann.me
+
 replicas: 1
+
+ingress:
+  enabled: false
+
+tls: external
 
 service:
   type: NodePort
@@ -11,8 +18,3 @@ service:
       protocol: TCP
       name: https
       nodePort: 30443
-
-tls: external
-
-ingress:
-  enabled: false
