@@ -15,6 +15,14 @@ spec:
       name: https
 ---
 apiVersion: traefik.io/v1alpha1
+kind: ServersTransport
+metadata:
+  name: rancher-insecure-transport
+  namespace: traefik
+spec:
+  insecureSkipVerify: true
+---
+apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: rancher-route
@@ -34,5 +42,7 @@ spec:
         - name: rancher-external
           port: 31453
           passHostHeader: true
+          scheme: https
+          serversTransport: rancher-insecure-transport@kubernetescrd
   tls:
     certResolver: cloudflare
