@@ -33,5 +33,7 @@ spec:
         - name: rancher-external
           port: 31453
           passHostHeader: true
+          scheme: https
+          serversTransport: rancher-insecure-transport
   tls:
     certResolver: cloudflare
