@@ -21,14 +21,14 @@ server:
   ingress:
     enabled: true
     ingressClassName: traefik
-    hostname: argo-rp.philippmhauptmann.me
+    hostname: argo-rancher.philippmhauptmann.me
     path: /
     pathType: Prefix
     annotations:
       traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
 
 global:
-  domain: argo-rp.philippmhauptmann.me
+  domain: argo-rancher.philippmhauptmann.me
 
 # yamllint disable rule:line-length
 configs:
