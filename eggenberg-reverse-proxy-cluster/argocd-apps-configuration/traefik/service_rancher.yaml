@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: rancher-external
+  namespace: traefik
+  labels:
+    app.kubernetes.io/name: rancher
+spec:
+  type: ExternalName
+  externalName: rancher-internal.philippmhauptmann.me
+  ports:
+    - port: 443
+      targetPort: 443
+      protocol: TCP
+      name: http
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: radarr-route
+  namespace: traefik
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`rancher.philippmhauptmann.me`)
+      middlewares:
+        - name: ratelimit
+        - name: cloudflare-ip-whitelist
+        - name: secure-headers
+      kind: Rule
+      services:
+        - name: rancher-external
+          port: 443
+          passHostHeader: true
+  tls:
+    certResolver: cloudflare
