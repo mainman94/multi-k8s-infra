@@ -43,6 +43,6 @@ spec:
           port: 31453
           passHostHeader: true
           scheme: https
-          serversTransport: rancher-insecure-transport@kubernetescrd
+          serversTransport: rancher-insecure-transport
   tls:
     certResolver: cloudflare
