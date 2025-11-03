@@ -17,7 +17,7 @@ spec:
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: radarr-route
+  name: rancher-route
   namespace: traefik
 spec:
   entryPoints:
