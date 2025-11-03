@@ -62,13 +62,3 @@ spec:
     customFrameOptionsValue: "SAMEORIGIN"
     browserXssFilter: true
     referrerPolicy: "strict-origin-when-cross-origin"
----
-apiVersion: traefik.io/v1alpha1
-kind: Middleware
-metadata:
-  name: rancher-x-forwarded-proto
-  namespace: traefik
-spec:
-  headers:
-    customRequestHeaders:
-      X-Forwarded-Proto: "https"
