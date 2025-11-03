@@ -14,7 +14,9 @@ service:
       protocol: TCP
       name: http
       nodePort: 30080
+      targetPort: 80
     - port: 443
       protocol: TCP
-      name: https
+      name: https-internal
       nodePort: 30443
+      targetPort: 444
