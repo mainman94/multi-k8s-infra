@@ -1,17 +1,25 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: misc
+  name: longhorn
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
 spec:
   project: default
   sources:
+    - repoURL: https://charts.longhorn.io
+      chart: longhorn
+      targetRevision: 1.10.0
+      helm:
+        valueFiles:
+          - $values/eggenberg-reverse-proxy-cluster/argocd-apps-configuration/longhorn/values.yaml
     - repoURL: https://github.com/mainman94/multi-k8s-infra
       targetRevision: HEAD
-      path: "eggenberg-rancher-cluster/bootstrap/misc"
+      ref: values
   destination:
     server: https://kubernetes.default.svc
-    namespace: kube-system
+    namespace: longhorn-system
   syncPolicy:
     automated:
       prune: true
