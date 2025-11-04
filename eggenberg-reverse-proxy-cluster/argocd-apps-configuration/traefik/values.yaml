@@ -102,3 +102,6 @@ persistence:
   accessMode: ReadWriteOnce
   size: 128Mi
   path: /data
+
+nodeSelector:
+  kubernetes.io/hostname: eggenberg-reverse-proxy
