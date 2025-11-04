@@ -1,9 +1,13 @@
-hostname: rancher-internal.philippmhauptmann.me
+hostname: rancher.philippmhauptmann.me
 
 replicas: 1
 
 ingress:
-  enabled: false
+  enabled: true
+  includeDefaultExtraAnnotations: true
+  extraAnnotations: 
+    traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
+  ingressClassName: "traefik"
 
 tls: external
 
