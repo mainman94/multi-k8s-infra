@@ -7,3 +7,9 @@ persistence:
 
 ingress:
   enabled: false
+
+csi:
+  attacherReplicaCount: "2"
+  provisionerReplicaCount: "2"
+  resizerReplicaCount: "2"
+  snapshotterReplicaCount: "2"
