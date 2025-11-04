@@ -25,5 +25,5 @@ prometheus:
   port: 9962
   serviceMonitor:
     enabled: true
-    labels: 
+    labels:
       release: kube-prometheus-stack
