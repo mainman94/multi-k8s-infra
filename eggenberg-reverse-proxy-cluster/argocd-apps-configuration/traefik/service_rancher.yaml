@@ -25,7 +25,6 @@ spec:
   routes:
     - match: Host(`rancher.philippmhauptmann.me`)
       middlewares:
-        - name: ratelimit
         - name: cloudflare-ip-whitelist
         - name: secure-headers
       kind: Rule
