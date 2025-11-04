@@ -11,5 +11,3 @@ ingress:
 
 tls: external
 
-service:
-  type: NodePort
