@@ -1,6 +1,6 @@
 hostname: rancher.philippmhauptmann.me
 
-replicas: 1
+replicas: 2
 
 ingress:
   enabled: true
