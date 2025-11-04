@@ -9,8 +9,8 @@ ingress:
   enabled: false
 
 csi:
-  kubeletRootDir: 2
-  attacherReplicaCount: 2
-  provisionerReplicaCount: 2
-  resizerReplicaCount: 2
-  snapshotterReplicaCount: 2
+  kubeletRootDir: "2"
+  attacherReplicaCount: "2"
+  provisionerReplicaCount: "2"
+  resizerReplicaCount: "2"
+  snapshotterReplicaCount: "2"
