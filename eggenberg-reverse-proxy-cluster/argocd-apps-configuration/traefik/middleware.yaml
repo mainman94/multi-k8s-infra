@@ -62,3 +62,15 @@ spec:
     customFrameOptionsValue: "SAMEORIGIN"
     browserXssFilter: true
     referrerPolicy: "strict-origin-when-cross-origin"
+---
+# Middleware: websocket-headers
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: websocket-headers
+  namespace: traefik
+spec:
+  headers:
+    customRequestHeaders:
+      Connection: "keep-alive, Upgrade"
+      Upgrade: "websocket"

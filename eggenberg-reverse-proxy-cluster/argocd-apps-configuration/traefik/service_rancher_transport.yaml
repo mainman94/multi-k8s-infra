@@ -1,7 +1,12 @@
 apiVersion: traefik.io/v1alpha1
 kind: ServersTransport
 metadata:
-  name: rancher-insecure-transport
+  name: rancher-transport
   namespace: traefik
 spec:
   insecureSkipVerify: true
+  forwardingTimeouts:
+    dialTimeout: 30s
+    responseHeaderTimeout: 0s
+    idleTimeout: 1200s  # 20 Minuten
+  disableHTTP2: false

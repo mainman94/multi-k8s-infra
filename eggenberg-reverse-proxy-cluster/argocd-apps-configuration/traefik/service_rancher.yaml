@@ -25,6 +25,7 @@ spec:
   routes:
     - match: Host(`rancher.philippmhauptmann.me`)
       middlewares:
+        - name: websocket-headers
         - name: cloudflare-ip-whitelist
       #  - name: secure-headers
       kind: Rule
@@ -33,6 +34,6 @@ spec:
           port: 443
           passHostHeader: true
           scheme: https
-          serversTransport: rancher-insecure-transport
+          serversTransport: rancher-transport
   tls:
     certResolver: cloudflare
