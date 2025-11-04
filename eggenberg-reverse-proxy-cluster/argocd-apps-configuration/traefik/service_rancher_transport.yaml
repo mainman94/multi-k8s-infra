@@ -8,5 +8,3 @@ spec:
   forwardingTimeouts:
     dialTimeout: 30s
     responseHeaderTimeout: 0s
-    requestTimeout: 1800s
-    idleConnTimeout: 0s
