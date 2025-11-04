@@ -26,7 +26,7 @@ spec:
     - match: Host(`rancher.philippmhauptmann.me`)
       middlewares:
         - name: websocket-headers
-        - name: cloudflare-ip-whitelist
+      #  - name: cloudflare-ip-whitelist
       #  - name: secure-headers
       kind: Rule
       services:
