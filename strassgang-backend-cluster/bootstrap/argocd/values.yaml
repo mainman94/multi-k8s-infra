@@ -1,0 +1,78 @@
+applicationSet:
+  metrics:
+    enabled: true
+    service:
+      portName: http-metrics
+    serviceMonitor:
+      enabled: true
+      additionalLabels:
+        release: kube-prometheus-stack
+
+server:
+  metrics:
+    enabled: true
+    service:
+      portName: http-metrics
+    serviceMonitor:
+      enabled: true
+      interval: 30s
+      additionalLabels:
+        release: kube-prometheus-stack
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    hostname: argo-backend.philippmhauptmann.me
+    path: /
+    pathType: Prefix
+    annotations:
+      traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
+
+global:
+  domain: argo-backend.philippmhauptmann.me
+
+# yamllint disable rule:line-length
+configs:
+  params:
+    server.insecure: true
+    timeout.reconciliation: 30s
+  cm:
+    resource.customizations.ignoreDifferences.apiextensions.k8s.io_CustomResourceDefinition: |
+      jsonPointers:
+      - /spec/preserveUnknownFields
+# yamllint enable rule:line-length
+
+redis:
+  metrics:
+    enabled: true
+    service:
+      portName: http-metrics
+    serviceMonitor:
+      enabled: false
+      additionalLabels:
+        release: kube-prometheus-stack
+
+controller:
+  metrics:
+    enabled: true
+    service:
+      portName: http-metrics
+    serviceMonitor:
+      enabled: false
+      additionalLabels:
+        release: kube-prometheus-stack
+
+repoServer:
+  metrics:
+    enabled: true
+    service:
+      portName: http-metrics
+    serviceMonitor:
+      enabled: false
+      additionalLabels:
+        release: kube-prometheus-stack
+
+dex:
+  enabled: false
+
+notifications:
+  enabled: false

@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudflare-tunnel
+  namespace: argocd
+spec:
+  project: default
+  sources:
+# yamllint disable rule:line-length
+    - repoURL: https://community-charts.github.io/helm-charts
+      chart: cloudflared
+      targetRevision: 2.2.3
+      helm:
+        valueFiles:
+          - $values/eggenberg-reverse-proxy-cluster/argocd-apps-configuration/cloudflare-tunnel/values.yaml
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
+      targetRevision: HEAD
+      ref: values
+  # yamllint enable rule:line-length
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cloudflared
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

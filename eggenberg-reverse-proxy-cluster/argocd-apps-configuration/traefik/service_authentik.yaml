@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: authentik-external
+  namespace: traefik
+  labels:
+    app.kubernetes.io/name: authentik
+spec:
+  type: ExternalName
+  externalName: 192.168.0.129
+  ports:
+    - port: 30140
+      targetPort: 30140
+      protocol: TCP
+      name: http
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: authentik-route
+  namespace: traefik
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`authentik.philippmhauptmann.me`)
+      middlewares:
+        - name: ratelimit
+        - name: cloudflare-ip-whitelist
+        - name: secure-headers
+      kind: Rule
+      services:
+        - name: authentik-external
+          port: 30140
+          passHostHeader: true
+  tls:
+    certResolver: cloudflare

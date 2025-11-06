@@ -1,0 +1,31 @@
+replica:
+  allNodes: false
+
+tunnelSecrets:
+  existingConfigJsonFileSecret:
+    name: cloudflare-tunnel-secret
+    key: credentials.json
+  existingPemFileSecret:
+    name: cloudflare-tunnel-secret
+    key: cert.pem
+tunnelConfig:
+  # -- cloudflared tunnel name
+  name: "eggenberg-tunnel"
+  metricsUpdateFrequency: 5s
+  autoUpdateFrequency: 24h
+  noAutoUpdate: true
+  gracePeriod: 30s
+  retries: 5
+  # auto, http2, h2mux, quic
+  protocol: auto
+  # info, warn, error, fatal, panic
+  logLevel: info
+  transportLogLevel: warn
+  connectTimeout: 30s
+  warpRouting: false
+
+ingress:
+  - hostname: 1234.philippmhauptmann.me
+    service: http://traefik.traefik.svc.cluster.local:80
+
+  - service: http_status:404

@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: jellyseerr-external
+  namespace: traefik
+  labels:
+    app.kubernetes.io/name: jellyseerr
+spec:
+  type: ExternalName
+  externalName: 192.168.0.129
+  ports:
+    - port: 30042
+      targetPort: 30042
+      protocol: TCP
+      name: http
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: jellyseerr-route
+  namespace: traefik
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`jellyseerr.philippmhauptmann.me`)
+      middlewares:
+        - name: ratelimit
+        - name: cloudflare-ip-whitelist
+        - name: secure-headers
+      kind: Rule
+      services:
+        - name: jellyseerr-external
+          port: 30042
+          passHostHeader: true
+  tls:
+    certResolver: cloudflare

@@ -1,0 +1,61 @@
+name: Helm Chart Updater
+
+on:
+  workflow_dispatch: # Allows manual triggering
+#  schedule:
+#    - cron: '0 8 * * 1' # Runs every Monday at 8 AM UTC
+
+jobs:
+  create_update_pr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+
+      - name: Install dependencies
+        run: pip install -r .github/scripts/requirements.txt
+
+      - name: Check for chart updates
+        id: analyse
+        run: |
+          python .github/scripts/analyse.py . > updates.json
+          if [[ $(jq 'length' updates.json) -eq 0 ]]; then
+            echo "No updates found."
+            echo "updates_found=false" >> $GITHUB_OUTPUT
+          else
+            echo "Updates found. Proceeding to apply them."
+            echo "updates_found=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Apply updates to YAML files
+        if: steps.analyse.outputs.updates_found == 'true'
+        run: python .github/scripts/apply-updates.py updates.json pr-body.md
+# yamllint disable rule:line-length
+      - name: Prepare Pull Request Content
+        if: steps.analyse.outputs.updates_found == 'true'
+        run: |
+          echo -e "\n\n**Changed files:**\n" >> pr-body.md
+          git status --porcelain | grep ' M ' | awk '{print "- " $2}' >> pr-body.md
+          # Clean up temporary files to prevent them from being committed
+          rm updates.json
+# yamllint enable rule:line-length
+      - name: Create Pull Request
+        if: steps.analyse.outputs.updates_found == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore(deps): Update Helm chart versions"
+          title: "chore(deps): Automatic Helm chart updates"
+          body-path: pr-body.md
+          branch: "bot/helm-chart-updates"
+          delete-branch: true
+          labels: dependencies, automated-pr

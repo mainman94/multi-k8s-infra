@@ -1,0 +1,93 @@
+# Global configuration
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+# Alertmanager configuration
+alertmanager:
+  enabled: true
+  service:
+    type: ClusterIP
+  persistentVolume:
+    enabled: true
+    size: 10Gi
+
+
+# Prometheus server configuration
+prometheus:
+  enabled: true
+  service:
+    type: ClusterIP
+
+  ingress:
+    enabled: false
+    ingressClassName: traefik
+    hosts:
+      - monitoring.philippmhauptmann.me
+    paths:
+      - /
+    pathType: Prefix
+    tls:
+      - secretName: wildcard-philippmhauptmann-tls
+        hosts:
+          - monitoring.philippmhauptmann.me
+
+# yamllint disable rule:line-length
+  prometheusSpec:
+    retention: 30d
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 20Gi
+          storageClassName: local-path
+    additionalScrapeConfigs:
+      - job_name: 'ztunnel'
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_label_app]
+            action: keep
+            regex: istio-system;ztunnel
+          - source_labels: [__meta_kubernetes_pod_container_port_name]
+            action: keep
+            regex: http-monitoring
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+          - source_labels: [__meta_kubernetes_pod_node_name]
+            target_label: instance
+# yamllint enable rule:line-length
+
+# ServiceMonitor configuration
+serviceMonitor:
+  enabled: true
+  relabelings:
+    - action: replace
+      sourceLabels: [__meta_kubernetes_pod_node_name]
+      targetLabel: instance
+
+# Grafana configuration
+grafana:
+  enabled: true
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    hosts:
+      - grafana.philippmhauptmann.me
+    paths:
+      - /
+    pathType: Prefix
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClassName: local-path
+
+# Node Exporter configuration
+nodeExporter:
+  enabled: true
+
+# Kube State Metrics configuration
+kubeStateMetrics:
+  enabled: true
