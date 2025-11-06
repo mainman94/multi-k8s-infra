@@ -8,7 +8,7 @@ spec:
   sources:
     - repoURL: https://prometheus-community.github.io/helm-charts
       chart: kube-prometheus-stack
-      targetRevision: 79.1.1
+      targetRevision: 79.2.1
       helm:
         valueFiles:
           - $values/eggenberg-reverse-proxy-cluster/argocd-apps-configuration/kube-prometheus-stack/values.yaml
