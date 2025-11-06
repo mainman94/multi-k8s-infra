@@ -99,6 +99,7 @@ metrics:
       tenant: X-Tenant
 
 persistence:
+  storageClass: "longhorn"
   enabled: true
   name: data
   accessMode: ReadWriteOnce
