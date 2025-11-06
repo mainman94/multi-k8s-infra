@@ -1,0 +1,4 @@
+cloudflare:
+  tunnelName: HomeLab
+  tunnelId: c2ba734e-c5ce-4378-bc1d-c43349e23f59
+  secretName: cloudflare-tunnel-secret
