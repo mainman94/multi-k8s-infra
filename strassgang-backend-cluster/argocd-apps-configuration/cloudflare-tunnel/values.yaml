@@ -25,9 +25,9 @@ tunnelConfig:
   warpRouting: false
 
 ingress:
-  - hostname: master-sw.philippmhauptmann.me
-    service: http://argocd-server.argocd.svc.cluster.local:80
-    originRequest:
-      originServerName: master-sw.philippmhauptmann.me
+#  - hostname: master-sw.philippmhauptmann.me
+#    service: http://argocd-server.argocd.svc.cluster.local:80
+#    originRequest:
+#      originServerName: master-sw.philippmhauptmann.me
 
   - service: http_status:404
