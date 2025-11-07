@@ -5,105 +5,32 @@ master:
     # Enter any extra configuration for master.toml here.
     # It may be a multi-line string.
 
-  # You may use ANY storage-class, example with local-path-provisioner
-  # Annotations are optional.
-  #  data:
-  #    type: "persistentVolumeClaim"
-  #    size: "24Ti"
-  #    storageClass: "local-path-provisioner"
-  #    annotations:
-  #      "key": "value"
-  
-
-  data:
-    type: "persistentVolumeClaim"
-    size: "20Gi"
-    storageClass: "longhorn"
-  
-  # You may use ANY storage-class, example with local-path-provisioner
-  # Annotations are optional.
-  # logs:
-  #   type: "persistentVolumeClaim"
-  #   size: "24Ti"
-  #   storageClass: "local-path-provisioner"
-  #   annotations:
-  #     "key": "value"
-
-  # You can also use emptyDir storage:
-  #  logs:
-  #    type: "emptyDir"
-  logs:
-    type: "persistentVolumeClaim"
-    size: "10Gi"
-    storageClass: "longhorn"
-
-  affinity: |
-    podAntiAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        - labelSelector:
-            matchLabels:
-              app.kubernetes.io/name: {{ template "seaweedfs.name" . }}
-              app.kubernetes.io/instance: {{ .Release.Name }}
-              app.kubernetes.io/component: master
-          topologyKey: kubernetes.io/hostname
-
-  
-  ingress:
-    enabled: true
-    className: "traefik"
-    # host: false for "*" hostname
-    host: "master-sw.philippmhauptmann.me"
-    path: "/sw-master/?(.*)"
-    pathType: ImplementationSpecific
-    annotations:
-      traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
-
-filer:
-  
   data:
     type: "persistentVolumeClaim"
     size: "20Gi"
     storageClass: "longhorn"
 
-  # You may use ANY storage-class, example with local-path-provisioner
-  # Annotations are optional.
-  # logs:
-  #   type: "persistentVolumeClaim"
-  #   size: "24Ti"
-  #   storageClass: "local-path-provisioner"
-  #   annotations:
-  #     "key": "value"
-
-  # You can also use emptyDir storage:
-  #  logs:
-  #    type: "emptyDir"
   logs:
     type: "persistentVolumeClaim"
     size: "10Gi"
     storageClass: "longhorn"
-
-  
-  affinity: |
-    podAntiAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        - labelSelector:
-            matchLabels:
-              app.kubernetes.io/name: {{ template "seaweedfs.name" . }}
-              app.kubernetes.io/instance: {{ .Release.Name }}
-              app.kubernetes.io/component: filer
-          topologyKey: kubernetes.io/hostname
-
   
   ingress:
     enabled: false
-    className: "nginx"
-    # host: false for "*" hostname
-    host: "seaweedfs.cluster.local"
-    path: "/sw-filer/?(.*)"
-    pathType: ImplementationSpecific
-    annotations:
-      traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
 
+filer:
+  data:
+    type: "persistentVolumeClaim"
+    size: "20Gi"
+    storageClass: "longhorn"
+
+  logs:
+    type: "persistentVolumeClaim"
+    size: "10Gi"
+    storageClass: "longhorn"
+
+  ingress:
+    enabled: false
 
   s3:
     enabled: true
@@ -115,19 +42,11 @@ filer:
     # Suffix of the host name, {bucket}.{domainName}
     domainName: ""
     # enable user & permission to s3 (need to inject to all services)
-    enableAuth: false
+    enableAuth: true
     # set to the name of an existing kubernetes Secret with the s3 json config file
     # should have a secret key called seaweedfs_s3_config with an inline json configure
-    existingConfigSecret: null
-    auditLogConfig: {}
-    # You may specify buckets to be created during the install process.
-    # Buckets may be exposed publicly by setting `anonymousRead` to `true`
-    # createBuckets:
-    #   - name: bucket-a
-    #     anonymousRead: true
-    #   - name: bucket-b
-    #     anonymousRead: false
-
+    existingConfigSecret: seaweedfs-s3-secret
+   
 volume:
   enabled: true
   imageOverride: null
@@ -147,14 +66,6 @@ volume:
     size: "100Gi"
     storageClass: "longhorn"
 
-
-   # - name: data2
-   #   type: "persistentVolumeClaim"
-   #   storageClass: "yourClassNameOfChoice"
-   #   size: "800Gi"
-   #   maxVolumes: 0
-
-  # This will automatically create a job for patching Kubernetes resources if the dataDirs type is 'persistentVolumeClaim' and the size has changed.
   resizeHook:
     enabled: true
     image: alpine/k8s:1.28.4
@@ -171,13 +82,13 @@ volume:
 
 
 s3:
-  enabled: false
+  enabled: true
   
   # enable user & permission to s3 (need to inject to all services)
-  enableAuth: false
+  enableAuth: true
   # set to the name of an existing kubernetes Secret with the s3 json config file
   # should have a secret key called seaweedfs_s3_config with an inline json config
-  existingConfigSecret: null
+  existingConfigSecret: seaweedfs-s3-secret
   auditLogConfig: {}
 
   # Suffix of the host name, {bucket}.{domainName}
@@ -189,15 +100,5 @@ s3:
     storageClass: "longhorn"
   extraEnvironmentVars:
 
-
-
   ingress:
     enabled: false
-    className: "nginx"
-    # host: false for "*" hostname
-    host: "seaweedfs.cluster.local"
-    path: "/"
-    pathType: Prefix
-    # additional ingress annotations for the s3 endpoint
-    annotations: {}
-    tls: []
