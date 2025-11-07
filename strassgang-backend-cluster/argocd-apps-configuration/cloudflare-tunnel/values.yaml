@@ -10,7 +10,7 @@ tunnelSecrets:
     key: cert.pem
 tunnelConfig:
   # -- cloudflared tunnel name
-  name: "strassgang-tunnel"
+  name: "eggenberg-tunnel"
   metricsUpdateFrequency: 5s
   autoUpdateFrequency: 24h
   noAutoUpdate: true
@@ -24,8 +24,11 @@ tunnelConfig:
   connectTimeout: 30s
   warpRouting: false
 
-#ingress:
-#  - hostname: 1234.philippmhauptmann.me
-#    service: http://traefik.traefik.svc.cluster.local:80
+ingress:
+  - hostname: master-sw.philippmhauptmann.me
+    service: http://traefik.traefik.svc.cluster.local:80
 
-#  - service: http_status:404
+  - hostname: s3-sw.philippmhauptmann.me
+    service: http://traefik.traefik.svc.cluster.local:80  
+
+  - service: http_status:404
