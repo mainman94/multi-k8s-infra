@@ -26,7 +26,7 @@ tunnelConfig:
 
 ingress:
   - hostname: master-sw.philippmhauptmann.me
-    service: http://traefik.traefik.svc.cluster.local:80
+    service: http://argocd-server.argocd.svc.cluster.local:80
     originRequest:
       originServerName: master-sw.philippmhauptmann.me
 
