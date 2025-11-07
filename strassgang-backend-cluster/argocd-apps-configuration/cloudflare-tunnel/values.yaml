@@ -25,6 +25,10 @@ tunnelConfig:
   warpRouting: false
 
 ingress:
+  - hostname: master-sw.philippmhauptmann.me
+    service: http://traefik.traefik.svc.cluster.local:80
+
   - service: http://traefik.traefik.svc.cluster.local:80
 
   - service: http_status:404
+  
