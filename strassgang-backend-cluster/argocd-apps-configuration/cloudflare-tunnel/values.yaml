@@ -27,5 +27,7 @@ tunnelConfig:
 ingress:
   - hostname: master-sw.philippmhauptmann.me
     service: http://traefik.traefik.svc.cluster.local:80
+    originRequest:
+      originServerName: master-sw.philippmhauptmann.me
 
   - service: http_status:404
