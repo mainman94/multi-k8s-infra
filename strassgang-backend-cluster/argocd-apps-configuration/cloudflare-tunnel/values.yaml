@@ -25,9 +25,7 @@ tunnelConfig:
   warpRouting: false
 
 ingress:
-#  - hostname: master-sw.philippmhauptmann.me
-#    service: http://argocd-server.argocd.svc.cluster.local:80
-#    originRequest:
-#      originServerName: master-sw.philippmhauptmann.me
+  - hostname: s3.philippmhauptmann.me
+    service: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333
 
   - service: http_status:404
