@@ -23,7 +23,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`authentik.philippmhauptmann.me`)
+    - match: Host(`auth.philippmhauptmann.me`)
       middlewares:
         - name: ratelimit
         - name: cloudflare-ip-whitelist
