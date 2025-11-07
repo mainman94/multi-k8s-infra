@@ -25,7 +25,7 @@ tunnelConfig:
   warpRouting: false
 
 ingress:
-  - hostname: s3.philippmhauptmann.me
+  - hostname: s3-sw.philippmhauptmann.me
     service: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333
 
   - service: http_status:404
