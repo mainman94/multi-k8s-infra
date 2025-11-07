@@ -14,11 +14,12 @@ master:
   #    annotations:
   #      "key": "value"
   
-  data:
-    type: "hostPath"
-    storageClass: "longhorn"
-    hostPathPrefix: /ssd
 
+  data:
+    type: "persistentVolumeClaim"
+    size: "20Gi"
+    storageClass: "longhorn"
+  
   # You may use ANY storage-class, example with local-path-provisioner
   # Annotations are optional.
   # logs:
@@ -32,10 +33,9 @@ master:
   #  logs:
   #    type: "emptyDir"
   logs:
-    type: "hostPath"
-    size: ""
+    type: "persistentVolumeClaim"
+    size: "10Gi"
     storageClass: "longhorn"
-    hostPathPrefix: /storage
 
   affinity: |
     podAntiAffinity:
@@ -61,10 +61,9 @@ master:
 filer:
   
   data:
-    type: "hostPath"
-    size: ""
+    type: "persistentVolumeClaim"
+    size: "100Gi"
     storageClass: "longhorn"
-    hostPathPrefix: /storage
 
   # You may use ANY storage-class, example with local-path-provisioner
   # Annotations are optional.
@@ -79,10 +78,9 @@ filer:
   #  logs:
   #    type: "emptyDir"
   logs:
-    type: "hostPath"
-    size: ""
+    type: "persistentVolumeClaim"
+    size: "10Gi"
     storageClass: "longhorn"
-    hostPathPrefix: /storage
 
   
   affinity: |
@@ -227,11 +225,10 @@ s3:
   #  logs:
   #    type: "emptyDir"
   logs:
-    type: "hostPath"
-    size: ""
-    storageClass: ""
-    hostPathPrefix: /storage
-
+    type: "persistentVolumeClaim"
+    size: "10Gi"
+    storageClass: "longhorn"
+    
   extraEnvironmentVars:
 
   # Custom command line arguments to add to the s3 command
