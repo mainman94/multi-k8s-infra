@@ -84,12 +84,17 @@ volume:
 s3:
   enabled: true
   
-  # enable user & permission to s3 (need to inject to all services)
   enableAuth: true
   # set to the name of an existing kubernetes Secret with the s3 json config file
   # should have a secret key called seaweedfs_s3_config with an inline json config
   existingConfigSecret: seaweedfs-s3-secret
   auditLogConfig: {}
+
+  config: |-
+    # Enter any extra configuration for s3.toml here.
+    # It may be a multi-line string.
+    [s3]
+    config = "/etc/sw/seaweedfs_s3_config"
 
   # Suffix of the host name, {bucket}.{domainName}
   domainName: ""
