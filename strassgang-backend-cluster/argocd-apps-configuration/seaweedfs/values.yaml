@@ -45,7 +45,7 @@ filer:
     enableAuth: true
     # set to the name of an existing kubernetes Secret with the s3 json config file
     # should have a secret key called seaweedfs_s3_config with an inline json configure
-    existingConfigSecret: seaweedfs-s3-secret
+#    existingConfigSecret: seaweedfs-s3-secret
    
 volume:
   enabled: true
