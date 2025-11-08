@@ -1,5 +1,6 @@
 
 garage:
+  
   # -- Default to 3 replicas, see the replication_factor section at
   # https://garagehq.deuxfleurs.fr/documentation/reference-manual/configuration/#replication_factor
   replicationFactor: "1"
@@ -27,10 +28,9 @@ persistence:
     #hostPath: /var/lib/garage/meta
   data:
     storageClass: "longhorn"
-    size: 100Mi
+    size: 100Gi
     # used only for daemon sets
     #hostPath: /var/lib/garage/data
-
 
 ingress:
   s3:
