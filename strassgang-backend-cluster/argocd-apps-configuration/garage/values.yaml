@@ -43,6 +43,8 @@ ingress:
       # examples [here](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers).
       annotations:
         traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
+        traefik.ingress.kubernetes.io/router.middlewares: garage-garage-host-header@kubernetescrd
+
         # kubernetes.io/ingress.class: "nginx"
         # kubernetes.io/tls-acme: "true"
       hosts:
