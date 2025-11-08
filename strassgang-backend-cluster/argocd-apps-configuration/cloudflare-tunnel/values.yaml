@@ -30,5 +30,7 @@ ingress:
 
   - hostname: master-sw.philippmhauptmann.me
     service: https://traefik.traefik.svc.cluster.local:443
+    originServerName: "master-sw.philippmhauptmann.me"
+    noTLSVerify: true
 
   - service: http_status:404
