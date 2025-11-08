@@ -47,17 +47,17 @@ ingress:
         # kubernetes.io/tls-acme: "true"
       hosts:
         # -- garage S3 API endpoint, to be used with awscli for example
-        - host: "s3-ws.philippmhauptmann.me"
+        - host: "s3-sw.philippmhauptmann.me"
           paths:
             - path: /
               pathType: Prefix
         # -- garage S3 API endpoint, DNS style bucket access
-        - host: "*.s3-ws.philippmhauptmann.me"
+        - host: "*.s3-sw.philippmhauptmann.me"
           paths:
             - path: /
               pathType: Prefix
     web:
-      enabled: false
+      enabled: true
       className: "traefik"
       # and replace "nginx" by an Ingress controller name,
       # examples [here](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers).
