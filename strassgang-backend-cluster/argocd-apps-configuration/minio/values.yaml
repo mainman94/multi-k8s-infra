@@ -1,0 +1,30 @@
+replicaCount: 1
+
+persistence:
+  enabled: true
+  size: 150Gi
+  storageClass: "longhorn"
+
+auth:
+  existingSecret: minio-credentials
+  existingSecretUserKey: "rootUser"
+  existingSecretPasswordKey: "rootPassword"
+
+resources:
+  requests:
+    memory: 512Mi
+    cpu: 250m
+  limits:
+    memory: 4Gi
+    cpu: 2000m
+
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
+  hosts:
+    - host: "s3-sw.philippmhauptmann.me"
+      paths:
+        - path: /
+          pathType: Prefix

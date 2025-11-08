@@ -1,26 +1,25 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: seaweedfs
+  name: minio
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "-2"
 spec:
   project: default
   sources:
-    - repoURL: https://seaweedfs.github.io/seaweedfs/helm
-      chart: seaweedfs
-      targetRevision: 4.0.400
+    - repoURL: oci://registry-1.docker.io/cloudpirates/minio
+      chart: minio
+      targetRevision: 0.5.3
       helm:
         valueFiles:
-          - $values/strassgang-backend-cluster/argocd-apps-configuration/seaweedfs/values.yaml
-    - repoURL: https://github.com/mainman94/multi-k8s-infra
+          - $values/strassgang-backend-cluster/argocd-apps-configuration/minio/values.yaml
+    - repoURL: https://github.com/mainman94/phm.me_cluster
       targetRevision: HEAD
       ref: values
-
   destination:
     server: https://kubernetes.default.svc
-    namespace: seaweedfs
+    namespace: minio
   syncPolicy:
     automated:
       prune: true
