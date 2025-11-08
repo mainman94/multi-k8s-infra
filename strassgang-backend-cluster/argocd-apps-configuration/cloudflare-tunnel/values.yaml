@@ -25,10 +25,7 @@ tunnelConfig:
   warpRouting: false
 
 ingress:
-  - hostname: s3-sw.philippmhauptmann.me
-    service: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333
-
-  - hostname: master-sw.philippmhauptmann.me
+  - hostname: "*.philippmhauptmann.me"
     service: https://traefik.traefik.svc.cluster.local:443
     originRequest:
       originServerName: "*.philippmhauptmann.me"

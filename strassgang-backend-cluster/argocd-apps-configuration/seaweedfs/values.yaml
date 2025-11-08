@@ -100,4 +100,11 @@ s3:
   extraEnvironmentVars:
 
   ingress:
-    enabled: false
+    enabled: true
+    className: "nginx"
+    # host: false for "*" hostname
+    host: "s3-sw.philippmhauptmann.me"
+    path: "/"
+    pathType: Prefix
+    annotations:
+      traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
