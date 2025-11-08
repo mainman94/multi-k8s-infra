@@ -25,6 +25,11 @@ tunnelConfig:
   warpRouting: false
 
 ingress:
+  - hostname: "s3-sw.philippmhauptmann.me"
+    service: http://minio.minio.svc.cluster.local:9000
+    originRequest:
+      originServerName: "s3-sw.philippmhauptmann.me"
+      matchSNItoHost: true
   - hostname: "*.philippmhauptmann.me"
     service: https://traefik.traefik.svc.cluster.local:443
     originRequest:
