@@ -14,7 +14,7 @@ spec:
       helm:
         valueFiles:
           - $values/strassgang-backend-cluster/argocd-apps-configuration/minio/values.yaml
-    - repoURL: https://github.com/mainman94/phm.me_cluster
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
       targetRevision: HEAD
       ref: values
   destination:
