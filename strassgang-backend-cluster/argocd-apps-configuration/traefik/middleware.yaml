@@ -1,9 +1,0 @@
-apiVersion: traefik.io/v1alpha1
-kind: Middleware
-metadata:
-  name: garage-host-header
-  namespace: garage
-spec:
-  headers:
-    customRequestHeaders:
-      Host: s3-sw.philippmhauptmann.me
