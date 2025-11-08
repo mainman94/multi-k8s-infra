@@ -14,9 +14,9 @@ garage:
   s3:
     api:
       region: "garage"
-      rootDomain: ".s3.garage.tld"
+      rootDomain: "s3-sw.philippmhauptmann.me"
     web:
-      rootDomain: ".web.garage.tld"
+      rootDomain: "master-sw.philippmhauptmann.me"
       index: "index.html"
 
 persistence:
