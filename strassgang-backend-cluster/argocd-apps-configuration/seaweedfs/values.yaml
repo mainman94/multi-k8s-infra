@@ -101,7 +101,7 @@ s3:
 
   ingress:
     enabled: true
-    className: "nginx"
+    className: "traefik"
     # host: false for "*" hostname
     host: "s3-sw.philippmhauptmann.me"
     path: "/"
