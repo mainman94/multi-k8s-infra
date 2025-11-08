@@ -27,7 +27,8 @@ tunnelConfig:
 ingress:
   - hostname: s3-sw.philippmhauptmann.me
     service: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333
+
   - hostname: master-sw.philippmhauptmann.me
-    service: http://traefik.traefik.svc.cluster.local:443
+    service: https://traefik.traefik.svc.cluster.local:443
 
   - service: http_status:404
