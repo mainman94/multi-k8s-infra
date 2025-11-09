@@ -25,10 +25,7 @@ tunnelConfig:
   warpRouting: false
 
 ingress:
-  - hostname: "sftp.philippmhauptmann.me"
-    service: https://traefik.traefik.svc.cluster.local:443
-    originRequest:
-      originServerName: "*.philippmhauptmann.me"
-      matchSNItoHost: true
+  - hostname: sftp.philippmhauptmann.me
+    service: tcp://seaweedfs-sftp.seaweedfs.svc.cluster.local:2022
 
   - service: http_status:404
