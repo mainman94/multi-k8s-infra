@@ -26,6 +26,6 @@ tunnelConfig:
 
 ingress:
   - hostname: sftp.philippmhauptmann.me
-    service: tcp://seaweedfs-sftp.seaweedfs.svc.cluster.local:2022
+    service: http://seaweedfs-filer.seaweedfs.svc.cluster.local:8888
 
   - service: http_status:404
