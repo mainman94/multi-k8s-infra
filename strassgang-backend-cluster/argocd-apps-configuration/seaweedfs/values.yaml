@@ -12,6 +12,7 @@ master:
     enabled: false
 
 filer:
+  enabled: false
   data:
     type: "persistentVolumeClaim"
     size: "20Gi"
@@ -65,7 +66,7 @@ s3:
   enabled: false
 
 sftp:
-  enabled: false
+  enabled: true
   imageOverride: null
   restartPolicy: null
   replicas: 1
