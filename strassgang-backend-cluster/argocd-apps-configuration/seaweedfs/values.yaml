@@ -49,7 +49,7 @@ volume:
 
   resizeHook:
     enabled: true
-    image: alpine/k8s:1.28.4
+    image: alpine/k8s:1.34.1
 
   idx:
    type: "persistentVolumeClaim"
