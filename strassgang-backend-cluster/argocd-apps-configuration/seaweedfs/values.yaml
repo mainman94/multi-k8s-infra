@@ -12,10 +12,10 @@ master:
     enabled: false
 
 filer:
-  enabled: false
+  enabled: true
   data:
     type: "persistentVolumeClaim"
-    size: "20Gi"
+    size: "100Gi"
     storageClass: "longhorn"
 
   logs:
