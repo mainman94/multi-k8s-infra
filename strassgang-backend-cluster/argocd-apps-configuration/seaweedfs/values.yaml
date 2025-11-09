@@ -91,9 +91,9 @@ sftp:
   enableAuth: true
   # Set to the name of an existing kubernetes Secret with the sftp json config file
   # Should have a secret key called seaweedfs_sftp_config with an inline json config
-  existingConfigSecret: ""
+  existingConfigSecret: "seaweedfs-sftp-secret"
   # Set to the name of an existing kubernetes Secret with the list of ssh private keys for sftp
-  existingSshConfigSecret: ""
+  existingSshConfigSecret: "seaweedfs-sftp-secret"
 
   # Additional resources
   sidecars: []
