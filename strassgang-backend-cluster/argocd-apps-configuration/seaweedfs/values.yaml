@@ -1,18 +1,25 @@
 
 master:
+
+  config: |-
+    # Enter any extra configuration for master.toml here.
+    # It may be a multi-line string.
+
   data:
     type: "persistentVolumeClaim"
     size: "20Gi"
     storageClass: "longhorn"
+
   logs:
     type: "persistentVolumeClaim"
     size: "10Gi"
     storageClass: "longhorn"
+  
   ingress:
     enabled: false
 
 filer:
-  enabled: true
+
   data:
     type: "persistentVolumeClaim"
     size: "100Gi"
@@ -28,7 +35,7 @@ filer:
 
   s3:
     enabled: false
-
+   
 volume:
   enabled: true
   imageOverride: null
@@ -40,7 +47,7 @@ volume:
   ipBind: "0.0.0.0"
   replicas: 1
   loggingOverrideLevel: null
- 
+   
   dataDirs:
   - name: data1
     type: "persistentVolumeClaim"
@@ -61,59 +68,30 @@ volume:
    size: "10Gi"
    storageClass: "longhorn"
 
+
 s3:
-  enabled: false
-
-sftp:
   enabled: true
-  imageOverride: null
-  restartPolicy: null
-  replicas: 1
-  bindAddress: 0.0.0.0
-  port: 2022
-  metricsPort: 9327
-  metricsIp: ""  # If empty, defaults to bindAddress
-  loggingOverrideLevel: null
-
-  # SSH server configuration
-  sshPrivateKey: "/etc/sw/seaweedfs_sftp_ssh_private_key"  # Path to the SSH private key file for host authentication
-  hostKeysFolder: "/etc/sw/ssh"  # path to folder containing SSH private key files for host authentication
-  authMethods: "password,publickey"  # Comma-separated list of allowed auth methods: password, publickey, keyboard-interactive
-  maxAuthTries: 6  # Maximum number of authentication attempts per connection
-  bannerMessage: "SeaweedFS SFTP Server"  # Message displayed before authentication
-  loginGraceTime: "2m"  # Timeout for authentication
-  clientAliveInterval: "5s"  # Interval for sending keep-alive messages
-  clientAliveCountMax: 3  # Maximum number of missed keep-alive messages before disconnecting
-  dataCenter: ""  # Prefer to read and write to volumes in this data center
-  localSocket: ""  # Default to /tmp/seaweedfs-sftp-<port>.sock
-
-  # User authentication
+  
   enableAuth: true
-  # Set to the name of an existing kubernetes Secret with the sftp json config file
-  # Should have a secret key called seaweedfs_sftp_config with an inline json config
-  existingConfigSecret: "seaweedfs-sftp-secret"
-  # Set to the name of an existing kubernetes Secret with the list of ssh private keys for sftp
-  existingSshConfigSecret: "seaweedfs-sftp-secret"
+  # set to the name of an existing kubernetes Secret with the s3 json config file
+  # should have a secret key called seaweedfs_s3_config with an inline json config
+  #existingConfigSecret: seaweedfs-s3-secret
+  auditLogConfig: {}
 
-  # Additional resources
-  sidecars: []
-  initContainers: ""
-  extraVolumes: ""
-  extraVolumeMounts: ""
-  podLabels: {}
-  podAnnotations: {}
-  annotations: {}
-  resources: {}
-  tolerations: ""
-  nodeSelector: ""
-  priorityClassName: ""
-  serviceAccountName: ""
-  podSecurityContext: {}
-  containerSecurityContext: {}
+  # Suffix of the host name, {bucket}.{domainName}
+  domainName: ""
 
   logs:
     type: "persistentVolumeClaim"
     size: "10Gi"
     storageClass: "longhorn"
+  extraEnvironmentVars:
 
-  extraEnvironmentVars: {}
+  ingress:
+    enabled: true
+    className: "traefik"
+    host: "s3.philippmhauptmann.me"
+    path: "/"
+    pathType: Prefix
+    annotations:
+      traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
