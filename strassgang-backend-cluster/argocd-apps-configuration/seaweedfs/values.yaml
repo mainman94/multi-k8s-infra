@@ -1,0 +1,119 @@
+
+master:
+  data:
+    type: "persistentVolumeClaim"
+    size: "20Gi"
+    storageClass: "longhorn"
+  logs:
+    type: "persistentVolumeClaim"
+    size: "10Gi"
+    storageClass: "longhorn"
+  ingress:
+    enabled: false
+
+filer:
+  data:
+    type: "persistentVolumeClaim"
+    size: "20Gi"
+    storageClass: "longhorn"
+
+  logs:
+    type: "persistentVolumeClaim"
+    size: "10Gi"
+    storageClass: "longhorn"
+
+  ingress:
+    enabled: false
+
+  s3:
+    enabled: false
+
+volume:
+  enabled: true
+  imageOverride: null
+  restartPolicy: null
+  port: 8080
+  grpcPort: 18080
+  metricsPort: 9327
+  metricsIp: ""  # Metrics listen IP. If empty, defaults to ipBind
+  ipBind: "0.0.0.0"
+  replicas: 1
+  loggingOverrideLevel: null
+  # number of seconds between heartbeats, must be smaller than or equal to the master's setting
+ 
+  dataDirs:
+  - name: data1
+    type: "persistentVolumeClaim"
+    size: "100Gi"
+    storageClass: "longhorn"
+
+  resizeHook:
+    enabled: true
+    image: alpine/k8s:1.28.4
+
+  idx:
+   type: "persistentVolumeClaim"
+   size: "20Gi"
+   storageClass: "longhorn"
+
+  logs:
+   type: "persistentVolumeClaim"
+   size: "10Gi"
+   storageClass: "longhorn"
+
+s3:
+  enabled: false
+
+sftp:
+  enabled: false
+  imageOverride: null
+  restartPolicy: null
+  replicas: 1
+  bindAddress: 0.0.0.0
+  port: 2022
+  metricsPort: 9327
+  metricsIp: ""  # If empty, defaults to bindAddress
+  loggingOverrideLevel: null
+
+  # SSH server configuration
+  sshPrivateKey: "/etc/sw/seaweedfs_sftp_ssh_private_key"  # Path to the SSH private key file for host authentication
+  hostKeysFolder: "/etc/sw/ssh"  # path to folder containing SSH private key files for host authentication
+  authMethods: "password,publickey"  # Comma-separated list of allowed auth methods: password, publickey, keyboard-interactive
+  maxAuthTries: 6  # Maximum number of authentication attempts per connection
+  bannerMessage: "SeaweedFS SFTP Server"  # Message displayed before authentication
+  loginGraceTime: "2m"  # Timeout for authentication
+  clientAliveInterval: "5s"  # Interval for sending keep-alive messages
+  clientAliveCountMax: 3  # Maximum number of missed keep-alive messages before disconnecting
+  dataCenter: ""  # Prefer to read and write to volumes in this data center
+  localSocket: ""  # Default to /tmp/seaweedfs-sftp-<port>.sock
+
+  # User authentication
+  enableAuth: true
+  # Set to the name of an existing kubernetes Secret with the sftp json config file
+  # Should have a secret key called seaweedfs_sftp_config with an inline json config
+  existingConfigSecret: null
+  # Set to the name of an existing kubernetes Secret with the list of ssh private keys for sftp
+  existingSshConfigSecret: null
+
+  # Additional resources
+  sidecars: []
+  initContainers: ""
+  extraVolumes: ""
+  extraVolumeMounts: ""
+  podLabels: {}
+  podAnnotations: {}
+  annotations: {}
+  resources: {}
+  tolerations: ""
+  nodeSelector: ""
+  priorityClassName: ""
+  serviceAccountName: ""
+  podSecurityContext: {}
+  containerSecurityContext: {}
+
+  logs:
+    type: "persistentVolumeClaim"
+    size: "10Gi"
+    storageClass: "longhorn"
+
+  extraEnvironmentVars: {}
