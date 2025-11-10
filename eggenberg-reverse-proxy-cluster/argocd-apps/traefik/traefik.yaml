@@ -8,7 +8,7 @@ spec:
   sources:
     - repoURL: https://traefik.github.io/charts
       chart: traefik
-      targetRevision: 37.2.0
+      targetRevision: 37.3.0
       helm:
         valueFiles:
           - $values/eggenberg-reverse-proxy-cluster/argocd-apps-configuration/traefik/values.yaml
