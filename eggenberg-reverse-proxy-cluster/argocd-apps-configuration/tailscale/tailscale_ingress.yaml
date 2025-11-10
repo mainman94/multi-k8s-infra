@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seaweedfs-s3-ingress
+  namespace: seaweedfs
+  annotations:
+    tailscale.com/tls-cert-name: "seaweedfs-s3-api-cert"
+    traefik.ingress.kubernetes.io/client-body-buffer-size: "2G"
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - s3.philippmhauptmann.me
+      secretName: seaweedfs-s3-api-cert
+  rules:
+    - host: s3.philippmhauptmann.me
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweedfs-s3
+                port:
+                  number: 8333
