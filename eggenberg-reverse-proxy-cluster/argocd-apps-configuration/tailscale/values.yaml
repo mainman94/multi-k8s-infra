@@ -1,0 +1,11 @@
+operator:
+  enabled: true
+  allowIncomingConnections: ["seaweedfs"]
+  name: tailscale-operator-strassgang-backend-cluster
+
+logLevel: info
+
+proxyConfig:
+  enabled: false
+
+namespace: tailscale

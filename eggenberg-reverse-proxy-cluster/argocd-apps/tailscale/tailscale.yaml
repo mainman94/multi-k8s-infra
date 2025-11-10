@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tailscale
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://pkgs.tailscale.com/helmcharts
+      chart: tailscale-operator
+      targetRevision: 1.88.4
+      helm:
+        valueFiles:
+          - $values/eggenberg-reverse-proxy-cluster/argocd-apps-configuration/tailscale/values.yaml
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
+      targetRevision: HEAD
+      ref: values
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
+      path: "eggenberg-reverse-proxy-cluster/argocd-apps-configuration/tailscale"
+      targetRevision: HEAD
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: tailscale
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
