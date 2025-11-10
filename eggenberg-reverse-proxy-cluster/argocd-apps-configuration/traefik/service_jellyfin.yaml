@@ -25,7 +25,7 @@ spec:
   routes:
     - match: Host(`jellyfin.philippmhauptmann.me`)
       middlewares:
-        - name: ratelimit
+     #   - name: ratelimit
         - name: cloudflare-ip-whitelist
         - name: secure-headers
       kind: Rule
