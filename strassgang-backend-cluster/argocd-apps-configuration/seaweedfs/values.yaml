@@ -45,7 +45,7 @@ volume:
   metricsPort: 9327
   metricsIp: ""
   ipBind: "0.0.0.0"
-  replicas: 1
+  replicas: 3
   loggingOverrideLevel: null
    
   dataDirs:
@@ -53,6 +53,7 @@ volume:
     type: "persistentVolumeClaim"
     size: "100Gi"
     storageClass: "longhorn"
+    maxVolumes: 0
 
   resizeHook:
     enabled: true
