@@ -1,8 +1,17 @@
 ingress:
   enabled: true
   className: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
   hosts:
     - host: uptime.philippmhauptmann.me
       paths:
         - path: /
           pathType: Prefix
+
+persistence:
+  enabled: true
+  storageClass: "longhorn"
+
+nscd:
+  enabled: true
