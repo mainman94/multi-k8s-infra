@@ -1,10 +1,5 @@
 
 master:
-
-  config: |-
-    # Enter any extra configuration for master.toml here.
-    # It may be a multi-line string.
-
   data:
     type: "persistentVolumeClaim"
     size: "20Gi"
@@ -19,7 +14,6 @@ master:
     enabled: false
 
 filer:
-
   data:
     type: "persistentVolumeClaim"
     size: "100Gi"
@@ -38,15 +32,7 @@ filer:
    
 volume:
   enabled: true
-  imageOverride: null
-  restartPolicy: null
-  port: 8080
-  grpcPort: 18080
-  metricsPort: 9327
-  metricsIp: ""
-  ipBind: "0.0.0.0"
   replicas: 1
-  loggingOverrideLevel: null
    
   dataDirs:
   - name: data1
@@ -57,7 +43,6 @@ volume:
 
   resizeHook:
     enabled: true
-    image: alpine/k8s:1.28.4
 
   idx:
    type: "persistentVolumeClaim"
@@ -69,19 +54,9 @@ volume:
    size: "10Gi"
    storageClass: "longhorn"
 
-
 s3:
   enabled: true
-  
   enableAuth: true
-  # set to the name of an existing kubernetes Secret with the s3 json config file
-  # should have a secret key called seaweedfs_s3_config with an inline json config
-  #existingConfigSecret: seaweedfs-s3-secret
-  auditLogConfig: {}
-
-  # Suffix of the host name, {bucket}.{domainName}
-  domainName: ""
-
   logs:
     type: "persistentVolumeClaim"
     size: "10Gi"
@@ -89,10 +64,5 @@ s3:
   extraEnvironmentVars:
 
   ingress:
-    enabled: true
-    className: "traefik"
-    host: "s3.philippmhauptmann.me"
-    path: "/"
-    pathType: Prefix
-    annotations:
-      traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
+    enabled: false
+
