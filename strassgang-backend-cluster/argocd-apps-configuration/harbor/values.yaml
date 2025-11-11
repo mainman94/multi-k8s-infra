@@ -4,8 +4,8 @@ expose:
     enabled: false
     certSource: none
     ingress:
-    hosts:
-      core: harbor.philippmhauptmann.me
+      hosts:
+        core: harbor.philippmhauptmann.me
     className: "traefik"
     annotations:
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
