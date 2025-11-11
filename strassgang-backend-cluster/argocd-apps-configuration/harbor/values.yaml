@@ -1,0 +1,59 @@
+expose:
+  type: ingress
+  tls:
+    enabled: true
+    certSource: none
+    ingress:
+    hosts:
+      core: harbor.philippmhauptmann.me
+    className: "traefik"
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+ 
+externalURL: https://harbor.philippmhauptmann.me
+
+persistence:
+  enabled: true
+  persistentVolumeClaim:
+    registry:
+      storageClass: "longhorn"
+    jobservice:
+      jobLog:
+        storageClass: "longhorn"
+    database:
+      storageClass: "longhorn"
+    redis:
+      storageClass: "longhorn"
+    trivy:
+      storageClass: "longhorn"
+
+#existingSecretAdminPassword: ""
+#existingSecretAdminPasswordKey: HARBOR_ADMIN_PASSWORD
+#harborAdminPassword: "Harbor12345"
+
+# The secret key used for encryption. Must be a string of 16 chars.
+#secretKey: "not-a-secure-key"
+# If using existingSecretSecretKey, the key must be secretKey
+#existingSecretSecretKey: ""
+
+metrics:
+  enabled: false
+  core:
+    path: /metrics
+    port: 8001
+  registry:
+    path: /metrics
+    port: 8001
+  jobservice:
+    path: /metrics
+    port: 8001
+  exporter:
+    path: /metrics
+    port: 8001
+  serviceMonitor:
+    enabled: false
+    additionalLabels: {}
+    interval: ""
+    metricRelabelings:
+      []
+    relabelings:
