@@ -63,6 +63,9 @@ tlsStore:
         sans:
           - '*.philippmhauptmann.me'
 
+podSecurityContext:
+  fsGroup: 65532
+
 logs:
   general:
     format: json
