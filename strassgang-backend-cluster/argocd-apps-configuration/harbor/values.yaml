@@ -5,12 +5,12 @@ expose:
     certSource: none
   ingress:
     hosts:
-      core: harbor.philippmhauptmann.me
+      core: registry.philippmhauptmann.me
     className: "traefik"
     annotations:
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
  
-externalURL: https://harbor.philippmhauptmann.me
+externalURL: https://registry.philippmhauptmann.me
 persistence:
   enabled: true
   persistentVolumeClaim:
