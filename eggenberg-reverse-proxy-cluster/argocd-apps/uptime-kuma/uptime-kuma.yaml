@@ -9,8 +9,8 @@ spec:
 # yamllint disable rule:line-length
   project: default
   sources:
-    - repoURL: https://helm.irsigler.cloud
-      targetRevision: 2.22.0
+    - repoURL: https://opensource.ncsa.illinois.edu/charts/
+      targetRevision: 1.2.0
       chart: uptime-kuma
       helm:
         valueFiles:
