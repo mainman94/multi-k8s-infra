@@ -10,8 +10,7 @@ expose:
     annotations:
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
  
-externalURL: https://harbor.philippmhauptmann.me
-
+externalURL: http://harbor.philippmhauptmann.me:8080
 persistence:
   enabled: true
   persistentVolumeClaim:
