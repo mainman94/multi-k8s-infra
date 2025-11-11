@@ -10,7 +10,7 @@ tunnelSecrets:
     key: cert.pem
 tunnelConfig:
   # -- cloudflared tunnel name
-  name: "eggenberg-tunnel"
+  name: "strassgang-tunnel"
   metricsUpdateFrequency: 5s
   autoUpdateFrequency: 24h
   noAutoUpdate: false
