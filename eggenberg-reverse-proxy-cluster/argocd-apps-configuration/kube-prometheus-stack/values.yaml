@@ -18,19 +18,14 @@ prometheus:
   enabled: true
   service:
     type: ClusterIP
-
   ingress:
     enabled: false
     ingressClassName: traefik
     hosts:
-      - monitoring.philippmhauptmann.me
+      - monitoring.hauptmann.dev
     paths:
       - /
     pathType: Prefix
-    tls:
-      - secretName: wildcard-philippmhauptmann-tls
-        hosts:
-          - monitoring.philippmhauptmann.me
 
 # yamllint disable rule:line-length
   prometheusSpec:
@@ -75,7 +70,7 @@ grafana:
     enabled: true
     ingressClassName: traefik
     hosts:
-      - grafana.philippmhauptmann.me
+      - grafana.hauptmann.dev
     paths:
       - /
     pathType: Prefix
