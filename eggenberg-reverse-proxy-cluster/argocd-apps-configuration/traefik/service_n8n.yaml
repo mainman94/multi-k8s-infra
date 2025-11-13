@@ -19,11 +19,13 @@ kind: IngressRoute
 metadata:
   name: n8n-route
   namespace: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
 spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`n8n.philippmhauptmann.me`)
+    - match: Host(`n8n.hauptmann.dev`)
       middlewares:
         - name: ratelimit
         - name: cloudflare-ip-whitelist
