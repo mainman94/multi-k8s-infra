@@ -4,10 +4,10 @@ master:
     type: "persistentVolumeClaim"
     size: "20Gi"
     storageClass: "longhorn"
-
+    
   logs:
     type: "persistentVolumeClaim"
-    size: "10Gi"
+    size: "10Gi"  
     storageClass: "longhorn"
   
   ingress:

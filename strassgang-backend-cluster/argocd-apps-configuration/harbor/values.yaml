@@ -5,12 +5,12 @@ expose:
     certSource: none
   ingress:
     hosts:
-      core: registry.philippmhauptmann.me
+      core: registry.hauptmann.dev
     className: "traefik"
     annotations:
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
- 
-externalURL: https://registry.philippmhauptmann.me
+
+externalURL: https://registry.hauptmann.dev
 persistence:
   enabled: true
   persistentVolumeClaim:
