@@ -5,3 +5,12 @@ resources:
 images:
   - name: dockerha08/pmhme
     newTag: 1.5.5
+
+patches:
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 3
+    target:
+      kind: Rollout
+      name: portfolio-app
