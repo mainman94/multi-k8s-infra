@@ -70,9 +70,3 @@ repoServer:
       enabled: true
       additionalLabels:
         release: kube-prometheus-stack
-
-dex:
-  enabled: false
-
-notifications:
-  enabled: false
