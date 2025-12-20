@@ -5,7 +5,6 @@ metadata:
   namespace: argocd
 spec:
   project: default
-  namespace: argocd
   sources:
     - repoURL: https://argoproj.github.io/argo-helm
       chart: argo-workflows
@@ -18,7 +17,7 @@ spec:
       ref: values
   destination:
     server: https://kubernetes.default.svc
-    namespace: argocd
+    namespace: argo-workflows
   syncPolicy:
     automated:
       prune: true
