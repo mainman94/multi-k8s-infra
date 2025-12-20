@@ -12,7 +12,7 @@ ingress:
 persistence:
   enabled: true
   storageClass: "longhorn"
-  accessMode: ReadWriteMany
+  accessMode: ReadWriteOnce
 
 nscd:
   enabled: true
