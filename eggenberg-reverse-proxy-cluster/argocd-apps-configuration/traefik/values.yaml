@@ -50,6 +50,15 @@ entryPoints:
           permanent: true
   websecure:
     address: ":443"
+    http:
+      encodedCharacters:
+        allowEncodedSlash: true
+        # allowEncodedBackSlash: true
+        # allowEncodedNullCharacter: true
+        # allowEncodedSemicolon: true
+        # allowEncodedPercent: true
+        allowEncodedQuestionMark: true
+        # allowEncodedHash: true  
     forwardedHeaders:
       insecure: true
     tls:
