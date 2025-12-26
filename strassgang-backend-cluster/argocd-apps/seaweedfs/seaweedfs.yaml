@@ -10,7 +10,7 @@ spec:
   sources:
     - repoURL: https://seaweedfs.github.io/seaweedfs/helm
       chart: seaweedfs
-      targetRevision: 4.0.403
+      targetRevision: 4.0.404
       helm:
         valueFiles:
           - $values/strassgang-backend-cluster/argocd-apps-configuration/seaweedfs/values.yaml
