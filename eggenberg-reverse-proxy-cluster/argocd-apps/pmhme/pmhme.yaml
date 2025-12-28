@@ -19,4 +19,11 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+  ignoreDifferences:
+    - group: argoproj.io
+      kind: Rollout
+      name: portfolio-app
+      namespace: portfolio
+      jsonPointers:
+        - /spec/template/spec/containers/0/resources
 # yamllint enable rule:line-length
