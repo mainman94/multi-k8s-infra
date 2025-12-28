@@ -1,0 +1,17 @@
+admissionController:
+  container:
+    volumeMounts:
+      - name: tls-certs
+        mountPath: /etc/tls-certs
+        readOnly: true
+  volumes:
+    - name: tls-certs
+      secret:
+        secretName: vpa-tls-certs
+        items:
+          - key: ca.crt
+            path: caCert.pem
+          - key: tls.crt
+            path: serverCert.pem
+          - key: tls.key
+            path: serverKey.pem
