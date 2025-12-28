@@ -15,9 +15,8 @@ spec:
     - repoURL: https://github.com/mainman94/multi-k8s-infra
       targetRevision: HEAD
       ref: values
-    - repoURL: https://github.com/mainman94/multi-k8s-infra
+    - repoURL: https://github.com/mainman94/multi-k8s-infra/eggenberg-reverse-proxy-cluster/argocd-apps-configuration/autoscaler
       targetRevision: HEAD
-      path: "eggenberg-reverse-proxy-cluster/bootstrap/argocd"
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd

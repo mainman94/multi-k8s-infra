@@ -3,8 +3,6 @@ kind: Application
 metadata:
   name: argocd
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "-2"
 spec:
   project: default
   sources:
@@ -17,9 +15,6 @@ spec:
     - repoURL: https://github.com/mainman94/multi-k8s-infra
       targetRevision: HEAD
       ref: values
-    - repoURL: https://github.com/mainman94/multi-k8s-infra
-      targetRevision: HEAD
-      path: "eggenberg-reverse-proxy-cluster/bootstrap/argocd"
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
