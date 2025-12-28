@@ -3,8 +3,9 @@ kind: ClusterRole
 metadata:
   name: vpa-admission-controller-patch
 rules:
+  # 1. Workload-Ressourcen (behebt die Reflektor-Fehler)
   - apiGroups: ["apps"]
-    resources: ["deployments", "statefulsets", "daemonsets", "replicasets", "rollouts"]
+    resources: ["deployments", "statefulsets", "daemonsets", "replicasets"]
     verbs: ["get", "list", "watch"]
   - apiGroups: ["batch"]
     resources: ["jobs", "cronjobs"]
@@ -15,6 +16,10 @@ rules:
   - apiGroups: [""]
     resources: ["replicationcontrollers"]
     verbs: ["get", "list", "watch"]
+    
+  - apiGroups: ["admissionregistration.k8s.io"]
+    resources: ["mutatingwebhookconfigurations"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -23,7 +28,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: vertical-pod-autoscaler-admission-controller
-    namespace: autoscaler # Dein Namespace
+    namespace: autoscaler
 roleRef:
   kind: ClusterRole
   name: vpa-admission-controller-patch
