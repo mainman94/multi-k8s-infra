@@ -9,7 +9,7 @@ spec:
     kind: Rollout
     name: portfolio-app
   updatePolicy:
-    updateMode: auto
+    updateMode: "Recreate"
   resourcePolicy:
     containerPolicies:
     - containerName: "*"
