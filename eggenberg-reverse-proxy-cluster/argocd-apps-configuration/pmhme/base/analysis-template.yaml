@@ -8,8 +8,8 @@ spec:
     - name: service-name
   metrics:
     - name: http-health-check
-      initialDelay: 30s
-      interval: 10s
+      initialDelay: 10s
+      interval: 5s
       count: 5
       successCondition: "true"
       failureCondition: result.statusCode != 200
