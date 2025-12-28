@@ -12,7 +12,7 @@ rules:
     verbs: ["get", "list", "watch"]
   - apiGroups: ["argoproj.io"]
     resources: ["rollouts", "rollouts/scale"]
-    verbs: ["get", "list", "watch"]
+    verbs: ["get", "list", "watch", "update", "patch"]
   - apiGroups: [""]
     resources: ["replicationcontrollers"]
     verbs: ["get", "list", "watch"]
