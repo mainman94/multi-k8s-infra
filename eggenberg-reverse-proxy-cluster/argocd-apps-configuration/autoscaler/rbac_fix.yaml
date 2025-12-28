@@ -11,7 +11,7 @@ rules:
     resources: ["jobs", "cronjobs"]
     verbs: ["get", "list", "watch"]
   - apiGroups: ["argoproj.io"]
-    resources: ["rollouts"]
+    resources: ["rollouts", "rollouts/scale"]
     verbs: ["get", "list", "watch"]
   - apiGroups: [""]
     resources: ["replicationcontrollers"]
