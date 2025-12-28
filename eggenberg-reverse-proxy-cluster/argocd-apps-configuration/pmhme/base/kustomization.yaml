@@ -8,3 +8,4 @@ resources:
   - ingress.yaml
   - imageUpdater.yaml
   - analysis-template.yaml
+  - pdb.yaml
