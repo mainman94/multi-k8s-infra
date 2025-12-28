@@ -17,7 +17,7 @@ spec:
       ref: values
   destination:
     server: https://kubernetes.default.svc
-    namespace: argo-events
+    namespace: argocd
   syncPolicy:
     automated:
       prune: true
