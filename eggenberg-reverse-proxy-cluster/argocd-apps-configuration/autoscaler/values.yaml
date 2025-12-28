@@ -1,3 +1,15 @@
 admissionController:
-  clusterRole:
+  enabled: true
+  rbac:
     create: true
+    # We add the missing controller permissions here
+    extraRules:
+      - apiGroups: ["apps"]
+        resources: ["deployments", "statefulsets", "daemonsets", "replicasets"]
+        verbs: ["get", "list", "watch"]
+      - apiGroups: ["batch"]
+        resources: ["jobs", "cronjobs"]
+        verbs: ["get", "list", "watch"]
+      - apiGroups: [""]
+        resources: ["replicationcontrollers"]
+        verbs: ["get", "list", "watch"]
