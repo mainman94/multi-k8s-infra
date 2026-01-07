@@ -10,7 +10,7 @@ spec:
     - repoURL:
         https://dl.cloudsmith.io/public/infisical/helm-charts/helm/charts/
       chart: secrets-operator
-      targetRevision: 0.10.17
+      targetRevision: 0.10.19
       helm:
         valueFiles:
           - $values/eggenberg-reverse-proxy-cluster/argocd-apps-configuration/infisical/values.yaml
