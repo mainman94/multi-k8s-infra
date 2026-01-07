@@ -157,5 +157,13 @@ persistence:
   size: 128Mi
   path: /data
 
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+
 nodeSelector:
   kubernetes.io/hostname: eggenberg-reverse-proxy
