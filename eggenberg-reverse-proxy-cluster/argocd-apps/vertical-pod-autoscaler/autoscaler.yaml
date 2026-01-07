@@ -1,3 +1,4 @@
+# yamllint disable rule:line-length
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -11,12 +12,12 @@ spec:
       targetRevision: 0.8.0
       helm:
         valueFiles:
-          - $values/eggenberg-reverse-proxy-cluster/argocd-apps-configuration/autoscaler/values.yaml
+          - $values/eggenberg-reverse-proxy-cluster/argocd-apps-configuration/vertical-pod-autoscaler/values.yaml
     - repoURL: https://github.com/mainman94/multi-k8s-infra
       targetRevision: HEAD
       ref: values
     - repoURL: https://github.com/mainman94/multi-k8s-infra
-      path: "eggenberg-reverse-proxy-cluster/argocd-apps-configuration/autoscaler"
+      path: eggenberg-reverse-proxy-cluster/argocd-apps-configuration/vertical-pod-autoscaler
       targetRevision: HEAD
   destination:
     server: https://kubernetes.default.svc
@@ -27,3 +28,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+# yamllint ensable rule:line-length

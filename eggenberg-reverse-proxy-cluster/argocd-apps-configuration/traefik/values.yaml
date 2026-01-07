@@ -58,7 +58,7 @@ entryPoints:
         # allowEncodedSemicolon: true
         # allowEncodedPercent: true
         allowEncodedQuestionMark: true
-        # allowEncodedHash: true  
+        # allowEncodedHash: true
     forwardedHeaders:
       insecure: true
     tls:

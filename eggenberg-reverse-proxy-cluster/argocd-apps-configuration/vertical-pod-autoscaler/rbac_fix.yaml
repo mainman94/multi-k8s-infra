@@ -16,7 +16,7 @@ rules:
   - apiGroups: [""]
     resources: ["replicationcontrollers"]
     verbs: ["get", "list", "watch"]
-    
+
   - apiGroups: ["admissionregistration.k8s.io"]
     resources: ["mutatingwebhookconfigurations"]
     verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]

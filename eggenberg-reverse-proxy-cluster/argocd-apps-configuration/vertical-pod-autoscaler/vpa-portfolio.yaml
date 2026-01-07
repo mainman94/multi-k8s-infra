@@ -12,11 +12,11 @@ spec:
     updateMode: "Recreate"
   resourcePolicy:
     containerPolicies:
-    - containerName: "*"
-      controlledResources: ["cpu", "memory"]
-      minAllowed:
-        cpu: 50m
-        memory: 64Mi
-      maxAllowed:
-        cpu: 2
-        memory: 2Gi
+      - containerName: "*"
+        controlledResources: ["cpu", "memory"]
+        minAllowed:
+          cpu: 50m
+          memory: 64Mi
+        maxAllowed:
+          cpu: 2
+          memory: 2Gi
