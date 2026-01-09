@@ -20,7 +20,7 @@ hubble:
     enabled: true
 
 prometheus:
-  metricsService: false
+  metricsService: true
   enabled: true
   port: 9962
   serviceMonitor:
