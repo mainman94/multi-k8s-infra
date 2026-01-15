@@ -19,20 +19,23 @@ spec:
         web:
           url: "http://{{args.service-name}}.portfolio.svc.cluster.local"
           timeoutSeconds: 5
+          insecure: true
           headers:
             - key: "User-Agent"
               value: "Argo-Rollouts-Health-Check"
-          jsonPath: "{$.status}"
-    - name: http-latency-check
+    - name: http-response-time-check
       initialDelay: 10s
       interval: 10s
       count: 5
-      successCondition: result < 1000
-      failureCondition: result >= 3000
+      successCondition: result < 2.0
+      failureCondition: result >= 5.0
       failureLimit: 2
       provider:
         web:
           url: "http://{{args.service-name}}.portfolio.svc.cluster.local"
           timeoutSeconds: 5
           insecure: true
-          jsonPath: "{$.latency}"
+          headers:
+            - key: "User-Agent"
+              value: "Argo-Rollouts-Health-Check"
+          jsonPath: "{$.duration}"
