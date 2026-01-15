@@ -10,14 +10,29 @@ spec:
     - name: http-health-check
       initialDelay: 10s
       interval: 5s
-      count: 5
-      successCondition: "true"
+      count: 6
+      successCondition: result.statusCode == 200
       failureCondition: result.statusCode != 200
-      failureLimit: 5
+      failureLimit: 2
+      inconclusiveLimit: 2
       provider:
         web:
           url: "http://{{args.service-name}}.portfolio.svc.cluster.local"
-          timeoutSeconds: 10
+          timeoutSeconds: 5
           headers:
             - key: "User-Agent"
               value: "Argo-Rollouts-Health-Check"
+          jsonPath: "{$.status}"
+    - name: http-latency-check
+      initialDelay: 10s
+      interval: 10s
+      count: 5
+      successCondition: result < 1000
+      failureCondition: result >= 3000
+      failureLimit: 2
+      provider:
+        web:
+          url: "http://{{args.service-name}}.portfolio.svc.cluster.local"
+          timeoutSeconds: 5
+          insecure: true
+          jsonPath: "{$.latency}"

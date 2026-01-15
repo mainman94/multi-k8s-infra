@@ -3,11 +3,19 @@ kind: Service
 metadata:
   name: portfolio-service
   namespace: portfolio
+  labels:
+    app: portfolio-app
+    role: active
 spec:
   selector:
     app: portfolio-app
   ports:
-    - protocol: TCP
+    - name: http
+      protocol: TCP
       port: 80
-      targetPort: 3000
+      targetPort: http
   type: ClusterIP
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800

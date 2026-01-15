@@ -19,5 +19,5 @@ spec:
               service:
                 name: portfolio-service
                 port:
-                  number: 80
+                  name: http
 # yamllint enable rule:line-length

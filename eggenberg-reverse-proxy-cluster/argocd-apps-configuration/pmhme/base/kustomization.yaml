@@ -9,3 +9,4 @@ resources:
   - imageUpdater.yaml
   - analysis-template.yaml
   - pdb.yaml
+  - networkpolicy.yaml
