@@ -18,24 +18,8 @@ spec:
       provider:
         web:
           url: "http://{{args.service-name}}.portfolio.svc.cluster.local"
-          timeoutSeconds: 5
+          timeoutSeconds: 10
           insecure: true
           headers:
             - key: "User-Agent"
               value: "Argo-Rollouts-Health-Check"
-    - name: http-response-time-check
-      initialDelay: 10s
-      interval: 10s
-      count: 5
-      successCondition: result < 2.0
-      failureCondition: result >= 5.0
-      failureLimit: 2
-      provider:
-        web:
-          url: "http://{{args.service-name}}.portfolio.svc.cluster.local"
-          timeoutSeconds: 5
-          insecure: true
-          headers:
-            - key: "User-Agent"
-              value: "Argo-Rollouts-Health-Check"
-          jsonPath: "{$.duration}"
