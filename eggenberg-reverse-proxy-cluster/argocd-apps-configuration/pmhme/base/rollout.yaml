@@ -24,8 +24,10 @@ spec:
           ports:
             - containerPort: 3000
               name: http
+              protocol: TCP
             - containerPort: 3001
               name: metrics
+              protocol: TCP
           startupProbe:
             httpGet:
               path: /
