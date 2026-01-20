@@ -22,9 +22,10 @@ spec:
         - name: portfolio-app
           image: dockerha08/pmhme
           ports:
-            - name: http
-              containerPort: 3000
-              protocol: TCP
+            - containerPort: 3000
+              name: http
+            - containerPort: 3001
+              name: metrics
           startupProbe:
             httpGet:
               path: /
