@@ -6,6 +6,8 @@ metadata:
   namespace: argocd
 spec:
   eventBusName: default
+  template:
+    serviceAccountName: argo-events-sa
   resource:
     rollouts:
       namespace: ""  # Watch all namespaces
