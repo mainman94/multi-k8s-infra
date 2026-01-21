@@ -61,10 +61,10 @@ spec:
                               name: cloudflare-cache-purge
                               key: api-token
           parameters:
-            # AnalysisRun has rollout name in label: rollout-name
+            # AnalysisRun has rollout name in label: app
             - src:
                 dependencyName: rollout-completed
-                dataKey: body.metadata.labels.rollout-name
+                dataKey: body.metadata.labels.app
               dest: spec.arguments.parameters.0.value
             - src:
                 dependencyName: rollout-completed

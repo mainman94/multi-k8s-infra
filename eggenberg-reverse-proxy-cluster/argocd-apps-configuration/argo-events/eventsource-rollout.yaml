@@ -19,7 +19,7 @@ spec:
       filter:
         # Only for portfolio-app rollout
         labels:
-          - key: rollout-name
+          - key: app
             operation: "=="
             value: portfolio-app
         # Only trigger when AnalysisRun phase CHANGES to "Successful"
