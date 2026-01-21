@@ -1,0 +1,23 @@
+# EventSource - watches for Argo Rollout phase changes
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: rollout-completed
+  namespace: argocd
+spec:
+  eventBusName: default
+  resource:
+    rollouts:
+      namespace: ""  # Watch all namespaces
+      group: argoproj.io
+      version: v1alpha1
+      resource: rollouts
+      eventTypes:
+        - UPDATE
+      filter:
+        # Only trigger when rollout phase changes to "Healthy"
+        afterEventData:
+          - path: body.status.phase
+            type: string
+            value:
+              - "Healthy"
