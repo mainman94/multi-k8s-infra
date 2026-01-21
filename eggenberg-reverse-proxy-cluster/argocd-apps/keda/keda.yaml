@@ -25,4 +25,5 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - ServerSideApply=true
 # yamllint enable rule:line-length
