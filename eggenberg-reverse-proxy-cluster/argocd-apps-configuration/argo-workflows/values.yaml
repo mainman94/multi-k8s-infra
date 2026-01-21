@@ -26,7 +26,7 @@ server:
       - profile
       - email
       - groups
-    # Group-based RBAC
+    # Group-based RBAC - maps SSO groups to ServiceAccounts
     rbac:
       enabled: true
 
@@ -39,8 +39,28 @@ controller:
     additionalLabels:
       release: kube-prometheus-stack
 
-# Extra K8s manifests for SSO RBAC bindings
+# Extra K8s manifests for SSO RBAC
 extraObjects:
+  # ServiceAccount for Admins
+  - apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: argo-workflows-admin-sa
+      namespace: argocd
+      annotations:
+        workflows.argoproj.io/rbac-rule: "'ArgoCD Admins' in groups"
+        workflows.argoproj.io/rbac-rule-precedence: "1"
+
+  # ServiceAccount for Users (readonly)
+  - apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: argo-workflows-user-sa
+      namespace: argocd
+      annotations:
+        workflows.argoproj.io/rbac-rule: "'ArgoCD Users' in groups"
+        workflows.argoproj.io/rbac-rule-precedence: "2"
+
   # ClusterRole for admin access
   - apiVersion: rbac.authorization.k8s.io/v1
     kind: ClusterRole
@@ -70,30 +90,30 @@ extraObjects:
         resources: ["workflows", "workflowtemplates", "cronworkflows", "clusterworkflowtemplates"]
         verbs: ["get", "list", "watch"]
 
-  # Bind ArgoCD Admins group to admin role
+  # Bind admin ServiceAccount to admin ClusterRole
   - apiVersion: rbac.authorization.k8s.io/v1
     kind: ClusterRoleBinding
     metadata:
-      name: argo-workflows-admins
+      name: argo-workflows-admin-sa-binding
     roleRef:
       apiGroup: rbac.authorization.k8s.io
       kind: ClusterRole
       name: argo-workflows-admin
     subjects:
-      - kind: Group
-        name: ArgoCD Admins
-        apiGroup: rbac.authorization.k8s.io
+      - kind: ServiceAccount
+        name: argo-workflows-admin-sa
+        namespace: argocd
 
-  # Bind ArgoCD Users group to readonly role
+  # Bind user ServiceAccount to readonly ClusterRole
   - apiVersion: rbac.authorization.k8s.io/v1
     kind: ClusterRoleBinding
     metadata:
-      name: argo-workflows-users
+      name: argo-workflows-user-sa-binding
     roleRef:
       apiGroup: rbac.authorization.k8s.io
       kind: ClusterRole
       name: argo-workflows-readonly
     subjects:
-      - kind: Group
-        name: ArgoCD Users
-        apiGroup: rbac.authorization.k8s.io
+      - kind: ServiceAccount
+        name: argo-workflows-user-sa
+        namespace: argocd
