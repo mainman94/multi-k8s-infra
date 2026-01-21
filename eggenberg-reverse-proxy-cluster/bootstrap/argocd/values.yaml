@@ -65,8 +65,8 @@ configs:
           secretEnv: ARGO_WORKFLOWS_SSO_CLIENT_SECRET
   rbac:
     policy.csv: |
-      # Authentik ArgoCD Admins Gruppe hat volle Admin-Rechte
-      g, ArgoCD Admins, role:admin
+      # Authentik ArgoCD Admin Gruppe hat volle Admin-Rechte
+      g, ArgoCD Admin, role:admin
       # Authentik ArgoCD Users Gruppe hat nur Lesezugriff
       g, ArgoCD Users, role:readonly
     policy.default: role:readonly
