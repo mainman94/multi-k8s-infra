@@ -9,6 +9,8 @@ server:
       traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
 
   # SSO via ArgoCD's Dex server (reuses existing Authentik config)
+  authModes:
+    - sso
   sso:
     enabled: true
     issuer: https://argo-rp.hauptmann.dev/api/dex
@@ -28,9 +30,6 @@ server:
     rbac:
       enabled: true
 
-  extraArgs:
-    - --auth-mode=sso
-
 # Controller Configuration
 controller:
   metricsConfig:
@@ -40,12 +39,8 @@ controller:
     additionalLabels:
       release: kube-prometheus-stack
 
-# RBAC for SSO groups
-rbac:
-  create: true
-
-# Additional manifests for SSO RBAC bindings
-extraManifests:
+# Extra K8s manifests for SSO RBAC bindings
+extraObjects:
   # ClusterRole for admin access
   - apiVersion: rbac.authorization.k8s.io/v1
     kind: ClusterRole
