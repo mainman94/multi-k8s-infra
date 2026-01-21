@@ -7,5 +7,4 @@ ingress:
   extraAnnotations:
     traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
   ingressClassName: "traefik"
-
 tls: external
