@@ -21,6 +21,12 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: kube-system
+  ignoreDifferences:
+    # Ignore auto-generated TLS certificates
+    - group: ""
+      kind: Secret
+      jsonPointers:
+        - /data
   syncPolicy:
     automated:
       prune: true
