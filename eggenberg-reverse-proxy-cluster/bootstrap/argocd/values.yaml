@@ -39,6 +39,33 @@ configs:
     resource.customizations.ignoreDifferences.apiextensions.k8s.io_CustomResourceDefinition: |
       jsonPointers:
       - /spec/preserveUnknownFields
+    # Dex/Authentik OIDC
+    url: https://argo-rp.hauptmann.dev
+    dex.config: |
+      connectors:
+        - type: oidc
+          id: authentik
+          name: Authentik
+          config:
+            issuer: https://auth.hauptmann.dev/application/o/argo-cd/
+            clientID: $argocd-dex-authentik:dex.authentik.clientID
+            clientSecret: $argocd-dex-authentik:dex.authentik.clientSecret
+            insecureEnableGroups: true
+            scopes:
+              - openid
+              - profile
+              - email
+              - groups
+  rbac:
+    policy.csv: |
+      # Authentik ArgoCD Admins Gruppe hat volle Admin-Rechte
+      g, ArgoCD Admins, role:admin
+      # Authentik ArgoCD Users Gruppe hat nur Lesezugriff
+      g, ArgoCD Users, role:readonly
+    policy.default: role:readonly
+    scopes: "[groups, email]"
+  secret:
+    argocdServerAdminPasswordMtime: "2024-01-01T00:00:00Z"
 # yamllint enable rule:line-length
 
 redis:
@@ -62,6 +89,17 @@ controller:
         release: kube-prometheus-stack
 
 repoServer:
+  metrics:
+    enabled: true
+    service:
+      portName: http-metrics
+    serviceMonitor:
+      enabled: true
+      additionalLabels:
+        release: kube-prometheus-stack
+
+dex:
+  enabled: true
   metrics:
     enabled: true
     service:
