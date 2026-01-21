@@ -1,4 +1,4 @@
-# Sensor - triggers Cloudflare cache purge workflow on rollout completion
+# Sensor - triggers Cloudflare cache purge workflow on AnalysisRun success
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
@@ -61,9 +61,10 @@ spec:
                               name: cloudflare-cache-purge
                               key: api-token
           parameters:
+            # AnalysisRun has rollout name in label: rollout-name
             - src:
                 dependencyName: rollout-completed
-                dataKey: body.metadata.name
+                dataKey: body.metadata.labels.rollout-name
               dest: spec.arguments.parameters.0.value
             - src:
                 dependencyName: rollout-completed

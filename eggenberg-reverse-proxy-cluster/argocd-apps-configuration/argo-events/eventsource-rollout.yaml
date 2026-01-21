@@ -1,4 +1,4 @@
-# EventSource - watches for Argo Rollout phase changes
+# EventSource - watches for Argo Rollout AnalysisRun completion
 apiVersion: argoproj.io/v1alpha1
 kind: EventSource
 metadata:
@@ -10,22 +10,27 @@ spec:
     serviceAccountName: argo-events-sa
   resource:
     rollouts:
-      namespace: ""  # Watch all namespaces
+      namespace: portfolio  # Only watch portfolio namespace
       group: argoproj.io
       version: v1alpha1
-      resource: rollouts
+      resource: analysisruns
       eventTypes:
         - UPDATE
       filter:
-        # Only trigger when rollout phase CHANGES to "Healthy"
+        # Only for portfolio-app rollout
+        labels:
+          - key: rollout-name
+            operation: "=="
+            value: portfolio-app
+        # Only trigger when AnalysisRun phase CHANGES to "Successful"
         beforeEventData:
           - path: body.status.phase
             type: string
             comparator: "!="
             value:
-              - "Healthy"
+              - "Successful"
         afterEventData:
           - path: body.status.phase
             type: string
             value:
-              - "Healthy"
+              - "Successful"
