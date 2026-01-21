@@ -17,7 +17,13 @@ spec:
       eventTypes:
         - UPDATE
       filter:
-        # Only trigger when rollout phase changes to "Healthy"
+        # Only trigger when rollout phase CHANGES to "Healthy"
+        beforeEventData:
+          - path: body.status.phase
+            type: string
+            comparator: "!="
+            value:
+              - "Healthy"
         afterEventData:
           - path: body.status.phase
             type: string
