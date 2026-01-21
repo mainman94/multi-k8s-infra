@@ -23,14 +23,9 @@ spec:
             operation: "=="
             value: portfolio-app
         # Only trigger when AnalysisRun phase CHANGES to "Successful"
-        beforeEventData:
-          - path: body.status.phase
-            type: string
-            comparator: "!="
-            value:
-              - "Successful"
         afterEventData:
-          - path: body.status.phase
+          - path: status.phase
             type: string
+            comparator: "="
             value:
               - "Successful"
