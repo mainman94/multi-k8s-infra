@@ -12,7 +12,7 @@ metadata:
   name: argo-events-rollout-watcher
 rules:
   - apiGroups: ["argoproj.io"]
-    resources: ["rollouts"]
+    resources: ["rollouts", "analysisruns"]
     verbs: ["get", "list", "watch"]
   - apiGroups: ["argoproj.io"]
     resources: ["workflows"]
