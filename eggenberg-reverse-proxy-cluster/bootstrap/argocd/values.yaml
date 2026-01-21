@@ -107,6 +107,12 @@ repoServer:
 
 dex:
   enabled: true
+  env:
+    - name: ARGO_WORKFLOWS_SSO_CLIENT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: argocd-dex-authentik
+          key: ARGO_WORKFLOWS_SSO_CLIENT_SECRET
   metrics:
     enabled: true
     service:
