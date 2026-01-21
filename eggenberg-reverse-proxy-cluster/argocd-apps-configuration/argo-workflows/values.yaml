@@ -1,0 +1,41 @@
+# Argo Workflows Server Configuration
+server:
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    hosts:
+      - argo-workflows-rp.hauptmann.dev
+    annotations:
+      traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
+
+  # SSO via ArgoCD's Dex server (reuses existing Authentik config)
+  sso:
+    enabled: true
+    issuer: https://argo-rp.hauptmann.dev/api/dex
+    clientId:
+      name: argo-workflows-sso
+      key: client-id
+    clientSecret:
+      name: argo-workflows-sso
+      key: client-secret
+    redirectUrl: https://argo-workflows-rp.hauptmann.dev/oauth2/callback
+    scopes:
+      - openid
+      - profile
+      - email
+      - groups
+    # Group-based RBAC
+    rbac:
+      enabled: true
+
+  extraArgs:
+    - --auth-mode=sso
+
+# Controller Configuration
+controller:
+  metricsConfig:
+    enabled: true
+  serviceMonitor:
+    enabled: true
+    additionalLabels:
+      release: kube-prometheus-stack

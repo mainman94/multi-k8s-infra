@@ -56,6 +56,13 @@ configs:
               - profile
               - email
               - groups
+      # Static client for Argo Workflows SSO
+      staticClients:
+        - id: argo-workflows
+          name: Argo Workflows
+          redirectURIs:
+            - https://argo-workflows-rp.hauptmann.dev/oauth2/callback
+          secretEnv: ARGO_WORKFLOWS_SSO_CLIENT_SECRET
   rbac:
     policy.csv: |
       # Authentik ArgoCD Admins Gruppe hat volle Admin-Rechte
