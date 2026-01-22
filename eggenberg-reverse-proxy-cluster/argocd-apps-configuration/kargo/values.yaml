@@ -1,0 +1,30 @@
+api:
+  replicas: 1
+  adminAccount:
+    enabled: true
+    tokenSigningKey: ""
+  argocd:
+    urls:
+      - "https://argocd.hauptmann.dev"
+    namespace: argocd
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    hosts:
+      - host: kargo.hauptmann.dev
+        paths:
+          - /
+
+controller:
+  replicas: 1
+  argocd:
+    namespace: argocd
+    watchArgocdNamespaceOnly: false
+
+webhooksServer:
+  replicas: 1
+
+managementController:
+  replicas: 1
