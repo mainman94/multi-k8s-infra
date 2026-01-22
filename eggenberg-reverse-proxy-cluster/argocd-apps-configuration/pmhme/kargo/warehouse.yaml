@@ -1,0 +1,11 @@
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Warehouse
+metadata:
+  name: pmhme-warehouse
+  namespace: pmhme
+spec:
+  subscriptions:
+    - image:
+        repoURL: docker.io/dockerha08/pmhme
+        semverConstraint: "*"
+        discoveryLimit: 5
