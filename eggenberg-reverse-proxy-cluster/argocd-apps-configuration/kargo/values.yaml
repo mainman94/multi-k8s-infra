@@ -15,6 +15,8 @@ api:
       - host: kargo.hauptmann.dev
         paths:
           - /
+    tls:
+      enabled: false
   tls:
     enabled: false
 
@@ -26,6 +28,8 @@ controller:
 
 webhooksServer:
   replicas: 1
+
+externalWebhooksServer:
   tls:
     enabled: false
 

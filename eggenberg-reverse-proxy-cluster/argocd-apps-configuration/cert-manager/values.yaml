@@ -1,0 +1,23 @@
+# Install CRDs as part of the Helm release
+crds:
+  enabled: true
+
+replicaCount: 1
+
+# Required for webhook to work properly
+webhook:
+  replicaCount: 1
+
+cainjector:
+  replicaCount: 1
+
+# Prometheus metrics
+prometheus:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    namespace: monitoring
+    interval: 30s
+    scrapeTimeout: 10s
+    labels:
+      release: prometheus-stack
