@@ -1,20 +1,16 @@
 api:
   replicas: 1
+  host: kargo.hauptmann.dev
   adminAccount:
     enabled: false
   argocd:
     urls:
-      - "https://argocd.hauptmann.dev"
-    namespace: argocd
+      "": "https://argocd.hauptmann.dev"
   ingress:
     enabled: true
     ingressClassName: traefik
     annotations:
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    hosts:
-      - host: kargo.hauptmann.dev
-        paths:
-          - /
     tls:
       enabled: false
   tls:
@@ -28,10 +24,6 @@ controller:
 
 webhooksServer:
   replicas: 1
-
-externalWebhooksServer:
-  tls:
-    enabled: false
 
 managementController:
   replicas: 1
