@@ -1,8 +1,7 @@
 api:
   replicas: 1
   adminAccount:
-    enabled: true
-    tokenSigningKey: ""
+    enabled: false
   argocd:
     urls:
       - "https://argocd.hauptmann.dev"
