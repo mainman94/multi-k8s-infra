@@ -2,10 +2,10 @@ apiVersion: argoproj.io/v1alpha1
 kind: AnalysisTemplate
 metadata:
   name: portfolio-http-check
-  namespace: portfolio
 spec:
   args:
     - name: service-name
+    - name: namespace
   metrics:
     - name: http-health-check
       initialDelay: 10s
@@ -17,7 +17,7 @@ spec:
       inconclusiveLimit: 2
       provider:
         web:
-          url: "http://{{args.service-name}}.portfolio.svc.cluster.local"
+          url: "http://{{args.service-name}}.{{args.namespace}}.svc.cluster.local"
           timeoutSeconds: 10
           insecure: true
           headers:

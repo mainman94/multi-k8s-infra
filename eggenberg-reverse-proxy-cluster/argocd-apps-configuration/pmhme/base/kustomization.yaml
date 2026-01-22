@@ -6,7 +6,6 @@ resources:
   - service.yaml
   - service-preview.yaml
   - ingress.yaml
-  - imageUpdater.yaml
   - analysis-template.yaml
   - pdb.yaml
   - networkpolicy.yaml

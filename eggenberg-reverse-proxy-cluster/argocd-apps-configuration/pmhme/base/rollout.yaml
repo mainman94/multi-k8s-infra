@@ -2,9 +2,8 @@ apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
   name: portfolio-app
-  namespace: portfolio
 spec:
-  replicas: 2
+  replicas: 1
   revisionHistoryLimit: 3
   selector:
     matchLabels:
@@ -92,9 +91,17 @@ spec:
         args:
           - name: service-name
             value: portfolio-service-preview
+          - name: namespace
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
       postPromotionAnalysis:
         templates:
           - templateName: portfolio-http-check
         args:
           - name: service-name
             value: portfolio-service
+          - name: namespace
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
