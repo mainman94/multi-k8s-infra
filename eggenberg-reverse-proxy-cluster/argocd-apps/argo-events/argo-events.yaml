@@ -8,7 +8,7 @@ spec:
   sources:
     - repoURL: https://argoproj.github.io/argo-helm
       chart: argo-events
-      targetRevision: 2.4.19
+      targetRevision: 2.4.20
       helm:
         valueFiles:
           - $values/eggenberg-reverse-proxy-cluster/argocd-apps-configuration/argo-events/values.yaml
