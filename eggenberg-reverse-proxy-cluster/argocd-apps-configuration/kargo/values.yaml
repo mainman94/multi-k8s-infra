@@ -1,8 +1,10 @@
 api:
   replicas: 1
   host: kargo.hauptmann.dev
+  secret:
+    name: kargo-admin-secret
   adminAccount:
-    enabled: false
+    enabled: true
   argocd:
     urls:
       "": "https://argocd.hauptmann.dev"
