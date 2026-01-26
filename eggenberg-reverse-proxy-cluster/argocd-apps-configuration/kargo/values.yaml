@@ -7,7 +7,7 @@ api:
     enabled: true
   argocd:
     urls:
-      "": "https://argocd.hauptmann.dev"
+      "": "https://argo-rp.hauptmann.dev"
   ingress:
     enabled: true
     ingressClassName: traefik
