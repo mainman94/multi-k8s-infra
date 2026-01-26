@@ -37,9 +37,8 @@ tlsOptions:
       - CurveP521
       - CurveP384
 
-entryPoints:
+ports:
   web:
-    address: ":80"
     http:
       redirections:
         entryPoint:
@@ -47,12 +46,11 @@ entryPoints:
           scheme: https
           permanent: true
   websecure:
-    address: ":443"
-    forwardedHeaders:
-      insecure: true
-    tls:
-      certResolver: cloudflare
+    http:
+      tls:
+        certResolver: cloudflare
       options: default@kubernetescrd
+
 
 tlsStore:
   default:
