@@ -1,0 +1,11 @@
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Warehouse
+metadata:
+  name: pmhme-portfolio
+  namespace: pmhme-portfolio
+spec:
+  subscriptions:
+    - image:
+        repoURL: dockerha08/pmhme
+        imageSelectionStrategy: Lexical
+        allowTags: '^\d{14}$'

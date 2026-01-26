@@ -1,0 +1,57 @@
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Stage
+metadata:
+  name: test
+  namespace: pmhme-portfolio
+spec:
+  vars:
+    - name: gitRepo
+      value: https://github.com/mainman94/multi-k8s-infra
+    - name: imageRepo
+      value: dockerha08/pmhme
+    - name: repoPath
+      value: ./repo
+    - name: overlayPath
+      value: eggenberg-reverse-proxy-cluster/argocd-apps-configuration/pmhme/overlays/test
+    - name: appName
+      value: pmhme-portfolio-test
+  requestedFreight:
+    - origin:
+        kind: Warehouse
+        name: pmhme-portfolio
+      sources:
+        stages:
+          - dev
+        autoPromotionOptions:
+          selectionPolicy: MatchUpstream
+  promotionTemplate:
+    spec:
+      steps:
+        - uses: git-clone
+          config:
+            repoURL: ${{ vars.gitRepo }}
+            checkout:
+              - branch: main
+                path: ${{ vars.repoPath }}
+        - uses: kustomize-set-image
+          as: update-image
+          config:
+            path: ${{ vars.repoPath }}/${{ vars.overlayPath }}
+            images:
+              - image: ${{ vars.imageRepo }}
+                tag: ${{ imageFrom(vars.imageRepo).Tag }}
+        - uses: git-commit
+          as: commit
+          config:
+            path: ${{ vars.repoPath }}
+            message: ${{ outputs['update-image'].commitMessage }}
+        - uses: git-push
+          config:
+            path: ${{ vars.repoPath }}
+        - uses: argocd-update
+          config:
+            apps:
+              - name: ${{ vars.appName }}
+                sources:
+                  - repoURL: ${{ vars.gitRepo }}
+                    desiredRevision: ${{ outputs['commit'].commit }}

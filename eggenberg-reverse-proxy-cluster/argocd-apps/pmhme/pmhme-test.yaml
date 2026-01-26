@@ -4,6 +4,8 @@ kind: Application
 metadata:
   name: pmhme-portfolio-test
   namespace: argocd
+  annotations:
+    kargo.akuity.io/authorized-stage: pmhme-portfolio:test
 spec:
   project: default
   sources:
