@@ -14,7 +14,8 @@ spec:
 
     - image:
         repoURL: dockerha08/pmhme
+        imageSelectionStrategy: Lexical
+        allowTags: '^\d{14}$'
         credentials:
           secretRef:
-            name: docker-pull-secret
-            namespace: pmhme-portfolio
+            name: dockerhub-creds
