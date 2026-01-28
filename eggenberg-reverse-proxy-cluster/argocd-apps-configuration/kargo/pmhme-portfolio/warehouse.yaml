@@ -16,3 +16,4 @@ spec:
         repoURL: dockerha08/pmhme
         imageSelectionStrategy: Lexical
         allowTags: '^\d{14}$'
+        discoveryLimit: 3
