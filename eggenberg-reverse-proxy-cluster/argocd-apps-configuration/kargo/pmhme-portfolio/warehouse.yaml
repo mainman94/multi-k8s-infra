@@ -16,6 +16,3 @@ spec:
         repoURL: dockerha08/pmhme
         imageSelectionStrategy: Lexical
         allowTags: '^\d{14}$'
-        credentials:
-          secretRef:
-            name: dockerhub-creds
