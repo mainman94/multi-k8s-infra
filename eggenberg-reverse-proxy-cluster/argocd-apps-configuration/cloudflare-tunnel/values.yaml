@@ -33,7 +33,9 @@ ingress:
     originRequest:
       originServerName: "*.hauptmann.dev"
       matchSNItoHost: true
-  - hostname: "*"
+  - hostname: "hauptmann.dev"
     service: https://traefik.traefik.svc.cluster.local:443
-
+    originRequest:
+      originServerName: "hauptmann.dev"
+      matchSNItoHost: true
   - service: http_status:404
