@@ -11,6 +11,7 @@ server:
   # SSO via ArgoCD's Dex server (reuses existing Authentik config)
   authModes:
     - sso
+    - token
   sso:
     enabled: true
     issuer: https://argo-rp.hauptmann.dev/api/dex
