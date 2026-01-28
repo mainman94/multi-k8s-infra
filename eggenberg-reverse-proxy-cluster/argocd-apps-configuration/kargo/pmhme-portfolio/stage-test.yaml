@@ -20,10 +20,9 @@ spec:
         kind: Warehouse
         name: pmhme-portfolio
       sources:
-        stages:
-          - dev
+        direct: true
         autoPromotionOptions:
-          selectionPolicy: MatchUpstream
+          selectionPolicy: NewestFreight
   promotionTemplate:
     spec:
       steps:
