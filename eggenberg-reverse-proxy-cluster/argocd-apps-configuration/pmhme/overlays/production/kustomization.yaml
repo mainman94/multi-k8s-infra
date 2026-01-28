@@ -1,19 +1,16 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
 namespace: portfolio
-
 resources:
-  - ../../base
-
+- ../../base
 images:
-  - name: dockerha08/pmhme
-    newTag: "20260121124740"
+- name: dockerha08/pmhme
+  newTag: "20260127181011"
 patches:
-  - patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 3
-    target:
-      kind: Rollout
-      name: portfolio-app
+- patch: |-
+    - op: replace
+      path: /spec/replicas
+      value: 3
+  target:
+    kind: Rollout
+    name: portfolio-app
