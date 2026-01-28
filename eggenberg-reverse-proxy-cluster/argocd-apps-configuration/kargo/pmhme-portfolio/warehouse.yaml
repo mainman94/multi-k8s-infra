@@ -5,6 +5,11 @@ metadata:
   namespace: pmhme-portfolio
 spec:
   subscriptions:
+    - git:
+        repoURL: https://github.com/mainman94/multi-k8s-infra
+        branch: main
+        includePaths:
+          - eggenberg-reverse-proxy-cluster/argocd-apps-configuration/pmhme/overlays/dev
     - image:
         repoURL: dockerha08/pmhme
         imageSelectionStrategy: Lexical

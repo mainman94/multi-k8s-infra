@@ -7,14 +7,8 @@ spec:
   vars:
     - name: gitRepo
       value: https://github.com/mainman94/multi-k8s-infra
-    - name: imageRepo
-      value: dockerha08/pmhme
     - name: repoPath
       value: ./repo
-    - name: overlayPath
-      value: eggenberg-reverse-proxy-cluster/argocd-apps-configuration/pmhme/overlays/dev
-    - name: appName
-      value: pmhme-portfolio-dev
   requestedFreight:
     - origin:
         kind: Warehouse
@@ -40,25 +34,3 @@ spec:
             checkout:
               - branch: main
                 path: ${{ vars.repoPath }}
-        - uses: kustomize-set-image
-          as: update-image
-          config:
-            path: ${{ vars.repoPath }}/${{ vars.overlayPath }}
-            images:
-              - image: ${{ vars.imageRepo }}
-                tag: ${{ imageFrom(vars.imageRepo).Tag }}
-        - uses: git-commit
-          as: commit
-          config:
-            path: ${{ vars.repoPath }}
-            message: ${{ outputs['update-image'].commitMessage }}
-        - uses: git-push
-          config:
-            path: ${{ vars.repoPath }}
-        - uses: argocd-update
-          config:
-            apps:
-              - name: ${{ vars.appName }}
-                sources:
-                  - repoURL: ${{ vars.gitRepo }}
-                    desiredRevision: ${{ outputs['commit'].commit }}
