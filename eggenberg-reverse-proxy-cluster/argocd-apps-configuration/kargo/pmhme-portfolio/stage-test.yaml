@@ -11,6 +11,10 @@ spec:
       value: dockerha08/pmhme
     - name: repoPath
       value: ./repo
+    - name: freightPath
+      value: ./freight
+    - name: devOverlayPath
+      value: eggenberg-reverse-proxy-cluster/argocd-apps-configuration/pmhme/overlays/dev
     - name: overlayPath
       value: eggenberg-reverse-proxy-cluster/argocd-apps-configuration/pmhme/overlays/test
     - name: appName
@@ -30,15 +34,24 @@ spec:
           config:
             repoURL: ${{ vars.gitRepo }}
             checkout:
+              - fromFreight: true
+                path: ${{ vars.freightPath }}
               - branch: main
                 path: ${{ vars.repoPath }}
+        - uses: yaml-parse
+          as: dev-image
+          config:
+            path: ${{ vars.freightPath }}/${{ vars.devOverlayPath }}/kustomization.yaml
+            outputs:
+              - name: imageTag
+                fromExpression: images[0].newTag
         - uses: kustomize-set-image
           as: update-image
           config:
             path: ${{ vars.repoPath }}/${{ vars.overlayPath }}
             images:
               - image: ${{ vars.imageRepo }}
-                tag: ${{ imageFrom(vars.imageRepo).Tag }}
+                tag: ${{ quote(outputs['dev-image'].imageTag) }}
         - uses: git-commit
           as: commit
           config:
