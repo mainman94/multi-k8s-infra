@@ -32,6 +32,14 @@ spec:
             checkout:
               - branch: main
                 path: ${{ vars.repoPath }}
+        - uses: http
+          as: smoke-http-200
+          retry:
+            timeout: 2m
+          config:
+            method: GET
+            url: https://pmhme-portfolio-dev.hauptmann.dev/healthz
+            successExpression: response.status == 200        
         - uses: kustomize-set-image
           as: update-image
           config:
