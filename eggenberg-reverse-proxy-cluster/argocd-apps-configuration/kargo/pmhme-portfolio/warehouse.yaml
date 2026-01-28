@@ -6,7 +6,15 @@ metadata:
 spec:
   subscriptions:
     - git:
-        repoURL: https://github.com/mainman94/multi-k8s-infra
+        repoURL: https://github.com/mainman94/multi-k8s-infra.git
         branch: main
+        commitSelectionStrategy: NewestFromBranch
         includePaths:
-          - eggenberg-reverse-proxy-cluster/argocd-apps-configuration/pmhme/overlays/dev
+          - eggenberg-reverse-proxy-cluster/argocd-apps-configuration/pmhme/overlays/dev/kustomization.yaml
+
+    - image:
+        repoURL: dockerha08/pmhme
+        credentials:
+          secretRef:
+            name: docker-pull-secret
+            namespace: pmhme-portfolio
