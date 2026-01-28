@@ -13,3 +13,6 @@ spec:
     - stageSelector:
         name: test
       autoPromotionEnabled: true
+    - stageSelector:
+        name: prod
+      autoPromotionEnabled: true
