@@ -38,7 +38,7 @@ spec:
             timeout: 2m0s
           config:
             method: GET
-            url: https://pmhme-portfolio-dev.hauptmann.dev/healthz
+            url: https://dev.hauptmann.dev/
             successExpression: response.status == 200        
         - uses: kustomize-set-image
           as: update-image
@@ -55,10 +55,4 @@ spec:
         - uses: git-push
           config:
             path: ${{ vars.repoPath }}
-        - uses: argocd-update
-          config:
-            apps:
-              - name: ${{ vars.appName }}
-                sources:
-                  - repoURL: ${{ vars.gitRepo }}
-                    desiredRevision: ${{ outputs['commit'].commit }}
+

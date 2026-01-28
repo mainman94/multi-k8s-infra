@@ -48,10 +48,3 @@ spec:
         - uses: git-push
           config:
             path: ${{ vars.repoPath }}
-        - uses: argocd-update
-          config:
-            apps:
-              - name: ${{ vars.appName }}
-                sources:
-                  - repoURL: ${{ vars.gitRepo }}
-                    desiredRevision: ${{ outputs['commit'].commit }}
