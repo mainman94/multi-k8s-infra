@@ -35,7 +35,7 @@ spec:
         - uses: http
           as: smoke-http-200
           retry:
-            timeout: 2m
+            timeout: 2m0s
           config:
             method: GET
             url: https://pmhme-portfolio-dev.hauptmann.dev/healthz
