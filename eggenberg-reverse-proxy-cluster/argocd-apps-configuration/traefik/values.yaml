@@ -152,6 +152,7 @@ persistence:
   accessMode: ReadWriteOnce
   size: 128Mi
   path: /data
+  storageClass: local-path
 
 resources:
   requests:
