@@ -48,8 +48,8 @@ configs:
           name: Authentik
           config:
             issuer: https://auth.hauptmann.dev/application/o/argo-cd/
-            clientID: $argocd-dex-authentik:dex.authentik.clientID
-            clientSecret: $argocd-dex-authentik:dex.authentik.clientSecret
+            clientID: $argocd-dex-authentik:DEX_AUTHENTIK_CLIENT_ID
+            clientSecret: $argocd-dex-authentik:DEX_AUTHENTIK_CLIENT_SECRET
             insecureEnableGroups: true
             scopes:
               - openid
