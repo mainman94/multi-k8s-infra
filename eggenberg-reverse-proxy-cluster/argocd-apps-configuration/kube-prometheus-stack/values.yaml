@@ -11,6 +11,7 @@ alertmanager:
   persistentVolume:
     enabled: true
     size: 10Gi
+    storageClassName: longhorn
 
 
 # Prometheus server configuration
@@ -37,6 +38,7 @@ prometheus:
           resources:
             requests:
               storage: 20Gi
+          storageClassName: longhorn
     additionalScrapeConfigs:
       - job_name: 'ztunnel'
         kubernetes_sd_configs:
@@ -76,6 +78,7 @@ grafana:
   persistence:
     enabled: true
     size: 10Gi
+    storageClassName: longhorn
 
 # Node Exporter configuration
 nodeExporter:
