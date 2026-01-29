@@ -9,7 +9,7 @@ spec:
   type: ExternalName
   externalName: 192.168.0.129
   ports:
-    - port: 30025
+    - port: 4321
       targetPort: 4321
       protocol: TCP
       name: http
