@@ -76,7 +76,6 @@ grafana:
   persistence:
     enabled: true
     size: 10Gi
-    storageClassName: local-path
 
 # Node Exporter configuration
 nodeExporter:
