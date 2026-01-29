@@ -8,7 +8,7 @@ spec:
   sources:
     - repoURL: ghcr.io/akuity/kargo-charts
       chart: kargo
-      targetRevision: 1.8.9
+      targetRevision: 1.9.0
       helm:
         valueFiles:
           - $values/eggenberg-reverse-proxy-cluster/argocd-apps-configuration/kargo/values.yaml
