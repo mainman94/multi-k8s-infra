@@ -37,7 +37,6 @@ prometheus:
           resources:
             requests:
               storage: 20Gi
-          storageClassName: local-path
     additionalScrapeConfigs:
       - job_name: 'ztunnel'
         kubernetes_sd_configs:
