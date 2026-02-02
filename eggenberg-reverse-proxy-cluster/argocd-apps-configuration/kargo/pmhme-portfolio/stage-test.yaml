@@ -46,7 +46,7 @@ spec:
             path: ${{ vars.repoPath }}/${{ vars.overlayPath }}
             images:
               - image: ${{ vars.imageRepo }}
-                tag: ${{ quote(imageFrom(vars.imageRepo).Tag) }}
+                tag: ${{ quote(commitFrom(vars.gitRepo).ID) }}
         - uses: git-commit
           as: commit
           config:
