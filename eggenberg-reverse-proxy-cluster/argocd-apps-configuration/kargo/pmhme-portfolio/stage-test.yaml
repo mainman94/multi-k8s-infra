@@ -47,14 +47,14 @@ spec:
           config:
             method: GET
             url: https://dev.hauptmann.dev/version
-            successExpression: response.status == 200 && response.body.version == commitFrom(vars.gitRepo).ID
+            successExpression: response.status == 200 && response.body.version == imageFrom(vars.imageRepo).tag
         - uses: kustomize-set-image
           as: update-image
           config:
             path: ${{ vars.repoPath }}/${{ vars.overlayPath }}
             images:
               - image: ${{ vars.imageRepo }}
-                tag: ${{ quote(commitFrom(vars.gitRepo).ID) }}
+                tag: ${{ imageFrom(vars.imageRepo).tag }}
         - uses: git-commit
           as: commit
           config:
@@ -63,4 +63,3 @@ spec:
         - uses: git-push
           config:
             path: ${{ vars.repoPath }}
-
