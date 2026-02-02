@@ -11,8 +11,8 @@ spec:
         commitSelectionStrategy: NewestFromBranch
         includePaths:
           - eggenberg-reverse-proxy-cluster/argocd-apps-configuration/pmhme/overlays/dev/kustomization.yaml
-    - image:
-        repoURL: dockerha08/pmhme
-        imageSelectionStrategy: Lexical
-        allowTags: '^\d{14}$'
-        discoveryLimit: 3
+    # - image:
+    #     repoURL: dockerha08/pmhme
+    #     imageSelectionStrategy: Lexical
+    #     allowTags: '^\d{14}$'
+    #     discoveryLimit: 3

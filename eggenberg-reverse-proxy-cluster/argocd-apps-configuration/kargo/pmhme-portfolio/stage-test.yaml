@@ -39,7 +39,15 @@ spec:
           config:
             method: GET
             url: https://dev.hauptmann.dev/
-            successExpression: response.status == 200        
+            successExpression: response.status == 200
+        - uses: http
+          as: version-check
+          retry:
+            timeout: 15m0s
+          config:
+            method: GET
+            url: https://dev.hauptmann.dev/version
+            successExpression: response.status == 200 && response.body.version == commitFrom(vars.gitRepo).ID
         - uses: kustomize-set-image
           as: update-image
           config:
