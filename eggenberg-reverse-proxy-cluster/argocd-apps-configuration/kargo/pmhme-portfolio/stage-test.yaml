@@ -77,4 +77,5 @@ spec:
           config:
             method: GET
             url: https://dev.hauptmann.dev/version
-            successExpression: response.status == 200 && response.body.version == outputs['overlay'].deployedTag
+            successExpression: response.status == 200 && response.body.version == output.overlay.deployedTag
+
