@@ -15,6 +15,7 @@ spec:
       value: eggenberg-reverse-proxy-cluster/argocd-apps-configuration/pmhme/overlays/test
     - name: appName
       value: pmhme-portfolio-test
+
   requestedFreight:
     - origin:
         kind: Warehouse
@@ -23,6 +24,7 @@ spec:
         direct: true
         autoPromotionOptions:
           selectionPolicy: NewestFreight
+
   promotionTemplate:
     spec:
       steps:
@@ -32,22 +34,7 @@ spec:
             checkout:
               - branch: main
                 path: ${{ vars.repoPath }}
-        - uses: http
-          as: smoke-http-200
-          retry:
-            timeout: 2m0s
-          config:
-            method: GET
-            url: https://dev.hauptmann.dev/
-            successExpression: response.status == 200
-        - uses: http
-          as: version-check
-          retry:
-            timeout: 15m0s
-          config:
-            method: GET
-            url: https://dev.hauptmann.dev/version
-            successExpression: response.status == 200 && response.body.version == imageFrom(vars.imageRepo).tag
+  
         - uses: kustomize-set-image
           as: update-image
           config:
@@ -55,11 +42,39 @@ spec:
             images:
               - image: ${{ vars.imageRepo }}
                 tag: ${{ imageFrom(vars.imageRepo).tag }}
+
         - uses: git-commit
           as: commit
           config:
             path: ${{ vars.repoPath }}
             message: ${{ outputs['update-image'].commitMessage }}
+
         - uses: git-push
           config:
             path: ${{ vars.repoPath }}
+            
+        - uses: yaml-parse
+          as: overlay
+          config:
+            path: ${{ vars.repoPath }}/${{ vars.overlayPath }}/kustomization.yaml
+            outputs:
+              - name: deployedTag
+                fromExpression: filter(images, {.name == "dockerha08/pmhme"})[0].newTag
+
+        - uses: http
+          as: smoke-http-200
+          retry:
+            timeout: 15m0s
+          config:
+            method: GET
+            url: https://dev.hauptmann.dev/
+            successExpression: response.status == 200
+
+        - uses: http
+          as: version-check
+          retry:
+            timeout: 15m0s
+          config:
+            method: GET
+            url: https://dev.hauptmann.dev/version
+            successExpression: response.status == 200 && response.body.version == outputs['overlay'].deployedTag
