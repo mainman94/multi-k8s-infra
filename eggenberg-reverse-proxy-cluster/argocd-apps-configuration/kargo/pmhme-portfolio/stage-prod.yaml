@@ -63,6 +63,16 @@ spec:
               - name: deployedTag
                 fromExpression: filter(images, {.name == "dockerha08/pmhme"})[0].newTag
 
+        - uses: argocd-update
+          as: argo
+          config:
+            apps:
+              - name: ${{ vars.appName }}
+                namespace: argocd
+                sources:
+                  - repoURL: ${{ vars.gitRepo }}
+                    desiredRevision: ${{ outputs.commit.commit }}
+
         # (Optional) prod version check against prod overlay value
         - uses: http
           as: version-check
@@ -72,3 +82,4 @@ spec:
             method: GET
             url: https://hauptmann.dev/version
             successExpression: response.status == 200 && response.body.version == '${{ outputs.overlay.deployedTag }}'
+
