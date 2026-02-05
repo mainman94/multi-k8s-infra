@@ -24,7 +24,7 @@ spec:
         stages:
           - test
         autoPromotionOptions:
-          selectionPolicy: MatchUpstream
+          selectionPolicy: NewestFreight
 
   promotionTemplate:
     spec:
