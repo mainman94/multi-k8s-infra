@@ -79,4 +79,12 @@ spec:
             url: https://dev.hauptmann.dev/version
             successExpression: response.status == 200 && response.body.version == '${{ outputs.overlay.deployedTag }}'
 
-
+        - uses: argocd-update
+          as: argo
+          config:
+            apps:
+              - name: ${{ vars.appName }}
+                namespace: argocd
+                sources:
+                  - repoURL: ${{ vars.gitRepo }}
+                    desiredRevision: ${{ outputs.commit.commit }}
