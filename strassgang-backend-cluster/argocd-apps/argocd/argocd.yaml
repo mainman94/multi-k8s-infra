@@ -8,7 +8,7 @@ spec:
   sources:
     - repoURL: https://argoproj.github.io/argo-helm
       chart: argo-cd
-      targetRevision: 9.4.0
+      targetRevision: 9.4.1
       helm:
         valueFiles:
           - $values/strassgang-backend-cluster/bootstrap/argocd/values.yaml
