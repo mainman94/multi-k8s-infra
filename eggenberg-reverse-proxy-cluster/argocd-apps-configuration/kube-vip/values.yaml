@@ -4,7 +4,7 @@
 # Virtual IP for the control-plane API server.
 config:
   # TODO: Set this to the desired API VIP if different.
-  address: "192.168.0.141"
+  address: "192.168.0.140"
 
 # Environment flags for kube-vip
 # See: https://kube-vip.io/docs/installation/flags/
