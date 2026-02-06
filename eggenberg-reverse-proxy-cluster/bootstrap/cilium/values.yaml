@@ -11,9 +11,14 @@ loadBalancer:
 
 l2announcements:
   enabled: true
-  
+
+externalIPs:
+  enabled: true
+
 operator:
   replicas: 1
+
+devices: "enp0s31f6+"
 
 hubble:
   enabled: true
