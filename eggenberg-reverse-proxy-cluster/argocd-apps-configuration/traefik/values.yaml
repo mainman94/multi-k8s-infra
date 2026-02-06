@@ -1,3 +1,7 @@
+service:
+  spec:
+    externalTrafficPolicy: Local
+
 autoscaling:
   enabled: true
   minReplicas: 1
