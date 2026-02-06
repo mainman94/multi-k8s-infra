@@ -1,6 +1,6 @@
-service:
-  spec:
-    externalTrafficPolicy: Local
+#service:
+#  spec:
+#    externalTrafficPolicy: Local
 
 autoscaling:
   enabled: true
