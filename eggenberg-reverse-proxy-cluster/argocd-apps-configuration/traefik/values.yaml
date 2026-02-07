@@ -172,3 +172,9 @@ podSecurityContext:
   runAsNonRoot: true
   fsGroup: 65532
   fsGroupChangePolicy: "OnRootMismatch"
+
+service:
+  enabled: true
+  type: LoadBalancer
+  annotations:
+    kube-vip.io/loadbalancerIP: "192.168.0.140"
