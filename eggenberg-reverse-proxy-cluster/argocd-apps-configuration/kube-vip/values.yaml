@@ -22,7 +22,7 @@ env:
   # Disable kube-vip service load-balancer to avoid conflicts with Cilium LB.
   lb_enable: "true"
   svc_enable: "true"
-  svc_election: "true"
+  #svc_election: "true"
 
   prometheus_server: ":2112"
 
