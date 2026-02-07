@@ -1,7 +1,7 @@
 autoscaling:
   enabled: true
-  minReplicas: 1
-  maxReplicas: 3
+  minReplicas: 3
+  maxReplicas: 6
   metrics:
     - type: Resource
       resource:
