@@ -1,7 +1,7 @@
 autoscaling:
   enabled: true
-  minReplicas: 3
-  maxReplicas: 6
+  minReplicas: 1
+  maxReplicas: 3
   metrics:
     - type: Resource
       resource:
@@ -149,7 +149,7 @@ metrics:
 persistence:
   enabled: true
   name: data
-  accessMode: ReadWriteOnce
+  accessMode: ReadWriteMany
   size: 128Mi
   path: /data
   storageClass: longhorn
