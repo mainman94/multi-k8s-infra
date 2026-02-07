@@ -1,7 +1,3 @@
-#service:
-#  spec:
-#    externalTrafficPolicy: Local
-
 autoscaling:
   enabled: true
   minReplicas: 1
@@ -175,8 +171,12 @@ podSecurityContext:
 
 service:
   enabled: true
+  single: true
   type: LoadBalancer
-  loadBalancerIP: "192.168.0.140"
-  externalTrafficPolicy: Cluster
   annotations:
     kube-vip.io/loadbalancerIP: "192.168.0.140"
+  labels: {}
+  spec:
+  # externalTrafficPolicy: Cluster
+  loadBalancerIP: "192.168.0.140"
+  
