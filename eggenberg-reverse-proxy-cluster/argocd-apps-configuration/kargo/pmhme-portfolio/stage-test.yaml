@@ -34,7 +34,7 @@ spec:
             checkout:
               - branch: main
                 path: ${{ vars.repoPath }}
-  
+
         - uses: kustomize-set-image
           as: update-image
           config:
@@ -52,7 +52,7 @@ spec:
         - uses: git-push
           config:
             path: ${{ vars.repoPath }}
-            
+
         - uses: yaml-parse
           as: overlay
           config:
@@ -70,15 +70,6 @@ spec:
             url: https://dev.hauptmann.dev/
             successExpression: response.status == 200
 
-        - uses: http
-          as: version-check
-          retry:
-            timeout: 15m0s
-          config:
-            method: GET
-            url: https://dev.hauptmann.dev/version
-            successExpression: response.status == 200 && response.body.version == '${{ outputs.overlay.deployedTag }}'
-
         - uses: argocd-update
           as: argo
           config:
@@ -88,3 +79,11 @@ spec:
                 sources:
                   - repoURL: ${{ vars.gitRepo }}
                     desiredRevision: ${{ outputs.commit.commit }}
+        - uses: http
+          as: version-check
+          retry:
+            timeout: 15m0s
+          config:
+            method: GET
+            url: https://dev.hauptmann.dev/version
+            successExpression: response.status == 200 && response.body.version == '${{ outputs.overlay.deployedTag }}'
