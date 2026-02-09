@@ -78,7 +78,7 @@ spec:
                 namespace: argocd
                 sources:
                   - repoURL: ${{ vars.gitRepo }}
-                    desiredRevision: ${{ outputs.commit.commit }}
+
         - uses: http
           as: version-check
           retry:

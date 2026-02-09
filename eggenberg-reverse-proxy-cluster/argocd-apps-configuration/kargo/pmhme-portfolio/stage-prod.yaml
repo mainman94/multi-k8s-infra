@@ -71,9 +71,7 @@ spec:
                 namespace: argocd
                 sources:
                   - repoURL: ${{ vars.gitRepo }}
-                    desiredRevision: ${{ outputs.commit.commit }}
 
-        # (Optional) prod version check against prod overlay value
         - uses: http
           as: version-check
           retry:
