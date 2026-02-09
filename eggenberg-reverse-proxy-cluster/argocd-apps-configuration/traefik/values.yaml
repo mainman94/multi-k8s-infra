@@ -171,12 +171,9 @@ podSecurityContext:
 
 service:
   enabled: true
-  single: true
   type: LoadBalancer
   annotations:
-    kube-vip.io/loadbalancerIP: "192.168.0.140"
-  labels: {}
+    kube-vip.io/loadbalancerIPs: "192.168.0.140"
   spec:
-  # externalTrafficPolicy: Cluster
     loadBalancerIP: "192.168.0.140"
   
