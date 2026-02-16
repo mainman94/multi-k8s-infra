@@ -33,3 +33,13 @@ podMonitor:
   enabled: true
   labels:
     release: kube-prometheus-stack
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - eggenberg-reverse-proxy-cp-nb-1
