@@ -4,5 +4,7 @@ replicas: 2
 ingress:
   enabled: true
   includeDefaultExtraAnnotations: true
+  extraAnnotations:
+    traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
   ingressClassName: "traefik"
 tls: external
