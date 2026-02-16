@@ -13,7 +13,7 @@ certificatesResolvers:
       caServer: "https://acme-v02.api.letsencrypt.org/directory"
       dnsChallenge:
         provider: cloudflare
-        delayBeforeCheck: 0
+        delayBeforeCheck: 15
         resolvers:
           - "1.1.1.1:53"
           - "8.8.8.8:53"
@@ -49,12 +49,12 @@ tlsStore:
   default:
     defaultCertificate:
       secretName: cloudflare-origin-cert
-    # defaultGeneratedCert:
-    #   resolver: cloudflare
-    #   domain:
-    #     main: hauptmann.dev
-    #     sans:
-    #       - '*.hauptmann.dev'
+    defaultGeneratedCert:
+      resolver: cloudflare
+      domain:
+        main: hauptmann.dev
+        sans:
+          - '*.hauptmann.dev'
 
 logs:
   general:
