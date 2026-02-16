@@ -13,7 +13,8 @@ certificatesResolvers:
       caServer: "https://acme-v02.api.letsencrypt.org/directory"
       dnsChallenge:
         provider: cloudflare
-        delayBeforeCheck: 15
+        propagation:
+          delayBeforeChecks: 15
         resolvers:
           - "1.1.1.1:53"
           - "8.8.8.8:53"
@@ -43,7 +44,6 @@ ports:
         # allowEncodedHash: true
       tls:
         certResolver: cloudflare
-        options: default@kubernetescrd
 
 tlsStore:
   default:
