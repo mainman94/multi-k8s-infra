@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kube-vip-cloud-provider
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://kube-vip.github.io/helm-charts
+      chart: kube-vip-cloud-provider
+      targetRevision: 0.2.10
+      helm:
+        valueFiles:
+          - $values/eggenberg-reverse-proxy-cluster/argocd-apps-configuration/kube-vip-cloud-provider/values.yaml
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
+      targetRevision: HEAD
+      ref: values
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
+      path: "eggenberg-reverse-proxy-cluster/argocd-apps-configuration/"
+      targetRevision: HEAD
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
