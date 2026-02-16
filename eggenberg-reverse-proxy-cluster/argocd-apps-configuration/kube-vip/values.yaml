@@ -1,7 +1,6 @@
 # kube-vip Helm Chart values
 # https://kube-vip.io/docs/installation/helm/
 
-# Virtual IP for the control-plane API server.
 config:
   # TODO: Set this to the desired API VIP if different.
   address: "192.168.0.140"
