@@ -1,6 +1,8 @@
 ingress:
   enabled: true
   className: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls.store: default
   hosts:
     - host: uptime.hauptmann.dev
       paths:
