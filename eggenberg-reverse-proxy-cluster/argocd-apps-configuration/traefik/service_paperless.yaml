@@ -33,3 +33,6 @@ spec:
         - name: paperless-external
           port: 30070
           passHostHeader: true
+  tls:
+    store:
+      name: default

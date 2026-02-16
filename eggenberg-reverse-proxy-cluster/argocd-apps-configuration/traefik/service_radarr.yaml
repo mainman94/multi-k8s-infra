@@ -33,3 +33,6 @@ spec:
         - name: radarr-external
           port: 30025
           passHostHeader: true
+  tls:
+    store:
+      name: default

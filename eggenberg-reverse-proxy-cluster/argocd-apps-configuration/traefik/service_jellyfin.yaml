@@ -33,3 +33,6 @@ spec:
         - name: jellyfin-external
           port: 30013
           passHostHeader: true
+  tls:
+    store:
+      name: default

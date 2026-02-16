@@ -33,3 +33,6 @@ spec:
         - name: audiobookshelf-external
           port: 30067
           passHostHeader: true
+  tls:
+    store:
+      name: default

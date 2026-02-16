@@ -33,3 +33,6 @@ spec:
         - name: jellystat-external
           port: 30176
           passHostHeader: true
+  tls:
+    store:
+      name: default

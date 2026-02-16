@@ -33,3 +33,6 @@ spec:
         - name: jellyseerr-external
           port: 30042
           passHostHeader: true
+  tls:
+    store:
+      name: default

@@ -33,3 +33,6 @@ spec:
         - name: nextcloud-external
           port: 30056
           passHostHeader: true
+  tls:
+    store:
+      name: default
