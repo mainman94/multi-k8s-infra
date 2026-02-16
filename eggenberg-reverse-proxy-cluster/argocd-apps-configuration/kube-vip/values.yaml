@@ -15,6 +15,10 @@ env:
   vip_subnet: "24"
   lb_port: "6443"
 
+  lease_duration: "30"
+  renew_deadline: "20"
+  retry_period: "5"
+
   # Control-plane VIP
   cp_enable: "true"
   vip_leaderelection: "true"
@@ -30,3 +34,13 @@ podMonitor:
   enabled: true
   labels:
     release: kube-prometheus-stack
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: NotIn
+          values:
+          - eggenberg-reverse-proxy-cp-nb-1
