@@ -118,7 +118,7 @@ service:
   enabled: true
   type: LoadBalancer
   annotations:
-    kube-vip.io/loadbalancerIPs: "192.168.0.140"
+    kube-vip.io/loadbalancerIPs: "192.168.0.150"
   spec:
-    loadBalancerIP: "192.168.0.140"
+    loadBalancerIP: "192.168.0.150"
   
