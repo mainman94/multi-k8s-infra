@@ -33,3 +33,6 @@ spec:
         - name: sonarr-external
           port: 30113
           passHostHeader: true
+  tls:
+    store:
+      name: default
