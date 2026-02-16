@@ -33,5 +33,3 @@ spec:
         - name: authentik-external
           port: 30140
           passHostHeader: true
-  tls:
-    certResolver: cloudflare

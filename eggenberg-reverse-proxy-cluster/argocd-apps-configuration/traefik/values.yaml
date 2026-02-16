@@ -49,12 +49,12 @@ tlsStore:
   default:
     defaultCertificate:
       secretName: cloudflare-origin-cert
-    defaultGeneratedCert:
-      resolver: cloudflare
-      domain:
-        main: hauptmann.dev
-        sans:
-          - '*.hauptmann.dev'
+    # defaultGeneratedCert:
+    #   resolver: cloudflare
+    #   domain:
+    #     main: hauptmann.dev
+    #     sans:
+    #       - '*.hauptmann.dev'
 
 logs:
   general:

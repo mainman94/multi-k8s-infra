@@ -33,5 +33,3 @@ spec:
         - name: umami-external
           port: 30060
           passHostHeader: true
-  tls:
-    certResolver: cloudflare

@@ -33,5 +33,3 @@ spec:
         - name: paperless-external
           port: 30070
           passHostHeader: true
-  tls:
-    certResolver: cloudflare

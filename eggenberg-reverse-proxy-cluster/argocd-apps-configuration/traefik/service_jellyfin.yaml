@@ -33,5 +33,3 @@ spec:
         - name: jellyfin-external
           port: 30013
           passHostHeader: true
-  tls:
-    certResolver: cloudflare

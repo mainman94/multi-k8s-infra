@@ -33,5 +33,3 @@ spec:
         - name: gitea-external
           port: 30008
           passHostHeader: true
-  tls:
-    certResolver: cloudflare

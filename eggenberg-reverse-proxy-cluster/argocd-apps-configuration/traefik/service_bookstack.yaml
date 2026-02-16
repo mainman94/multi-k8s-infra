@@ -33,5 +33,3 @@ spec:
         - name: bookstack-external
           port: 30214
           passHostHeader: true
-  tls:
-    certResolver: cloudflare

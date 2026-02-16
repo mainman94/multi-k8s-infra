@@ -33,5 +33,3 @@ spec:
         - name: radarr-external
           port: 30025
           passHostHeader: true
-  tls:
-    certResolver: cloudflare

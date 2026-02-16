@@ -33,5 +33,3 @@ spec:
         - name: nextcloud-external
           port: 30056
           passHostHeader: true
-  tls:
-    certResolver: cloudflare

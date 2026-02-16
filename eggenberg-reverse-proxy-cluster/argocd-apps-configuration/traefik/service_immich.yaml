@@ -33,5 +33,3 @@ spec:
         - name: immich-external
           port: 30041
           passHostHeader: true
-  tls:
-    certResolver: cloudflare

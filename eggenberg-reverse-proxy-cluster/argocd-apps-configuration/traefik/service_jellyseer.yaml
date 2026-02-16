@@ -33,5 +33,3 @@ spec:
         - name: jellyseerr-external
           port: 30042
           passHostHeader: true
-  tls:
-    certResolver: cloudflare

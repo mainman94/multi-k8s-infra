@@ -33,5 +33,3 @@ spec:
         - name: vaultwarden-external
           port: 30032
           passHostHeader: true
-  tls:
-    certResolver: cloudflare

@@ -33,5 +33,3 @@ spec:
         - name: jellystat-external
           port: 30176
           passHostHeader: true
-  tls:
-    certResolver: cloudflare

@@ -33,5 +33,3 @@ spec:
         - name: n8n-external
           port: 30109
           passHostHeader: true
-  tls:
-    certResolver: cloudflare

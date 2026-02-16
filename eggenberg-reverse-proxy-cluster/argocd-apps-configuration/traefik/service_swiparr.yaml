@@ -33,5 +33,3 @@ spec:
         - name: swiparr-external
           port: 4321
           passHostHeader: true
-  tls:
-    certResolver: cloudflare
