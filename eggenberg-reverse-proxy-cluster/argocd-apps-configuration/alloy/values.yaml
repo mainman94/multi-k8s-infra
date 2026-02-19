@@ -1,35 +1,33 @@
 alloy:
   extraEnv:
     - name: CLOUD_USER_LOKI
-      valueFrom:
-        secretKeyRef:
-          name: grafana-cloud-creds
-          key: GRAFANA_CLOUD_USERNAME
+      value: "1183961"
     - name: CLOUD_TOKEN
       valueFrom:
         secretKeyRef:
           name: grafana-cloud-creds
           key: GRAFANA_CLOUD_TOKEN
 
-  config: |
-    discovery.kubernetes "pods" {
-      role = "pod"
-    }
+  configMap:
+    content: |
+      discovery.kubernetes "pods" {
+        role = "pod"
+      }
 
-    loki.source.kubernetes "local_logs" {
-      targets    = discovery.kubernetes.pods.targets
-      forward_to = [loki.write.grafana_cloud.receiver]
-    }
+      loki.source.kubernetes "local_logs" {
+        targets    = discovery.kubernetes.pods.targets
+        forward_to = [loki.write.grafana_cloud.receiver]
+      }
 
-    loki.write "grafana_cloud" {
-      endpoint {
-        url = "https://logs-prod-eu-west-0.grafana.net/loki/api/v1/push"
-        basic_auth {
-          username = "1183961"
-          password = sys.env("CLOUD_TOKEN")
+      loki.write "grafana_cloud" {
+        endpoint {
+          url = "https://logs-prod-eu-west-0.grafana.net/loki/api/v1/push"
+          basic_auth {
+            username = sys.env("CLOUD_USER_LOKI")
+            password = sys.env("CLOUD_TOKEN")
+          }
         }
       }
-    }
 
 controller:
   type: daemonset
