@@ -37,13 +37,16 @@ alloy:
       }
     }
 
-    // --- METRIKEN (Scraping) ---
-    discovery.kubernetes "services" {
-      role = "service"
+// --- METRIKEN: Alles scrapen was geht ---
+    // Wir suchen nach Pods, die Metriken liefern könnten
+    discovery.kubernetes "all_pods_metrics" {
+      role = "pod"
     }
 
-    prometheus.scrape "metrics" {
-      targets    = discovery.kubernetes.services.targets
+    prometheus.scrape "all_metrics" {
+      targets    = discovery.kubernetes.all_pods_metrics.targets
+      // Wir erzwingen das Scraping von allen Pods auf Port 8080 oder ähnlichem
+      // Falls deine Apps andere Ports nutzen, finden wir sie über die Targets
       forward_to = [prometheus.remote_write.grafana_cloud.receiver]
     }
 
