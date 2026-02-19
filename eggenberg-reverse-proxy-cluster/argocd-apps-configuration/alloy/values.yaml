@@ -24,8 +24,49 @@ alloy:
         }
       }
 
+      discovery.relabel "pods_enriched" {
+        targets = discovery.relabel.pods_running.output
+
+        rule {
+          source_labels = ["__meta_kubernetes_namespace"]
+          target_label  = "namespace"
+        }
+
+        rule {
+          source_labels = ["__meta_kubernetes_pod_name"]
+          target_label  = "pod"
+        }
+
+        rule {
+          source_labels = ["__meta_kubernetes_pod_container_name"]
+          target_label  = "container"
+        }
+
+        rule {
+          source_labels = ["__meta_kubernetes_pod_node_name"]
+          target_label  = "node"
+        }
+
+        rule {
+          source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
+          target_label  = "app"
+        }
+      }
+
       loki.process "sanitize_for_cloud" {
         forward_to = [loki.write.grafana_cloud.receiver]
+
+        stage.decolorize {}
+
+        stage.static_labels {
+          values = {
+            cluster = "eggenberg-reverse-proxy"
+          }
+        }
+
+        stage.label_drop {
+          values = ["service_name"]
+        }
 
         stage.drop {
           older_than          = "168h"
@@ -34,7 +75,7 @@ alloy:
       }
 
       loki.source.kubernetes "local_logs" {
-        targets    = discovery.relabel.pods_running.output
+        targets    = discovery.relabel.pods_enriched.output
         forward_to = [loki.process.sanitize_for_cloud.receiver]
       }
 
