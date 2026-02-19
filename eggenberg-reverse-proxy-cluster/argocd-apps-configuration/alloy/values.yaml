@@ -1,5 +1,4 @@
 alloy:
-  # Konfiguration für dein Secret (wie zuvor)
   extraEnv:
     - name: CLOUD_USER_LOKI
       valueFrom:
@@ -50,7 +49,7 @@ alloy:
 
     prometheus.remote_write "grafana_cloud" {
       endpoint {
-        url = "https://prometheus-prod-01-eu-west-0.grafana.net/api/prom/push"
+        url = "https://prometheus-prod-24-prod-eu-west-2.grafana.net/api/prom/push"
         basic_auth {
           username = sys.env("CLOUD_USER_PROM")
           password = sys.env("CLOUD_TOKEN")
