@@ -60,7 +60,7 @@ alloy:
 
         stage.static_labels {
           values = {
-            cluster = "eggenberg-reverse-proxy"
+            cluster = "eggenberg-reverse-proxy",
           }
         }
 
