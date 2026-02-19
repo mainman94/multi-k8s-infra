@@ -21,7 +21,7 @@ alloy:
 
       loki.write "grafana_cloud" {
         endpoint {
-          url = "https://logs-prod-eu-west-0.grafana.net/loki/api/v1/push"
+          url = "https://logs-prod-012.grafana.net/loki/api/v1/push"
           basic_auth {
             username = sys.env("CLOUD_USER_LOKI")
             password = sys.env("CLOUD_TOKEN")
