@@ -1,0 +1,62 @@
+alloy:
+  # Konfiguration für dein Secret (wie zuvor)
+  extraEnv:
+    - name: CLOUD_USER_LOKI
+      valueFrom:
+        secretKeyRef:
+          name: grafana-cloud-creds
+          key: GRAFANA_CLOUD_USERNAME
+    - name: CLOUD_USER_PROM
+      valueFrom:
+        secretKeyRef:
+          name: grafana-cloud-creds
+          key: GRAFANA_CLOUD_PROM_ID
+    - name: CLOUD_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: grafana-cloud-creds
+          key: GRAFANA_CLOUD_TOKEN
+
+  config: |
+    // --- LOGS (DaemonSet liest lokale Files) ---
+    discovery.kubernetes "pods" {
+      role = "pod"
+    }
+
+    loki.source.kubernetes "local_logs" {
+      targets    = discovery.kubernetes.pods.targets
+      forward_to = [loki.write.grafana_cloud.receiver]
+    }
+
+    loki.write "grafana_cloud" {
+      endpoint {
+        url = "https://logs-prod-eu-west-0.grafana.net/loki/api/v1/push"
+        basic_auth {
+          username = sys.env("CLOUD_USER_LOKI")
+          password = sys.env("CLOUD_TOKEN")
+        }
+      }
+    }
+
+    // --- METRIKEN (Scraping) ---
+    discovery.kubernetes "services" {
+      role = "service"
+    }
+
+    prometheus.scrape "metrics" {
+      targets    = discovery.kubernetes.services.targets
+      forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+    }
+
+    prometheus.remote_write "grafana_cloud" {
+      endpoint {
+        url = "https://prometheus-prod-01-eu-west-0.grafana.net/api/prom/push"
+        basic_auth {
+          username = sys.env("CLOUD_USER_PROM")
+          password = sys.env("CLOUD_TOKEN")
+        }
+      }
+    }
+
+controller:
+  type: daemonset
