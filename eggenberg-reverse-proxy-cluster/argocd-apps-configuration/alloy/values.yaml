@@ -14,9 +14,28 @@ alloy:
         role = "pod"
       }
 
-      loki.source.kubernetes "local_logs" {
-        targets    = discovery.kubernetes.pods.targets
+      discovery.relabel "pods_running" {
+        targets = discovery.kubernetes.pods.targets
+
+        rule {
+          source_labels = ["__meta_kubernetes_pod_phase"]
+          regex         = "Running"
+          action        = "keep"
+        }
+      }
+
+      loki.process "sanitize_for_cloud" {
         forward_to = [loki.write.grafana_cloud.receiver]
+
+        stage.drop {
+          older_than          = "168h"
+          drop_counter_reason = "too_old_for_grafana_cloud"
+        }
+      }
+
+      loki.source.kubernetes "local_logs" {
+        targets    = discovery.relabel.pods_running.output
+        forward_to = [loki.process.sanitize_for_cloud.receiver]
       }
 
       loki.write "grafana_cloud" {
