@@ -17,37 +17,13 @@ alloy:
           key: GRAFANA_CLOUD_TOKEN
 
   config: |
-    // --- LOGS (DaemonSet liest lokale Files) ---
-    discovery.kubernetes "pods" {
-      role = "pod"
-    }
-
-    loki.source.kubernetes "local_logs" {
-      targets    = discovery.kubernetes.pods.targets
-      forward_to = [loki.write.grafana_cloud.receiver]
-    }
-
-    loki.write "grafana_cloud" {
-      endpoint {
-        url = "https://logs-prod-eu-west-0.grafana.net/loki/api/v1/push"
-        basic_auth {
-          username = sys.env("CLOUD_USER_LOKI")
-          password = sys.env("CLOUD_TOKEN")
-        }
-      }
-    }
-
-// --- METRIKEN: Alles scrapen was geht ---
-    // Wir suchen nach Pods, die Metriken liefern könnten
     discovery.kubernetes "all_pods_metrics" {
       role = "pod"
     }
 
     prometheus.scrape "all_metrics" {
       targets    = discovery.kubernetes.all_pods_metrics.targets
-      // Wir erzwingen das Scraping von allen Pods auf Port 8080 oder ähnlichem
-      // Falls deine Apps andere Ports nutzen, finden wir sie über die Targets
-      forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+       forward_to = [prometheus.remote_write.grafana_cloud.receiver]
     }
 
     prometheus.remote_write "grafana_cloud" {
