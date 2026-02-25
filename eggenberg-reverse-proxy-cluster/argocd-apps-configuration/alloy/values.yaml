@@ -79,15 +79,5 @@ alloy:
         forward_to = [loki.process.sanitize_for_cloud.receiver]
       }
 
-      loki.write "grafana_cloud" {
-        endpoint {
-          url = "https://logs-prod-012.grafana.net/loki/api/v1/push"
-          basic_auth {
-            username = sys.env("CLOUD_USER_LOKI")
-            password = sys.env("CLOUD_TOKEN")
-          }
-        }
-      }
-
 controller:
   type: daemonset

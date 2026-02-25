@@ -29,16 +29,7 @@ prometheus:
 
   # yamllint disable rule:line-length
   prometheusSpec:
-    retention: 30d
-    remoteWrite:
-      - url: https://prometheus-prod-24-prod-eu-west-2.grafana.net/api/prom/push
-        basicAuth:
-          username:
-            name: grafana-cloud-creds
-            key: GRAFANA_CLOUD_PROM_ID
-          password:
-            name: grafana-cloud-creds
-            key: GRAFANA_CLOUD_TOKEN
+    retention: 10d
     storageSpec:
       volumeClaimTemplate:
         spec:
