@@ -1,13 +1,4 @@
 alloy:
-  extraEnv:
-    - name: CLOUD_USER_LOKI
-      value: "1183961"
-    - name: CLOUD_TOKEN
-      valueFrom:
-        secretKeyRef:
-          name: grafana-cloud-creds
-          key: GRAFANA_CLOUD_TOKEN
-
   configMap:
     content: |
       discovery.kubernetes "pods" {
@@ -53,8 +44,14 @@ alloy:
         }
       }
 
-      loki.process "sanitize_for_cloud" {
-        forward_to = [loki.write.grafana_cloud.receiver]
+      loki.write "local_loki" {
+        endpoint {
+          url = "http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push"
+        }
+      }
+
+      loki.process "sanitize" {
+        forward_to = [loki.write.local_loki.receiver]
 
         stage.decolorize {}
 
@@ -67,16 +64,11 @@ alloy:
         stage.label_drop {
           values = ["service_name"]
         }
-
-        stage.drop {
-          older_than          = "168h"
-          drop_counter_reason = "too_old_for_grafana_cloud"
-        }
       }
 
       loki.source.kubernetes "local_logs" {
         targets    = discovery.relabel.pods_enriched.output
-        forward_to = [loki.process.sanitize_for_cloud.receiver]
+        forward_to = [loki.process.sanitize.receiver]
       }
 
 controller:
