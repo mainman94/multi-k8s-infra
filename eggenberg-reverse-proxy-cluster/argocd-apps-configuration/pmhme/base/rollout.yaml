@@ -15,7 +15,7 @@ spec:
         version: "v1"
       annotations:
         prometheus.io/scrape: "true"
-        prometheus.io/port: "3000"
+        prometheus.io/port: "3001"
     spec:
       containers:
         - name: portfolio-app

@@ -13,6 +13,10 @@ spec:
       protocol: TCP
       port: 80
       targetPort: http
+    - name: metrics
+      protocol: TCP
+      port: 3001
+      targetPort: metrics
   type: ClusterIP
   sessionAffinity: ClientIP
   sessionAffinityConfig:

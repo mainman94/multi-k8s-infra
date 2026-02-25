@@ -1,0 +1,14 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: portfolio-app
+  labels:
+    app: portfolio-app
+spec:
+  selector:
+    matchLabels:
+      app: portfolio-app
+  endpoints:
+    - port: metrics
+      interval: 30s
+      path: /metrics

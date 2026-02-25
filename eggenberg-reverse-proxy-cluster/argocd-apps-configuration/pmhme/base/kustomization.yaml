@@ -5,6 +5,7 @@ resources:
   - rollout.yaml
   - service.yaml
   - service-preview.yaml
+  - servicemonitor.yaml
   - ingress.yaml
   - analysis-template.yaml
   - pdb.yaml
