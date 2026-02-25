@@ -4,6 +4,7 @@ metadata:
   name: portfolio-app
   labels:
     app: portfolio-app
+    release: kube-prometheus-stack
 spec:
   selector:
     matchLabels:
