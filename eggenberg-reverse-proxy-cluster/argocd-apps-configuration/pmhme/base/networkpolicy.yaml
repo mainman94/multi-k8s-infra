@@ -32,6 +32,14 @@ spec:
       ports:
         - protocol: TCP
           port: 3000
+    # Allow Prometheus scraping from monitoring namespace
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 3001
   egress:
     # Allow traffic within the same namespace
     - to:
