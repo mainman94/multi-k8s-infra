@@ -70,6 +70,5 @@ alloy:
         targets    = discovery.relabel.pods_enriched.output
         forward_to = [loki.process.sanitize.receiver]
       }
-
 controller:
   type: daemonset

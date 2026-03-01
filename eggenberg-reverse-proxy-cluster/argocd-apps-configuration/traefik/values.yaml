@@ -4,7 +4,6 @@ env:
       secretKeyRef:
         name: cloudflare-api-token
         key: CF_DNS_API_TOKEN
-
 certificatesResolvers:
   cloudflare:
     acme:
@@ -18,12 +17,10 @@ certificatesResolvers:
         resolvers:
           - "1.1.1.1:53"
           - "8.8.8.8:53"
-
 providers:
   kubernetesCRD:
     allowExternalNameServices: true
     allowCrossNamespace: true
-
 ports:
   web:
     http:
@@ -44,7 +41,6 @@ ports:
         # allowEncodedHash: true
       tls:
         certResolver: cloudflare
-
 tlsStore:
   default:
     defaultCertificate:
@@ -55,7 +51,6 @@ tlsStore:
         main: hauptmann.dev
         sans:
           - '*.hauptmann.dev'
-
 logs:
   general:
     format: json
@@ -66,7 +61,6 @@ logs:
     fields:
       headers:
         defaultmode: keep
-
 metrics:
   prometheus:
     service:
@@ -90,7 +84,6 @@ metrics:
     headerLabels:
       user_id: X-User-Id
       tenant: X-Tenant
-
 persistence:
   enabled: true
   name: data
@@ -98,7 +91,6 @@ persistence:
   size: 128Mi
   path: /data
   storageClass: longhorn
-
 resources:
   requests:
     cpu: 100m
@@ -106,14 +98,12 @@ resources:
   limits:
     cpu: 1000m
     memory: 512Mi
-
 podSecurityContext:
   runAsGroup: 65532
   runAsUser: 65532
   runAsNonRoot: true
   fsGroup: 65532
   fsGroupChangePolicy: "OnRootMismatch"
-
 service:
   enabled: true
   type: LoadBalancer
@@ -121,4 +111,3 @@ service:
     kube-vip.io/loadbalancerIPs: "192.168.0.150"
   spec:
     loadBalancerIP: "192.168.0.150"
-  

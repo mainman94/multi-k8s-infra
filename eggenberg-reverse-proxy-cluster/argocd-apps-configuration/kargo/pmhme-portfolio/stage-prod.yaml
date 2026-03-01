@@ -15,7 +15,6 @@ spec:
       value: eggenberg-reverse-proxy-cluster/argocd-apps-configuration/pmhme/overlays/production
     - name: appName
       value: pmhme-portfolio-prod
-
   requestedFreight:
     - origin:
         kind: Warehouse
@@ -25,7 +24,6 @@ spec:
           - test
         autoPromotionOptions:
           selectionPolicy: NewestFreight
-
   promotionTemplate:
     spec:
       steps:
@@ -35,7 +33,6 @@ spec:
             checkout:
               - branch: main
                 path: ${{ vars.repoPath }}
-
         - uses: kustomize-set-image
           as: update-image
           config:
@@ -43,17 +40,14 @@ spec:
             images:
               - image: ${{ vars.imageRepo }}
                 tag: ${{ quote(imageFrom(vars.imageRepo).Tag) }}
-
         - uses: git-commit
           as: commit
           config:
             path: ${{ vars.repoPath }}
             message: ${{ outputs['update-image'].commitMessage }}
-
         - uses: git-push
           config:
             path: ${{ vars.repoPath }}
-
         # (Optional, recommended) read back what prod overlay now contains
         - uses: yaml-parse
           as: overlay
@@ -62,7 +56,6 @@ spec:
             outputs:
               - name: deployedTag
                 fromExpression: filter(images, {.name == "dockerha08/pmhme"})[0].newTag
-
         - uses: argocd-update
           as: argo
           config:
@@ -71,7 +64,6 @@ spec:
                 namespace: argocd
                 sources:
                   - repoURL: ${{ vars.gitRepo }}
-
         - uses: http
           as: version-check
           retry:
@@ -80,4 +72,3 @@ spec:
             method: GET
             url: https://hauptmann.dev/version
             successExpression: response.status == 200 && response.body.version == '${{ outputs.overlay.deployedTag }}'
-

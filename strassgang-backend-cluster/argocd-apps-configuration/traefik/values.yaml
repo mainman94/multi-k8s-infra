@@ -4,7 +4,6 @@ env:
       secretKeyRef:
         name: cloudflare-api-token
         key: CF_DNS_API_TOKEN
-
 certificatesResolvers:
   cloudflare:
     acme:
@@ -17,12 +16,10 @@ certificatesResolvers:
         resolvers:
           - "1.1.1.1:53"
           - "8.8.8.8:53"
-
 providers:
   kubernetesCRD:
     allowExternalNameServices: true
     allowCrossNamespace: true
-
 tlsOptions:
   default:
     minVersion: "VersionTLS12"
@@ -36,7 +33,6 @@ tlsOptions:
     curvePreferences:
       - CurveP521
       - CurveP384
-
 ports:
   web:
     http:
@@ -50,8 +46,6 @@ ports:
       tls:
         certResolver: cloudflare
       options: default@kubernetescrd
-
-
 tlsStore:
   default:
     defaultGeneratedCert:
@@ -60,10 +54,8 @@ tlsStore:
         main: hauptmann.dev
         sans:
           - '*.hauptmann.dev'
-
 podSecurityContext:
   fsGroup: 65532
-
 logs:
   general:
     format: json
@@ -74,7 +66,6 @@ logs:
     fields:
       headers:
         defaultmode: keep
-
 metrics:
   prometheus:
     service:
@@ -98,9 +89,8 @@ metrics:
     headerLabels:
       user_id: X-User-Id
       tenant: X-Tenant
-
 persistence:
-# storageClass: "longhorn"
+  # storageClass: "longhorn"
   enabled: true
   name: data
   accessMode: ReadWriteMany

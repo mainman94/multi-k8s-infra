@@ -35,4 +35,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-# yamllint ensable rule:line-length
+    # yamllint ensable rule:line-length

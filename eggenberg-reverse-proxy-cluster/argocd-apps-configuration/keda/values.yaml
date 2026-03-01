@@ -1,18 +1,14 @@
 # KEDA Helm Chart Values
 # https://github.com/kedacore/charts/tree/main/keda
-
 # Operator configuration
 operator:
   replicaCount: 1
-
 # Metrics server configuration
 metricsServer:
   replicaCount: 1
-
 # Webhooks configuration
 webhooks:
   replicaCount: 1
-
 # Resource limits
 resources:
   operator:
@@ -36,7 +32,6 @@ resources:
     limits:
       cpu: 200m
       memory: 256Mi
-
 # Prometheus metrics
 prometheus:
   metricServer:

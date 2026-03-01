@@ -4,7 +4,7 @@ metadata:
   name: uptime-kuma
   namespace: argocd
 spec:
-# yamllint disable rule:line-length
+  # yamllint disable rule:line-length
   project: default
   sources:
     - repoURL: https://opensource.ncsa.illinois.edu/charts/
@@ -28,4 +28,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-# yamllint enable rule:line-length
+    # yamllint enable rule:line-length

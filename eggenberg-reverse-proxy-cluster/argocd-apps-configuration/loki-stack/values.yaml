@@ -13,15 +13,12 @@ loki:
         index:
           prefix: loki_index_
           period: 24h
-
 deploymentMode: SingleBinary
-
 singleBinary:
   replicas: 1
   persistence:
     enabled: true
     size: 20Gi
-
 # Disable distributed components
 backend:
   replicas: 0
@@ -29,19 +26,14 @@ read:
   replicas: 0
 write:
   replicas: 0
-
 lokiCanary:
   enabled: false
-
 test:
   enabled: false
-
 gateway:
   enabled: false
-
 # Disable memcached caches (not needed for single binary / filesystem storage)
 chunksCache:
   enabled: false
-
 resultsCache:
   enabled: false

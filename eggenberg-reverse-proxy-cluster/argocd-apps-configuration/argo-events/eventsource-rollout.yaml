@@ -10,7 +10,7 @@ spec:
     serviceAccountName: argo-events-sa
   resource:
     rollouts:
-      namespace: portfolio  # Only watch portfolio namespace
+      namespace: portfolio # Only watch portfolio namespace
       group: argoproj.io
       version: v1alpha1
       resource: analysisruns

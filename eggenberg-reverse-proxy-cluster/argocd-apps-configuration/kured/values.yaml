@@ -6,7 +6,6 @@ configuration:
   timeZone: "Europe/Vienna"
   drainTimeout: "3m"
   forceReboot: true
-
 metrics:
   create: true
   labels:

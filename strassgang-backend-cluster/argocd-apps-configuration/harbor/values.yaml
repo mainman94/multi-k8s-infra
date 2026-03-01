@@ -9,9 +9,7 @@ expose:
     className: "traefik"
     annotations:
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
-
 externalURL: https://registry.hauptmann.dev
-
 persistence:
   enabled: true
   persistentVolumeClaim:
@@ -28,7 +26,6 @@ persistence:
       storageClass: "longhorn"
     trivy:
       storageClass: "longhorn"
-
 #existingSecretAdminPassword: ""
 #existingSecretAdminPasswordKey: HARBOR_ADMIN_PASSWORD
 #harborAdminPassword: "Harbor12345"
@@ -37,7 +34,6 @@ persistence:
 #secretKey: "not-a-secure-key"
 # If using existingSecretSecretKey, the key must be secretKey
 #existingSecretSecretKey: ""
-
 metrics:
   enabled: false
   core:
@@ -56,6 +52,5 @@ metrics:
     enabled: false
     additionalLabels: {}
     interval: ""
-    metricRelabelings:
-      []
+    metricRelabelings: []
     relabelings:

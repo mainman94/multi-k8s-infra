@@ -6,20 +6,6 @@ spec:
   blocks:
     - start: 192.168.0.102
       stop: 192.168.0.102
+
+
 ---
-#apiVersion: cilium.io/v2alpha1
-#kind: CiliumL2AnnouncementPolicy
-#metadata:
-#  name: l2-lb
-#spec:
-#  # WICHTIG: Erlaubt allen Nodes die Teilnahme am L2-Announcement
-#  nodeSelector:
-#    matchLabels: {}
-#  # WICHTIG: Gilt für alle Services vom Typ LoadBalancer
-#  serviceSelector:
-#    matchLabels: {}
-#  interfaces:
-#    - enp0s31f6
-#  externalIPs: true
-#  loadBalancerIPs: true
-  

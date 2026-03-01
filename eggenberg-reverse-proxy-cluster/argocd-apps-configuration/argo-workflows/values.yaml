@@ -7,7 +7,6 @@ server:
       - argo-workflows-rp.hauptmann.dev
     annotations:
       traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
-
   # SSO via ArgoCD's Dex server (reuses existing Authentik config)
   authModes:
     - sso
@@ -29,7 +28,6 @@ server:
     # Group-based RBAC - maps SSO groups to ServiceAccounts
     rbac:
       enabled: true
-
 # Controller Configuration
 controller:
   metricsConfig:
@@ -38,7 +36,6 @@ controller:
     enabled: true
     additionalLabels:
       release: kube-prometheus-stack
-
 # Extra K8s manifests for SSO RBAC
 extraObjects:
   # Default ServiceAccount (catch-all fallback)
@@ -50,7 +47,6 @@ extraObjects:
       annotations:
         workflows.argoproj.io/rbac-rule: "true"
         workflows.argoproj.io/rbac-rule-precedence: "100"
-
   # Token Secret for Default ServiceAccount (required since K8s 1.24)
   - apiVersion: v1
     kind: Secret
@@ -60,7 +56,6 @@ extraObjects:
       annotations:
         kubernetes.io/service-account.name: argo-workflows-default-sa
     type: kubernetes.io/service-account-token
-
   # ClusterRole for admin access
   - apiVersion: rbac.authorization.k8s.io/v1
     kind: ClusterRole
@@ -76,7 +71,6 @@ extraObjects:
       - apiGroups: ["argoproj.io"]
         resources: ["eventsources", "sensors"]
         verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
-
   # Bind default ServiceAccount to admin ClusterRole
   - apiVersion: rbac.authorization.k8s.io/v1
     kind: ClusterRoleBinding

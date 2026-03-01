@@ -5,6 +5,5 @@ dashboard:
     ingressClassName: traefik
     hosts:
       - rollouts-reverse-proxy.hauptmann.dev
-
 controller:
   replicas: 1

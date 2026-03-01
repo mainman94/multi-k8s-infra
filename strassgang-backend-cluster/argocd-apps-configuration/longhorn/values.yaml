@@ -1,9 +1,7 @@
 defaultSettings:
   defaultReplicaCount: "2"
-
 persistence:
   defaultClass: true
   defaultClassReplicaCount: "2"
-
 ingress:
   enabled: false

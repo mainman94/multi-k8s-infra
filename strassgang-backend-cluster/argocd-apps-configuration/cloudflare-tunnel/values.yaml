@@ -1,6 +1,5 @@
 replica:
   allNodes: false
-
 tunnelSecrets:
   existingConfigJsonFileSecret:
     name: cloudflare-tunnel-secret
@@ -23,11 +22,9 @@ tunnelConfig:
   transportLogLevel: warn
   connectTimeout: 30s
   warpRouting: false
-
 ingress:
-#  - hostname: s3.hauptmann.dev
-#    service: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333
-
+  #  - hostname: s3.hauptmann.dev
+  #    service: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333
   - hostname: "*.hauptmann.dev"
     service: https://traefik.traefik.svc.cluster.local:443
     originRequest:

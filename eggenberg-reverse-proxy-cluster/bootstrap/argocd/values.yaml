@@ -7,7 +7,6 @@ applicationSet:
       enabled: true
       additionalLabels:
         release: kube-prometheus-stack
-
 server:
   metrics:
     enabled: true
@@ -26,10 +25,8 @@ server:
     pathType: Prefix
     annotations:
       traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
-
 global:
   domain: argo-rp.hauptmann.dev
-
 # yamllint disable rule:line-length
 configs:
   params:
@@ -84,7 +81,6 @@ redis:
       enabled: true
       additionalLabels:
         release: kube-prometheus-stack
-
 controller:
   metrics:
     enabled: true
@@ -94,7 +90,6 @@ controller:
       enabled: true
       additionalLabels:
         release: kube-prometheus-stack
-
 repoServer:
   metrics:
     enabled: true
@@ -104,7 +99,6 @@ repoServer:
       enabled: true
       additionalLabels:
         release: kube-prometheus-stack
-
 dex:
   enabled: true
   env:

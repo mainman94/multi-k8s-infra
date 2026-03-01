@@ -26,4 +26,4 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
-# yamllint enable rule:line-length
+    # yamllint enable rule:line-length

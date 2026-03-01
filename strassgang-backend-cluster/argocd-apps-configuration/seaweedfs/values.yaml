@@ -3,56 +3,44 @@ master:
     type: "persistentVolumeClaim"
     size: "20Gi"
     storageClass: "longhorn"
-
   logs:
     type: "persistentVolumeClaim"
     size: "10Gi"
     storageClass: "longhorn"
-
   ingress:
     enabled: false
-
 filer:
   data:
     type: "persistentVolumeClaim"
     size: "100Gi"
     storageClass: "longhorn"
-
   logs:
     type: "persistentVolumeClaim"
     size: "10Gi"
     storageClass: "longhorn"
-
   ingress:
     enabled: false
-
   s3:
     enabled: false
-
 volume:
   enabled: true
   replicas: 1
-
   dataDirs:
     - name: data1
       type: "persistentVolumeClaim"
       size: "300Gi"
       storageClass: "longhorn"
       maxVolumes: 0
-
   resizeHook:
     enabled: true
-
   idx:
     type: "persistentVolumeClaim"
     size: "20Gi"
     storageClass: "longhorn"
-
   logs:
     type: "persistentVolumeClaim"
     size: "10Gi"
     storageClass: "longhorn"
-
 s3:
   enabled: true
   enableAuth: true
