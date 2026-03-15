@@ -17,7 +17,7 @@ spec:
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: n8n-route
+  name: lidarr-route
   namespace: traefik
 spec:
   entryPoints:
