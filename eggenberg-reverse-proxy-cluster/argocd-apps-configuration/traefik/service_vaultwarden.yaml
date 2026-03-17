@@ -33,6 +33,16 @@ spec:
         - name: vaultwarden-external
           port: 30032
           passHostHeader: true
+    - match: Host(`passwords.hauptmann.dev`)
+      middlewares:
+        - name: ratelimit
+        - name: cloudflare-ip-whitelist
+        - name: secure-headers
+      kind: Rule
+      services:
+        - name: vaultwarden-external
+          port: 30032
+          passHostHeader: true
   tls:
     store:
       name: default
