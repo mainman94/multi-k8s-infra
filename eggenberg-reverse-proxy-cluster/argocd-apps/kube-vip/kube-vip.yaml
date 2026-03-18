@@ -8,7 +8,7 @@ spec:
   sources:
     - repoURL: https://kube-vip.github.io/helm-charts
       chart: kube-vip
-      targetRevision: 0.9.6
+      targetRevision: 0.9.7
       helm:
         valueFiles:
           - $values/eggenberg-reverse-proxy-cluster/argocd-apps-configuration/kube-vip/values.yaml
