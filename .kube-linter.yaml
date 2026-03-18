@@ -1,0 +1,5 @@
+checks:
+  exclude:
+    # Services backed by Argo Rollouts are not recognised as workloads by
+    # kube-linter, producing false-positive dangling-service warnings.
+    - dangling-service

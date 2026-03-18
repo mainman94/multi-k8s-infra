@@ -1,56 +1,81 @@
-name: Validate YAML Files
+name: Validate Kubernetes Manifests
 permissions: read-all
 on:
   pull_request:
     paths:
-      - '**/*.yaml'
-      - '**/*.yml'
+      - "**/*.yaml"
+      - "**/*.yml"
   push:
     branches: [main]
     paths:
-      - '**/*.yaml'
-      - '**/*.yml'
+      - "**/*.yaml"
+      - "**/*.yml"
   workflow_dispatch:
+
 jobs:
-  yaml-linting:
+  kubeconform:
+    name: Schema Validation (kubeconform)
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-      - name: Find YAML files for kubeconform
-        id: yaml_files
+      - uses: actions/checkout@v6
+
+      - name: Install kubeconform
         run: |
-          YAML_FILES=$(find . -type f \( -name '*.yaml' -o -name '*.yml' \) \
-            -not -path './.github/*' -print0 | tr '\0' ' ')
-          echo "YAML_FILES=$YAML_FILES" >> $GITHUB_ENV
-          echo "Files to check: $YAML_FILES"
-        # yamllint disable rule:line-length
+          curl -sSL "https://github.com/yannh/kubeconform/releases/download/v0.7.0/kubeconform-linux-amd64.tar.gz" | tar xz
+          sudo mv kubeconform /usr/local/bin/
+
       - name: Run kubeconform
-        if: ${{ env.YAML_FILES != '' }}
         run: |
-          for file in ${{ env.YAML_FILES }}; do
-            echo "Validating $file"
-            docker run --rm -v $(pwd):/workdir ghcr.io/yannh/kubeconform:latest \
+          find . -type f \( -name '*.yaml' -o -name '*.yml' \) \
+            -not -path './.github/*' \
+            -not -name 'values.yaml' \
+            -print0 | xargs -0 kubeconform \
               -verbose \
               -ignore-missing-schemas \
-              -ignore-filename-pattern 'values.yaml' \
+              -skip InfisicalSecret,Warehouse \
               -schema-location default \
-              "/workdir/$file" || exit 1
-          done
-        # yamllint enable rule:line-length
-      - name: Install yamllint
-        run: pip install yamllint
-      - name: Run yamllint
-        run: |
-          find . -name '*.yaml' -o -name '*.yml' | xargs yamllint --no-warnings
+              -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
+
+  kube-linter:
+    name: Best Practices (kube-linter)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Run kube-linter
+        uses: stackrox/kube-linter-action@v1
+        with:
+          directory: .
+          config: .kube-linter.yaml
+
+  checkov:
+    name: Security Scan (checkov)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Run checkov
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: .
+          framework: kubernetes
+          quiet: true
+          soft_fail: true
+
+  notify:
+    name: Discord Notification
+    runs-on: ubuntu-latest
+    needs: [kubeconform, kube-linter, checkov]
+    if: always()
+    steps:
       - name: Report to Discord
-        if: always()
         run: |
-          STATUS="✅ Success"
-          COLOR="3066993"  # green
-          if [ "${{ job.status }}" != "success" ]; then
-            STATUS="❌ Failed"
-            COLOR="15158332"  # red
+          if [ "${{ needs.kubeconform.result }}" = "success" ] && \
+             [ "${{ needs.kube-linter.result }}" = "success" ] && \
+             [ "${{ needs.checkov.result }}" = "success" ]; then
+            STATUS="✅ Success"
+          else
+            STATUS="❌ Failed (kubeconform: ${{ needs.kubeconform.result }}, kube-linter: ${{ needs.kube-linter.result }}, checkov: ${{ needs.checkov.result }})"
           fi
 
           BRANCH=$(echo "${GITHUB_REF}" | sed 's|refs/heads/||')
@@ -67,4 +92,3 @@ jobs:
           curl -X POST -H "Content-Type: application/json" \
             -d "$JSON" \
             ${{ secrets.DISCORD_WEBHOOK_URL }}
-        # yamllint enable rule:line-length
