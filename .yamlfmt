@@ -1,3 +1,8 @@
+exclude:
+  # These files contain only comments (disabled/WIP manifests) and would be
+  # wiped by yamlfmt since it treats comment-only files as empty documents.
+  - eggenberg-reverse-proxy-cluster/argocd-apps/neuvector/neuvector.yaml
+  - eggenberg-reverse-proxy-cluster/bootstrap/misc/coredns-custom.yaml
 formatter:
   indent: 2
   line_ending: lf

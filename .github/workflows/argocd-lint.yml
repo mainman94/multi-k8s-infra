@@ -29,6 +29,8 @@ jobs:
           find . -type f \( -name '*.yaml' -o -name '*.yml' \) \
             -not -path './.github/*' \
             -not -name 'values.yaml' \
+            -not -name '.kube-linter.yaml' \
+            -not -name '.pre-commit-config.yaml' \
             -print0 | xargs -0 kubeconform \
               -verbose \
               -ignore-missing-schemas \
@@ -69,7 +71,7 @@ jobs:
     if: always()
     steps:
       - name: Report to Discord
-        run: |
+        run: |-
           if [ "${{ needs.kubeconform.result }}" = "success" ] && \
              [ "${{ needs.kube-linter.result }}" = "success" ] && \
              [ "${{ needs.checkov.result }}" = "success" ]; then
