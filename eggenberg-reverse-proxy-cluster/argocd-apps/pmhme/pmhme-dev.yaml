@@ -10,7 +10,7 @@ spec:
   project: default
   sources:
     - repoURL: https://github.com/mainman94/multi-k8s-infra
-      targetRevision: HEAD
+      targetRevision: main
       path: "eggenberg-reverse-proxy-cluster/argocd-apps-configuration/pmhme/overlays/dev"
   destination:
     server: https://kubernetes.default.svc
