@@ -5,7 +5,6 @@ metadata:
   name: portfolio-updater
   namespace: argocd
 spec:
-  namespace: argocd
   applicationRefs:
     - namePattern: pmhme-portfolio-dev
       images:
@@ -21,5 +20,5 @@ spec:
     gitConfig:
       repository: "https://github.com/mainman94/multi-k8s-infra"
       branch: "main"
-      writeBackTarget: "kustomization:eggenberg-reverse-proxy-cluster/argocd-apps-configuration/pmhme/overlays/dev/kustomization.yaml"
+      writeBackTarget: "kustomization:/eggenberg-reverse-proxy-cluster/argocd-apps-configuration/pmhme/overlays/dev"
       # yamllint enable rule:line-length
