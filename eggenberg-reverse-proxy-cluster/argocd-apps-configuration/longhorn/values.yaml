@@ -1,8 +1,8 @@
 defaultSettings:
-  defaultReplicaCount: "1"
+  defaultReplicaCount: "2"
 persistence:
   defaultClass: true
-  defaultClassReplicaCount: 1
+  defaultClassReplicaCount: 2
 ingress:
   enabled: false
 csi:
