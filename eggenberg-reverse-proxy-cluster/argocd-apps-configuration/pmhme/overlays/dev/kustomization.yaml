@@ -3,7 +3,6 @@ kind: Kustomization
 namespace: portfolio-dev
 resources:
   - ../../base
-  - imageUpdater.yaml
 images:
   - name: dockerha08/pmhme
     newTag: "20260322144542"
