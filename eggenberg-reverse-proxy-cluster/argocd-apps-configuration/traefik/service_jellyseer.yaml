@@ -23,7 +23,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`seerr.hauptmann.dev`)
+    - match: Host(`jseerr.hauptmann.dev`)
       middlewares:
         - name: ratelimit
         - name: cloudflare-ip-whitelist
