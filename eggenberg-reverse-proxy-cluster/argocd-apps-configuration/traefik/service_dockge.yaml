@@ -15,6 +15,14 @@ spec:
       name: http
 ---
 apiVersion: traefik.io/v1alpha1
+kind: ServersTransport
+metadata:
+  name: dockge-upstream-transport
+  namespace: traefik
+spec:
+  serverName: truenas.hauptmann.dev
+---
+apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: dockge-route
@@ -32,6 +40,8 @@ spec:
       services:
         - name: dockge-external
           port: 31014
+          scheme: https
+          serversTransport: dockge-upstream-transport
           passHostHeader: true
   tls:
     store:
