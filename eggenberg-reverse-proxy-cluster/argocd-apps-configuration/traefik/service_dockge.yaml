@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dockge-external
+  namespace: traefik
+  labels:
+    app.kubernetes.io/name: dockge
+spec:
+  type: ExternalName
+  externalName: 192.168.0.129
+  ports:
+    - port: 31014
+      targetPort: 31014
+      protocol: TCP
+      name: http
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: dockge-route
+  namespace: traefik
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`dockge.hauptmann.dev`)
+      middlewares:
+        - name: ratelimit
+        - name: cloudflare-ip-whitelist
+        - name: secure-headers
+      kind: Rule
+      services:
+        - name: dockge-external
+          port: 31014
+          passHostHeader: true
+  tls:
+    store:
+      name: default
