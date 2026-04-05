@@ -15,14 +15,6 @@ spec:
       name: http
 ---
 apiVersion: traefik.io/v1alpha1
-kind: ServersTransport
-metadata:
-  name: dockhand-upstream-transport
-  namespace: traefik
-spec:
-  serverName: truenas.hauptmann.dev
----
-apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: dockhand-route
@@ -40,8 +32,6 @@ spec:
       services:
         - name: dockhand-external
           port: 30328
-          scheme: https
-          serversTransport: dockhand-upstream-transport
           passHostHeader: true
   tls:
     store:
