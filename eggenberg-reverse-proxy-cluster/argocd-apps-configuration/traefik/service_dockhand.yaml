@@ -1,23 +1,23 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: dockge-external
+  name: dockhand-external
   namespace: traefik
   labels:
-    app.kubernetes.io/name: dockge
+    app.kubernetes.io/name: dockhand
 spec:
   type: ExternalName
   externalName: 192.168.0.129
   ports:
-    - port: 31014
-      targetPort: 31014
+    - port: 30328
+      targetPort: 30328
       protocol: TCP
       name: http
 ---
 apiVersion: traefik.io/v1alpha1
 kind: ServersTransport
 metadata:
-  name: dockge-upstream-transport
+  name: dockhand-upstream-transport
   namespace: traefik
 spec:
   serverName: truenas.hauptmann.dev
@@ -25,23 +25,23 @@ spec:
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: dockge-route
+  name: dockhand-route
   namespace: traefik
 spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`dockge.hauptmann.dev`)
+    - match: Host(`dockhand.hauptmann.dev`)
       middlewares:
         - name: ratelimit
         - name: cloudflare-ip-whitelist
         - name: secure-headers
       kind: Rule
       services:
-        - name: dockge-external
-          port: 31014
+        - name: dockhand-external
+          port: 30328
           scheme: https
-          serversTransport: dockge-upstream-transport
+          serversTransport: dockhand-upstream-transport
           passHostHeader: true
   tls:
     store:
