@@ -52,8 +52,8 @@ spec:
               path: /
               port: http
               scheme: HTTP
-            initialDelaySeconds: 30
-            periodSeconds: 10
+            initialDelaySeconds: 5
+            periodSeconds: 5
             timeoutSeconds: 2
             failureThreshold: 3
             successThreshold: 1
@@ -83,8 +83,8 @@ spec:
       activeService: portfolio-service
       previewService: portfolio-service-preview
       autoPromotionEnabled: true
-      autoPromotionSeconds: 60
-      scaleDownDelaySeconds: 60
+      autoPromotionSeconds: 30
+      scaleDownDelaySeconds: 30
       prePromotionAnalysis:
         templates:
           - templateName: portfolio-http-check
