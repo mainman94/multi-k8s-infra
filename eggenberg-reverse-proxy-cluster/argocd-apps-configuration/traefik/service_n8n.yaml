@@ -6,13 +6,26 @@ metadata:
   labels:
     app.kubernetes.io/name: n8n
 spec:
-  type: ExternalName
-  externalName: 192.168.0.129
   ports:
     - port: 30109
       targetPort: 30109
       protocol: TCP
       name: http
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: n8n-external
+  namespace: traefik
+  labels:
+    app.kubernetes.io/name: n8n
+subsets:
+  - addresses:
+      - ip: 192.168.0.129
+    ports:
+      - port: 30109
+        protocol: TCP
+        name: http
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
