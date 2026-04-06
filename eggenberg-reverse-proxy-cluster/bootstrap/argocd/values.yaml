@@ -36,6 +36,59 @@ configs:
     resource.customizations.ignoreDifferences.apiextensions.k8s.io_CustomResourceDefinition: |
       jsonPointers:
       - /spec/preserveUnknownFields
+    resource.exclusions: |
+      - apiGroups:
+        - ""
+        kinds:
+        - Endpoints
+      - apiGroups:
+        - coordination.k8s.io
+        kinds:
+        - Lease
+      - apiGroups:
+        - authentication.k8s.io
+        kinds:
+        - SelfSubjectReview
+        - TokenReview
+      - apiGroups:
+        - authorization.k8s.io
+        kinds:
+        - LocalSubjectAccessReview
+        - SelfSubjectAccessReview
+        - SelfSubjectRulesReview
+        - SubjectAccessReview
+      - apiGroups:
+        - certificates.k8s.io
+        kinds:
+        - CertificateSigningRequest
+      - apiGroups:
+        - wgpolicyk8s.io
+        kinds:
+        - PolicyReport
+        - ClusterPolicyReport
+      - apiGroups:
+        - cert-manager.io
+        kinds:
+        - CertificateRequest
+      - apiGroups:
+        - reports.kyverno.io
+        kinds:
+        - EphemeralReport
+        - ClusterEphemeralReport
+        - AdmissionReport
+        - ClusterAdmissionReport
+        - BackgroundScanReport
+        - ClusterBackgroundScanReport
+      - apiGroups:
+        - kyverno.io
+        kinds:
+        - UpdateRequest
+      - apiGroups:
+        - cilium.io
+        kinds:
+        - CiliumIdentity
+        - CiliumEndpoint
+        - CiliumEndpointSlice
     # Dex/Authentik OIDC
     url: https://argo-rp.hauptmann.dev
     dex.config: |
