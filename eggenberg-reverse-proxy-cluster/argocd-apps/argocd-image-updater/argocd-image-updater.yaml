@@ -15,9 +15,6 @@ spec:
     - repoURL: https://github.com/mainman94/multi-k8s-infra
       targetRevision: HEAD
       ref: values
-    - repoURL: https://github.com/mainman94/multi-k8s-infra
-      targetRevision: HEAD
-      path: "strassgang-backend-cluster/bootstrap/argocd"
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
