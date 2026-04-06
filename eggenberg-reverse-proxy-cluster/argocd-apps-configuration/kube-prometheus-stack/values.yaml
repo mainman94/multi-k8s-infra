@@ -1,16 +1,17 @@
-# Global configuration
-global:
-  scrape_interval: 15s
-  evaluation_interval: 15s
 # Alertmanager configuration
 alertmanager:
   enabled: true
   service:
     type: ClusterIP
-  persistentVolume:
-    enabled: true
-    size: 10Gi
-    storageClassName: longhorn
+  alertmanagerSpec:
+    storage:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 10Gi
+          storageClassName: longhorn
 # Prometheus server configuration
 prometheus:
   enabled: true
@@ -26,6 +27,8 @@ prometheus:
     pathType: Prefix
   # yamllint disable rule:line-length
   prometheusSpec:
+    scrapeInterval: 30s
+    evaluationInterval: 30s
     retention: 10d
     storageSpec:
       volumeClaimTemplate:
@@ -51,14 +54,6 @@ prometheus:
           - source_labels: [__meta_kubernetes_pod_node_name]
             target_label: instance
 # yamllint enable rule:line-length
-
-# ServiceMonitor configuration
-serviceMonitor:
-  enabled: true
-  relabelings:
-    - action: replace
-      sourceLabels: [__meta_kubernetes_pod_node_name]
-      targetLabel: instance
 # Grafana configuration
 grafana:
   enabled: true
