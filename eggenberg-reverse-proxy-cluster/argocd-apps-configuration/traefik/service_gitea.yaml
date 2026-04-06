@@ -6,13 +6,30 @@ metadata:
   labels:
     app.kubernetes.io/name: gitea
 spec:
-  type: ExternalName
-  externalName: 192.168.0.129
   ports:
     - port: 30008
       targetPort: 30008
       protocol: TCP
       name: http
+---
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: gitea-external-1
+  namespace: traefik
+  labels:
+    app.kubernetes.io/name: gitea
+    kubernetes.io/service-name: gitea-external
+    endpointslice.kubernetes.io/managed-by: staff
+addressType: IPv4
+ports:
+  - name: http
+    protocol: TCP
+    port: 30008
+endpoints:
+  - addresses:
+      - 192.168.0.129
+    conditions: {}
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute

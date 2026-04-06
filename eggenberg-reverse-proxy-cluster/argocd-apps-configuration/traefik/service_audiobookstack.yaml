@@ -6,13 +6,30 @@ metadata:
   labels:
     app.kubernetes.io/name: audiobookshelf
 spec:
-  type: ExternalName
-  externalName: 192.168.0.129
   ports:
     - port: 30067
       targetPort: 30067
       protocol: TCP
       name: http
+---
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: audiobookshelf-external-1
+  namespace: traefik
+  labels:
+    app.kubernetes.io/name: audiobookshelf
+    kubernetes.io/service-name: audiobookshelf-external
+    endpointslice.kubernetes.io/managed-by: staff
+addressType: IPv4
+ports:
+  - name: http
+    protocol: TCP
+    port: 30067
+endpoints:
+  - addresses:
+      - 192.168.0.129
+    conditions: {}
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute

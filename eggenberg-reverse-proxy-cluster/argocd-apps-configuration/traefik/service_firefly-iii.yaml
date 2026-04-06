@@ -6,13 +6,30 @@ metadata:
   labels:
     app.kubernetes.io/name: firefly-iii
 spec:
-  type: ExternalName
-  externalName: 192.168.0.129
   ports:
     - port: 30666
       targetPort: 30666
       protocol: TCP
       name: http
+---
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: firefly-iii-external-1
+  namespace: traefik
+  labels:
+    app.kubernetes.io/name: firefly-iii
+    kubernetes.io/service-name: firefly-iii-external
+    endpointslice.kubernetes.io/managed-by: staff
+addressType: IPv4
+ports:
+  - name: http
+    protocol: TCP
+    port: 30666
+endpoints:
+  - addresses:
+      - 192.168.0.129
+    conditions: {}
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute

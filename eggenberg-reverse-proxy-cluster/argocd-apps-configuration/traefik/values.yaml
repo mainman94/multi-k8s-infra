@@ -19,7 +19,6 @@ certificatesResolvers:
           - "8.8.8.8:53"
 providers:
   kubernetesCRD:
-    allowExternalNameServices: true
     allowCrossNamespace: true
 tlsOptions:
   default:
