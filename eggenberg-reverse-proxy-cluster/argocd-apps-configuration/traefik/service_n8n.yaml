@@ -29,6 +29,7 @@ ports:
 endpoints:
   - addresses:
       - 192.168.0.129
+    conditions: {}
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
