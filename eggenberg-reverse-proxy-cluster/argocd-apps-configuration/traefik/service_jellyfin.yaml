@@ -25,9 +25,7 @@ spec:
   routes:
     - match: Host(`jellyfin.hauptmann.dev`)
       middlewares:
-        #   - name: ratelimit
-        - name: cloudflare-ip-whitelist
-        - name: secure-headers
+        - name: streaming-secure-chain
       kind: Rule
       services:
         - name: jellyfin-external

@@ -25,9 +25,7 @@ spec:
   routes:
     - match: Host(`paperless.hauptmann.dev`)
       middlewares:
-        - name: ratelimit
-        - name: cloudflare-ip-whitelist
-        - name: secure-headers
+        - name: default-secure-chain
       kind: Rule
       services:
         - name: paperless-external

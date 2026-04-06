@@ -62,3 +62,28 @@ spec:
     browserXssFilter: true
     contentTypeNosniff: true
     referrerPolicy: "strict-origin-when-cross-origin"
+---
+# Middleware: default-secure-chain
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: default-secure-chain
+  namespace: traefik
+spec:
+  chain:
+    middlewares:
+      - name: ratelimit
+      - name: cloudflare-ip-whitelist
+      - name: secure-headers
+---
+# Middleware: streaming-secure-chain
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: streaming-secure-chain
+  namespace: traefik
+spec:
+  chain:
+    middlewares:
+      - name: cloudflare-ip-whitelist
+      - name: secure-headers

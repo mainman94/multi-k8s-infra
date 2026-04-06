@@ -25,9 +25,7 @@ spec:
   routes:
     - match: Host(`vault.hauptmann.dev`)
       middlewares:
-        - name: ratelimit
-        - name: cloudflare-ip-whitelist
-        - name: secure-headers
+        - name: default-secure-chain
       kind: Rule
       services:
         - name: vaultwarden-external
@@ -35,9 +33,7 @@ spec:
           passHostHeader: true
     - match: Host(`passwords.hauptmann.dev`)
       middlewares:
-        - name: ratelimit
-        - name: cloudflare-ip-whitelist
-        - name: secure-headers
+        - name: default-secure-chain
       kind: Rule
       services:
         - name: vaultwarden-external
