@@ -20,7 +20,7 @@ metadata:
   labels:
     app.kubernetes.io/name: sonarr
     kubernetes.io/service-name: sonarr-external
-    endpointslice.kubernetes.io/managed-by: staff
+    endpointslice.kubernetes.io/managed-by: argocd
 addressType: IPv4
 ports:
   - name: http

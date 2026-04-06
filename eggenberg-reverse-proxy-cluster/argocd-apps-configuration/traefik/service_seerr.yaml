@@ -20,7 +20,7 @@ metadata:
   labels:
     app.kubernetes.io/name: seerr
     kubernetes.io/service-name: seerr-external
-    endpointslice.kubernetes.io/managed-by: staff
+    endpointslice.kubernetes.io/managed-by: argocd
 addressType: IPv4
 ports:
   - name: http
