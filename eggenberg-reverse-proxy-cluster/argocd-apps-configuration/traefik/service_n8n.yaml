@@ -12,20 +12,23 @@ spec:
       protocol: TCP
       name: http
 ---
-apiVersion: v1
-kind: Endpoints
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
 metadata:
-  name: n8n-external
+  name: n8n-external-1
   namespace: traefik
   labels:
     app.kubernetes.io/name: n8n
-subsets:
+    kubernetes.io/service-name: n8n-external
+    endpointslice.kubernetes.io/managed-by: staff
+addressType: IPv4
+ports:
+  - name: http
+    protocol: TCP
+    port: 30109
+endpoints:
   - addresses:
-      - ip: 192.168.0.129
-    ports:
-      - port: 30109
-        protocol: TCP
-        name: http
+      - 192.168.0.129
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
