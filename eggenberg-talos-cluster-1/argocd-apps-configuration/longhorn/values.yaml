@@ -1,12 +1,12 @@
 defaultSettings:
-  defaultReplicaCount: "2"
+  defaultReplicaCount: "1"
 persistence:
   defaultClass: true
-  defaultClassReplicaCount: 2
+  defaultClassReplicaCount: 1
 ingress:
   enabled: false
-#csi:
-  #attacherReplicaCount: "1"
-  #provisionerReplicaCount: "1"
-  #resizerReplicaCount: "1"
-  #snapshotterReplicaCount: "1"
+csi:
+  attacherReplicaCount: "1"
+  provisionerReplicaCount: "1"
+  resizerReplicaCount: "1"
+  snapshotterReplicaCount: "1"
