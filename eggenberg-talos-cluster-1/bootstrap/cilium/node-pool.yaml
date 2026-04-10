@@ -4,8 +4,8 @@ metadata:
   name: services-vip-pool
 spec:
   blocks:
-    - start: "192.168.0.8"
-      stop: "192.168.0.10"
+    - start: "192.168.0.9"
+      stop: "192.168.0.9"
   serviceSelector:
     matchLabels:
       vip-pool: services
