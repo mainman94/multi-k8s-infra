@@ -117,8 +117,10 @@ podSecurityContext:
   runAsNonRoot: true
   fsGroup: 65532
   fsGroupChangePolicy: "OnRootMismatch"
-# service:
-#  enabled: true
-#  type: LoadBalancer
+service:
+  enabled: true
+  type: LoadBalancer
+  labels:
+    vip-pool: services
 #  spec:
 #    loadBalancerIP: "192.168.0.150"
