@@ -1,0 +1,25 @@
+apiVersion: cilium.io/v2
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: services-vip-pool
+spec:
+  blocks:
+    - start: "192.168.0.8"
+      stop: "192.168.0.10"
+  serviceSelector:
+    matchLabels:
+      vip-pool: services
+---
+apiVersion: cilium.io/v2alpha1
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: services-vip-l2
+spec:
+  serviceSelector:
+    matchLabels:
+      vip-pool: services
+  interfaces:
+    - "^enp0s31f6$"
+  loadBalancerIPs: true
+  externalIPs: false
+---

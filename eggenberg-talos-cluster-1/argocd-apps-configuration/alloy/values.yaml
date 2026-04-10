@@ -1,0 +1,74 @@
+alloy:
+  configMap:
+    content: |
+      discovery.kubernetes "pods" {
+        role = "pod"
+      }
+
+      discovery.relabel "pods_running" {
+        targets = discovery.kubernetes.pods.targets
+
+        rule {
+          source_labels = ["__meta_kubernetes_pod_phase"]
+          regex         = "Running"
+          action        = "keep"
+        }
+      }
+
+      discovery.relabel "pods_enriched" {
+        targets = discovery.relabel.pods_running.output
+
+        rule {
+          source_labels = ["__meta_kubernetes_namespace"]
+          target_label  = "namespace"
+        }
+
+        rule {
+          source_labels = ["__meta_kubernetes_pod_name"]
+          target_label  = "pod"
+        }
+
+        rule {
+          source_labels = ["__meta_kubernetes_pod_container_name"]
+          target_label  = "container"
+        }
+
+        rule {
+          source_labels = ["__meta_kubernetes_pod_node_name"]
+          target_label  = "node"
+        }
+
+        rule {
+          source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
+          target_label  = "app"
+        }
+      }
+
+      loki.write "local_loki" {
+        endpoint {
+          url = "http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push"
+        }
+      }
+
+      loki.process "sanitize" {
+        forward_to = [loki.write.local_loki.receiver]
+
+        stage.decolorize {}
+
+        stage.static_labels {
+          values = {
+            cluster = "eggenberg-talos-cluster-1",
+          }
+        }
+
+        stage.label_drop {
+          values = ["service_name"]
+        }
+      }
+
+      loki.source.kubernetes "local_logs" {
+        targets    = discovery.relabel.pods_enriched.output
+        forward_to = [loki.process.sanitize.receiver]
+      }
+controller:
+  type: daemonset

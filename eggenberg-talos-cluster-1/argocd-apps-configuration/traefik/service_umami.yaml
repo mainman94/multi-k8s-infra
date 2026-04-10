@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: umami-external
+  namespace: traefik
+  labels:
+    app.kubernetes.io/name: umami
+spec:
+  ports:
+    - port: 30060
+      targetPort: 30060
+      protocol: TCP
+      name: http
+---
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: umami-external-1
+  namespace: traefik
+  labels:
+    app.kubernetes.io/name: umami
+    kubernetes.io/service-name: umami-external
+    endpointslice.kubernetes.io/managed-by: argocd
+addressType: IPv4
+ports:
+  - name: http
+    protocol: TCP
+    port: 30060
+endpoints:
+  - addresses:
+      - 192.168.0.129
+    conditions: {}
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: umami-route
+  namespace: traefik
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`umami.hauptmann.dev`)
+      middlewares:
+        - name: default-secure-chain
+      kind: Rule
+      services:
+        - name: umami-external
+          port: 30060
+          passHostHeader: true
+  tls:
+    store:
+      name: default

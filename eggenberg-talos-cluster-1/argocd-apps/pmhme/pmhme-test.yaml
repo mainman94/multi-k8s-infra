@@ -1,0 +1,31 @@
+# yamllint disable rule:line-length
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: pmhme-portfolio-test
+  namespace: argocd
+  annotations:
+    kargo.akuity.io/authorized-stage: pmhme-portfolio:test
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
+      targetRevision: HEAD
+      path: "eggenberg-talos-cluster-1/argocd-apps-configuration/pmhme/overlays/test"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: portfolio-test
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+  ignoreDifferences:
+    - group: argoproj.io
+      kind: Rollout
+      name: portfolio-app
+      namespace: portfolio-test
+      jsonPointers:
+        - /spec/template/spec/containers/0/resources
+      # yamllint enable rule:line-length

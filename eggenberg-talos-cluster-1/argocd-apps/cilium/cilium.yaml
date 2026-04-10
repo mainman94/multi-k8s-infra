@@ -11,13 +11,13 @@
       targetRevision: 1.19.0
       helm:
         valueFiles:
-          - $values/eggenberg-reverse-proxy-cluster/bootstrap/cilium/values.yaml
+          - $values/eggenberg-talos-cluster-1/bootstrap/cilium/values.yaml
     - repoURL: https://github.com/mainman94/multi-k8s-infra
       targetRevision: HEAD
       ref: values
     - repoURL: https://github.com/mainman94/multi-k8s-infra
       targetRevision: HEAD
-      path: "eggenberg-reverse-proxy-cluster/bootstrap/cilium"
+      path: "eggenberg-talos-cluster-1/bootstrap/cilium"
   destination:
     server: https://kubernetes.default.svc
     namespace: kube-system

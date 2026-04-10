@@ -1,0 +1,31 @@
+# EventSource - watches for Argo Rollout AnalysisRun completion
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: rollout-completed
+  namespace: argocd
+spec:
+  eventBusName: default
+  template:
+    serviceAccountName: argo-events-sa
+  resource:
+    rollouts:
+      namespace: portfolio # Only watch portfolio namespace
+      group: argoproj.io
+      version: v1alpha1
+      resource: analysisruns
+      eventTypes:
+        - UPDATE
+      filter:
+        # Only for portfolio-app rollout
+        labels:
+          - key: app
+            operation: "=="
+            value: portfolio-app
+        # Only trigger when AnalysisRun phase CHANGES to "Successful"
+        afterEventData:
+          - path: status.phase
+            type: string
+            comparator: "="
+            value:
+              - "Successful"

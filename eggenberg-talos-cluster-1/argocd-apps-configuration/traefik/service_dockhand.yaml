@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dockhand-external
+  namespace: traefik
+  labels:
+    app.kubernetes.io/name: dockhand
+spec:
+  ports:
+    - port: 30328
+      targetPort: 30328
+      protocol: TCP
+      name: http
+---
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: dockhand-external-1
+  namespace: traefik
+  labels:
+    app.kubernetes.io/name: dockhand
+    kubernetes.io/service-name: dockhand-external
+    endpointslice.kubernetes.io/managed-by: argocd
+addressType: IPv4
+ports:
+  - name: http
+    protocol: TCP
+    port: 30328
+endpoints:
+  - addresses:
+      - 192.168.0.129
+    conditions: {}
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: dockhand-route
+  namespace: traefik
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`dockhand.hauptmann.dev`)
+      middlewares:
+        - name: default-secure-chain
+      kind: Rule
+      services:
+        - name: dockhand-external
+          port: 30328
+          passHostHeader: true
+  tls:
+    store:
+      name: default
