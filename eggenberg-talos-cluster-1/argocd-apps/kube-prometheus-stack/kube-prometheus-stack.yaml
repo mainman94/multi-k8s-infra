@@ -32,6 +32,11 @@ spec:
       jsonPointers:
         - /spec/template/metadata/annotations/checksum~1secret
   syncPolicy:
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+        pod-security.kubernetes.io/audit: privileged
+        pod-security.kubernetes.io/warn: privileged
     automated:
       prune: true
       selfHeal: true
