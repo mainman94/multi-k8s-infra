@@ -3,6 +3,8 @@
   "extends": [
     "config:recommended"
   ],
+  "automerge": false,
+  "rebaseWhen": "behind-base-branch",
   "argocd": {
     "managerFilePatterns": [
       "**/*.yaml"
