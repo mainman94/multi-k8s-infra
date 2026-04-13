@@ -1,0 +1,190 @@
+name: Renovate AI Auto-Merge Gate
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  evaluate-and-automerge:
+    if: >
+      github.event.pull_request.user.login == 'renovate[bot]' ||
+      startsWith(github.event.pull_request.head.ref, 'renovate/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Evaluate PR risk (rules + AI)
+        id: evaluate
+        uses: actions/github-script@v7
+        env:
+          AI_PROVIDER: ${{ vars.AI_PROVIDER || 'openai' }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-4.1-mini' }}
+          OPENROUTER_MODEL: ${{ vars.OPENROUTER_MODEL || 'openai/gpt-4.1-mini' }}
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const prNumber = pr.number;
+
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner,
+              repo,
+              pull_number: prNumber,
+              per_page: 100
+            });
+
+            const changedPaths = files.map((f) => f.filename);
+            const badExt = changedPaths.filter((p) => !p.endsWith(".yaml") && !p.endsWith(".yml"));
+            const forbiddenPaths = changedPaths.filter((p) =>
+              p.startsWith(".github/") ||
+              p.endsWith(".md") ||
+              p.endsWith(".sh") ||
+              p.endsWith(".json") ||
+              p.endsWith(".tf")
+            );
+            const tooManyFiles = files.length > 30;
+
+            // Hard gate: only manifest-like YAML updates from Renovate.
+            if (badExt.length || forbiddenPaths.length || tooManyFiles) {
+              const reason = [
+                badExt.length ? `non-yaml files: ${badExt.join(", ")}` : "",
+                forbiddenPaths.length ? `forbidden paths: ${forbiddenPaths.join(", ")}` : "",
+                tooManyFiles ? `too many changed files: ${files.length}` : ""
+              ].filter(Boolean).join(" | ");
+              core.setOutput("decision", "manual");
+              core.setOutput("reason", `Hard gate failed: ${reason}`);
+              return;
+            }
+
+            const patchText = files
+              .map((f) => `FILE: ${f.filename}\n${f.patch || ""}`)
+              .join("\n\n---\n\n")
+              .slice(0, 120000);
+
+            const provider = (process.env.AI_PROVIDER || "openai").toLowerCase();
+            const openaiKey = process.env.OPENAI_API_KEY;
+            const openrouterKey = process.env.OPENROUTER_API_KEY;
+
+            // Optional AI step. If key is missing, fallback to manual for safety.
+            if (provider === "openai" && !openaiKey) {
+              core.setOutput("decision", "manual");
+              core.setOutput("reason", "OPENAI_API_KEY missing");
+              return;
+            }
+            if (provider === "openrouter" && !openrouterKey) {
+              core.setOutput("decision", "manual");
+              core.setOutput("reason", "OPENROUTER_API_KEY missing");
+              return;
+            }
+            if (provider !== "openai" && provider !== "openrouter") {
+              core.setOutput("decision", "manual");
+              core.setOutput("reason", `Unsupported AI_PROVIDER: ${provider}`);
+              return;
+            }
+
+            const prompt = `
+            You are reviewing a Renovate pull request for Kubernetes GitOps manifests.
+            Classify risk as one of: low, medium, high.
+
+            low = only straightforward dependency/chart/image version bumps with no semantic config change.
+            medium = unclear impact, mixed changes, or broader value changes.
+            high = security-sensitive, privilege/network policy/ingress/auth/rbac changes, removals, or major behavioral shifts.
+
+            Return strict JSON:
+            {"risk":"low|medium|high","summary":"short reason","flags":["..."]}
+            `;
+
+            const endpoint = provider === "openrouter"
+              ? "https://openrouter.ai/api/v1/chat/completions"
+              : "https://api.openai.com/v1/chat/completions";
+
+            const model = provider === "openrouter"
+              ? (process.env.OPENROUTER_MODEL || "openai/gpt-4.1-mini")
+              : (process.env.OPENAI_MODEL || "gpt-4.1-mini");
+
+            const headers = {
+              "Authorization": `Bearer ${provider === "openrouter" ? openrouterKey : openaiKey}`,
+              "Content-Type": "application/json"
+            };
+            if (provider === "openrouter") {
+              headers["HTTP-Referer"] = `https://github.com/${owner}/${repo}`;
+              headers["X-Title"] = `${owner}/${repo} renovate-ai-automerge`;
+            }
+
+            const response = await fetch(endpoint, {
+              method: "POST",
+              headers,
+              body: JSON.stringify({
+                model,
+                temperature: 0,
+                messages: [
+                  { role: "system", content: prompt },
+                  { role: "user", content: patchText }
+                ],
+                response_format: { type: "json_object" }
+              })
+            });
+
+            if (!response.ok) {
+              const body = await response.text();
+              core.setOutput("decision", "manual");
+              core.setOutput("reason", `AI call failed: ${response.status} ${body.slice(0, 300)}`);
+              return;
+            }
+
+            const data = await response.json();
+            const outputText = data?.choices?.[0]?.message?.content || "{}";
+            let parsed;
+            try {
+              parsed = JSON.parse(outputText);
+            } catch (e) {
+              core.setOutput("decision", "manual");
+              core.setOutput("reason", `AI parse failed: ${String(e)}`);
+              return;
+            }
+
+            const risk = parsed.risk || "medium";
+            const summary = parsed.summary || "No summary";
+            const flags = Array.isArray(parsed.flags) ? parsed.flags : [];
+            core.setOutput("reason", `AI risk=${risk}; ${summary}${flags.length ? `; flags=${flags.join(", ")}` : ""}`);
+            core.setOutput("decision", risk === "low" ? "automerge" : "manual");
+
+      - name: Comment decision
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const decision = `${{ steps.evaluate.outputs.decision }}`;
+            const reason = `${{ steps.evaluate.outputs.reason }}`;
+            const icon = decision === "automerge" ? "✅" : "🛑";
+            const title = decision === "automerge" ? "AI gate passed" : "AI gate requires manual review";
+            const body = `${icon} **${title}**\n\n- Decision: \`${decision}\`\n- Reason: ${reason}`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body
+            });
+
+      - name: Enable auto-merge
+        if: steps.evaluate.outputs.decision == 'automerge'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNodeId = context.payload.pull_request.node_id;
+            await github.graphql(
+              `mutation($pullRequestId: ID!) {
+                enablePullRequestAutoMerge(input: {
+                  pullRequestId: $pullRequestId,
+                  mergeMethod: SQUASH
+                }) {
+                  pullRequest { number }
+                }
+              }`,
+              { pullRequestId: prNodeId }
+            );
