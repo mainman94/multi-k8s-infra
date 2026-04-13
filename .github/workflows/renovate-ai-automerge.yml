@@ -18,7 +18,7 @@ jobs:
     steps:
       - name: Evaluate PR risk (rules + AI)
         id: evaluate
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         env:
           AI_PROVIDER: ${{ vars.AI_PROVIDER || 'openai' }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -156,7 +156,7 @@ jobs:
             core.setOutput("decision", risk === "low" ? "automerge" : "manual");
 
       - name: Comment decision
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const decision = `${{ steps.evaluate.outputs.decision }}`;
@@ -173,7 +173,7 @@ jobs:
 
       - name: Enable auto-merge
         if: steps.evaluate.outputs.decision == 'automerge'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const prNodeId = context.payload.pull_request.node_id;
