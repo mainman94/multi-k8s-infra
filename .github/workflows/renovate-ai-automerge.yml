@@ -3,7 +3,6 @@ name: Renovate AI Auto-Merge Gate
 on:
   pull_request_target:
     types: [opened, synchronize, reopened, ready_for_review]
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -21,6 +20,9 @@ jobs:
         uses: actions/github-script@v9
         env:
           AI_PROVIDER: ${{ vars.AI_PROVIDER || 'openai' }}
+          AI_REQUIRE_RELEASE_NOTES: ${{ vars.AI_REQUIRE_RELEASE_NOTES || 'true' }}
+          AI_MAX_DOC_URLS: ${{ vars.AI_MAX_DOC_URLS || '5' }}
+          AI_MAX_DOC_CHARS: ${{ vars.AI_MAX_DOC_CHARS || '12000' }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-4.1-mini' }}
@@ -31,6 +33,9 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const prNumber = pr.number;
+            const requireReleaseNotes = (process.env.AI_REQUIRE_RELEASE_NOTES || "true").toLowerCase() === "true";
+            const maxDocUrls = Number(process.env.AI_MAX_DOC_URLS || "5");
+            const maxDocChars = Number(process.env.AI_MAX_DOC_CHARS || "12000");
 
             const files = await github.paginate(github.rest.pulls.listFiles, {
               owner,
@@ -59,6 +64,10 @@ jobs:
               ].filter(Boolean).join(" | ");
               core.setOutput("decision", "manual");
               core.setOutput("reason", `Hard gate failed: ${reason}`);
+              core.setOutput("risk", "n/a");
+              core.setOutput("hard_gate", "failed");
+              core.setOutput("docs_reviewed", "0");
+              core.setOutput("docs_urls", "");
               return;
             }
 
@@ -66,6 +75,61 @@ jobs:
               .map((f) => `FILE: ${f.filename}\n${f.patch || ""}`)
               .join("\n\n---\n\n")
               .slice(0, 120000);
+
+            // Pull release notes / docs links from PR body (Renovate usually includes these).
+            const body = pr.body || "";
+            const urlMatches = body.match(/https?:\/\/[^\s)\]>"]+/g) || [];
+            const docUrls = [...new Set(urlMatches)].slice(0, maxDocUrls);
+
+            async function fetchDocSnippet(url) {
+              try {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 6000);
+                const res = await fetch(url, { signal: controller.signal, redirect: "follow" });
+                clearTimeout(timeout);
+                if (!res.ok) return null;
+                const ctype = (res.headers.get("content-type") || "").toLowerCase();
+                let text = await res.text();
+                if (ctype.includes("text/html")) {
+                  text = text
+                    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+                    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+                    .replace(/<[^>]+>/g, " ");
+                }
+                text = text.replace(/\s+/g, " ").trim().slice(0, maxDocChars);
+                return text || null;
+              } catch {
+                return null;
+              }
+            }
+
+            const docSnippets = [];
+            for (const url of docUrls) {
+              const snippet = await fetchDocSnippet(url);
+              if (snippet) {
+                docSnippets.push({ url, snippet });
+              }
+            }
+
+            if (requireReleaseNotes && docSnippets.length === 0) {
+              core.setOutput("decision", "manual");
+              core.setOutput("reason", "No readable release notes/docs found in PR body links");
+              core.setOutput("risk", "n/a");
+              core.setOutput("hard_gate", "passed");
+              core.setOutput("docs_reviewed", "0");
+              core.setOutput("docs_urls", docUrls.join("\n"));
+              await core.summary
+                .addHeading("Renovate AI Decision")
+                .addTable([
+                  [{ data: "Decision", header: true }, "manual"],
+                  [{ data: "Hard gate", header: true }, "passed"],
+                  [{ data: "Docs required", header: true }, "true"],
+                  [{ data: "Docs reviewed", header: true }, "0"]
+                ])
+                .addRaw("Reason: No readable release notes/docs found in PR body links")
+                .write();
+              return;
+            }
 
             const provider = (process.env.AI_PROVIDER || "openai").toLowerCase();
             const openaiKey = process.env.OPENAI_API_KEY;
@@ -75,16 +139,28 @@ jobs:
             if (provider === "openai" && !openaiKey) {
               core.setOutput("decision", "manual");
               core.setOutput("reason", "OPENAI_API_KEY missing");
+              core.setOutput("risk", "n/a");
+              core.setOutput("hard_gate", "passed");
+              core.setOutput("docs_reviewed", String(docSnippets.length));
+              core.setOutput("docs_urls", docSnippets.map((d) => d.url).join("\n"));
               return;
             }
             if (provider === "openrouter" && !openrouterKey) {
               core.setOutput("decision", "manual");
               core.setOutput("reason", "OPENROUTER_API_KEY missing");
+              core.setOutput("risk", "n/a");
+              core.setOutput("hard_gate", "passed");
+              core.setOutput("docs_reviewed", String(docSnippets.length));
+              core.setOutput("docs_urls", docSnippets.map((d) => d.url).join("\n"));
               return;
             }
             if (provider !== "openai" && provider !== "openrouter") {
               core.setOutput("decision", "manual");
               core.setOutput("reason", `Unsupported AI_PROVIDER: ${provider}`);
+              core.setOutput("risk", "n/a");
+              core.setOutput("hard_gate", "passed");
+              core.setOutput("docs_reviewed", String(docSnippets.length));
+              core.setOutput("docs_urls", docSnippets.map((d) => d.url).join("\n"));
               return;
             }
 
@@ -96,9 +172,23 @@ jobs:
             medium = unclear impact, mixed changes, or broader value changes.
             high = security-sensitive, privilege/network policy/ingress/auth/rbac changes, removals, or major behavioral shifts.
 
+            Use BOTH sources:
+            1) Git diff itself
+            2) Provided release notes / docs snippets
+
             Return strict JSON:
             {"risk":"low|medium|high","summary":"short reason","flags":["..."]}
             `;
+            const docContext = docSnippets
+              .map((d, idx) => `DOC_${idx + 1}: ${d.url}\n${d.snippet}`)
+              .join("\n\n---\n\n")
+              .slice(0, 100000);
+            const userContext = [
+              `PR_TITLE: ${pr.title || ""}`,
+              `PR_BODY: ${(pr.body || "").slice(0, 20000)}`,
+              `PATCHES:\n${patchText}`,
+              `DOCS:\n${docContext || "none"}`
+            ].join("\n\n");
 
             const endpoint = provider === "openrouter"
               ? "https://openrouter.ai/api/v1/chat/completions"
@@ -125,7 +215,7 @@ jobs:
                 temperature: 0,
                 messages: [
                   { role: "system", content: prompt },
-                  { role: "user", content: patchText }
+                  { role: "user", content: userContext }
                 ],
                 response_format: { type: "json_object" }
               })
@@ -135,6 +225,10 @@ jobs:
               const body = await response.text();
               core.setOutput("decision", "manual");
               core.setOutput("reason", `AI call failed: ${response.status} ${body.slice(0, 300)}`);
+              core.setOutput("risk", "n/a");
+              core.setOutput("hard_gate", "passed");
+              core.setOutput("docs_reviewed", String(docSnippets.length));
+              core.setOutput("docs_urls", docSnippets.map((d) => d.url).join("\n"));
               return;
             }
 
@@ -146,6 +240,10 @@ jobs:
             } catch (e) {
               core.setOutput("decision", "manual");
               core.setOutput("reason", `AI parse failed: ${String(e)}`);
+              core.setOutput("risk", "n/a");
+              core.setOutput("hard_gate", "passed");
+              core.setOutput("docs_reviewed", String(docSnippets.length));
+              core.setOutput("docs_urls", docSnippets.map((d) => d.url).join("\n"));
               return;
             }
 
@@ -153,7 +251,24 @@ jobs:
             const summary = parsed.summary || "No summary";
             const flags = Array.isArray(parsed.flags) ? parsed.flags : [];
             core.setOutput("reason", `AI risk=${risk}; ${summary}${flags.length ? `; flags=${flags.join(", ")}` : ""}`);
+            core.setOutput("risk", risk);
+            core.setOutput("hard_gate", "passed");
+            core.setOutput("docs_reviewed", String(docSnippets.length));
+            core.setOutput("docs_urls", docSnippets.map((d) => d.url).join("\n"));
             core.setOutput("decision", risk === "low" ? "automerge" : "manual");
+
+            await core.summary
+              .addHeading("Renovate AI Decision")
+              .addTable([
+                [{ data: "Decision", header: true }, risk === "low" ? "automerge" : "manual"],
+                [{ data: "Risk", header: true }, risk],
+                [{ data: "Hard gate", header: true }, "passed"],
+                [{ data: "Provider/Model", header: true }, `${provider}/${model}`],
+                [{ data: "Files changed", header: true }, String(files.length)],
+                [{ data: "Docs reviewed", header: true }, String(docSnippets.length)]
+              ])
+              .addRaw(`Reason: ${summary}`)
+              .write();
 
       - name: Comment decision
         uses: actions/github-script@v9
@@ -161,9 +276,17 @@ jobs:
           script: |
             const decision = `${{ steps.evaluate.outputs.decision }}`;
             const reason = `${{ steps.evaluate.outputs.reason }}`;
+            const risk = `${{ steps.evaluate.outputs.risk }}`;
+            const hardGate = `${{ steps.evaluate.outputs.hard_gate }}`;
+            const docsReviewed = `${{ steps.evaluate.outputs.docs_reviewed }}`;
+            const docsUrlsRaw = `${{ steps.evaluate.outputs.docs_urls }}`;
+            const docsUrls = docsUrlsRaw ? docsUrlsRaw.split("\n").filter(Boolean) : [];
             const icon = decision === "automerge" ? "✅" : "🛑";
             const title = decision === "automerge" ? "AI gate passed" : "AI gate requires manual review";
-            const body = `${icon} **${title}**\n\n- Decision: \`${decision}\`\n- Reason: ${reason}`;
+            const docsList = docsUrls.length
+              ? docsUrls.map((u) => `- ${u}`).join("\n")
+              : "- none";
+            const body = `${icon} **${title}**\n\n- Decision: \`${decision}\`\n- Risk: \`${risk}\`\n- Hard gate: \`${hardGate}\`\n- Docs reviewed: \`${docsReviewed}\`\n- Reason: ${reason}\n\n<details><summary>Reviewed docs</summary>\n\n${docsList}\n\n</details>`;
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
