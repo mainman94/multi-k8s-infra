@@ -75,6 +75,23 @@ jobs:
               .map((f) => `FILE: ${f.filename}\n${f.patch || ""}`)
               .join("\n\n---\n\n")
               .slice(0, 50000);
+            const diffLines = files
+              .flatMap((f) => (f.patch || "").split("\n"))
+              .filter((line) =>
+                (line.startsWith("+") || line.startsWith("-")) &&
+                !line.startsWith("+++") &&
+                !line.startsWith("---")
+              );
+            const versionLinePatterns = [
+              /^[+-]\s*-?\s*(version|appversion|tag|imagetag|targetrevision|digest)\s*:\s*["']?[^"'\s]+["']?\s*$/i,
+              /^[+-]\s*image\s*:\s*[^"'\s]+:[^"'\s]+["']?\s*$/i
+            ];
+            const riskyChangePattern = /(clusterrole|clusterrolebinding|rolebinding|serviceaccount|networkpolicy|ingress|hostnetwork|privileged|allowprivilegeescalation|capabilities|securitycontext|runasuser|runasnonroot|podsecurity|webhook|rbac)/i;
+            const hasRiskySignals = diffLines.some((line) => riskyChangePattern.test(line.slice(1)));
+            const nonVersionLines = diffLines.filter(
+              (line) => !versionLinePatterns.some((pattern) => pattern.test(line))
+            );
+            const onlyVersionBumps = diffLines.length > 0 && nonVersionLines.length === 0 && !hasRiskySignals;
 
             // Pull release notes / docs links from PR body (Renovate usually includes these).
             const body = pr.body || "";
@@ -320,14 +337,20 @@ jobs:
             if (!parsed) {
               const lower = trimmedOutput.toLowerCase();
               let inferredRisk = "medium";
-              if (/\bhigh risk\b|\brisk[:=\s-]*high\b/.test(lower)) inferredRisk = "high";
+              if (onlyVersionBumps) inferredRisk = "low";
+              else if (/\bhigh risk\b|\brisk[:=\s-]*high\b/.test(lower)) inferredRisk = "high";
               else if (/\blow risk\b|\brisk[:=\s-]*low\b/.test(lower)) inferredRisk = "low";
               else if (/\bmedium risk\b|\brisk[:=\s-]*medium\b/.test(lower)) inferredRisk = "medium";
 
               const fallbackSummary = trimmedOutput
                 ? `Non-JSON AI output parsed heuristically: ${trimmedOutput.slice(0, 180)}`
                 : "Non-JSON AI output parsed heuristically";
-              parsed = { risk: inferredRisk, summary: fallbackSummary, flags: ["non_json_ai_output"] };
+              const summary = onlyVersionBumps
+                ? "Non-JSON AI output; deterministic diff check found version-only changes"
+                : fallbackSummary;
+              const flags = ["non_json_ai_output"];
+              if (onlyVersionBumps) flags.push("version_only_diff");
+              parsed = { risk: inferredRisk, summary, flags };
               core.warning(`AI parse fallback used. parse_error=${parseError}`);
             }
 
