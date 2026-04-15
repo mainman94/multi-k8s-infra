@@ -407,14 +407,37 @@ jobs:
         with:
           script: |
             const prNodeId = context.payload.pull_request.node_id;
-            await github.graphql(
-              `mutation($pullRequestId: ID!) {
-                enablePullRequestAutoMerge(input: {
-                  pullRequestId: $pullRequestId,
-                  mergeMethod: SQUASH
-                }) {
-                  pullRequest { number }
+            const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+            let lastError = null;
+            for (let attempt = 1; attempt <= 6; attempt++) {
+              try {
+                await github.graphql(
+                  `mutation($pullRequestId: ID!) {
+                    enablePullRequestAutoMerge(input: {
+                      pullRequestId: $pullRequestId,
+                      mergeMethod: SQUASH
+                    }) {
+                      pullRequest { number }
+                    }
+                  }`,
+                  { pullRequestId: prNodeId }
+                );
+                core.info(`Auto-merge enabled (attempt ${attempt}).`);
+                return;
+              } catch (err) {
+                lastError = err;
+                const message = String(err?.message || err);
+                const isUnstable = message.toLowerCase().includes("unstable status");
+                if (isUnstable && attempt < 6) {
+                  core.info(`PR still unstable (attempt ${attempt}/6), retrying...`);
+                  await sleep(5000);
+                  continue;
                 }
-              }`,
-              { pullRequestId: prNodeId }
-            );
+                if (isUnstable) {
+                  core.warning(`Skipped auto-merge for now: ${message}`);
+                  return;
+                }
+                throw err;
+              }
+            }
+            core.warning(`Skipped auto-merge after retries: ${String(lastError?.message || lastError)}`);
