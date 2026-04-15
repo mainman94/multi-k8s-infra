@@ -294,18 +294,41 @@ jobs:
             }
 
             const data = await response.json();
-            const outputText = data?.choices?.[0]?.message?.content || "{}";
-            let parsed;
-            try {
-              parsed = JSON.parse(outputText);
-            } catch (e) {
-              core.setOutput("decision", "manual");
-              core.setOutput("reason", `AI parse failed: ${String(e)}`);
-              core.setOutput("risk", "n/a");
-              core.setOutput("hard_gate", "passed");
-              core.setOutput("docs_reviewed", String(docSnippets.length));
-              core.setOutput("docs_urls", [...new Set(docSnippets.map((d) => d.url))].join("\n"));
-              return;
+            const outputText = data?.choices?.[0]?.message?.content || "";
+            const parseCandidates = [];
+            const trimmedOutput = outputText.trim();
+            if (trimmedOutput) parseCandidates.push(trimmedOutput);
+            const fenceMatch = trimmedOutput.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+            if (fenceMatch?.[1]) parseCandidates.push(fenceMatch[1].trim());
+            const firstBrace = trimmedOutput.indexOf("{");
+            const lastBrace = trimmedOutput.lastIndexOf("}");
+            if (firstBrace >= 0 && lastBrace > firstBrace) {
+              parseCandidates.push(trimmedOutput.slice(firstBrace, lastBrace + 1));
+            }
+
+            let parsed = null;
+            let parseError = "";
+            for (const candidate of parseCandidates) {
+              try {
+                parsed = JSON.parse(candidate);
+                break;
+              } catch (e) {
+                parseError = String(e);
+              }
+            }
+
+            if (!parsed) {
+              const lower = trimmedOutput.toLowerCase();
+              let inferredRisk = "medium";
+              if (/\bhigh risk\b|\brisk[:=\s-]*high\b/.test(lower)) inferredRisk = "high";
+              else if (/\blow risk\b|\brisk[:=\s-]*low\b/.test(lower)) inferredRisk = "low";
+              else if (/\bmedium risk\b|\brisk[:=\s-]*medium\b/.test(lower)) inferredRisk = "medium";
+
+              const fallbackSummary = trimmedOutput
+                ? `Non-JSON AI output parsed heuristically: ${trimmedOutput.slice(0, 180)}`
+                : "Non-JSON AI output parsed heuristically";
+              parsed = { risk: inferredRisk, summary: fallbackSummary, flags: ["non_json_ai_output"] };
+              core.warning(`AI parse fallback used. parse_error=${parseError}`);
             }
 
             const risk = parsed.risk || "medium";
