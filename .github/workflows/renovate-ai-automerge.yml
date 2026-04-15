@@ -88,6 +88,7 @@ jobs:
                 const res = await fetch(url, { signal: controller.signal, redirect: "follow" });
                 clearTimeout(timeout);
                 if (!res.ok) return null;
+                const resolvedUrl = res.url || url;
                 const ctype = (res.headers.get("content-type") || "").toLowerCase();
                 let text = await res.text();
                 if (ctype.includes("text/html")) {
@@ -97,7 +98,8 @@ jobs:
                     .replace(/<[^>]+>/g, " ");
                 }
                 text = text.replace(/\s+/g, " ").trim().slice(0, maxDocChars);
-                return text || null;
+                if (!text) return null;
+                return { url: resolvedUrl, originalUrl: url, snippet: text };
               } catch {
                 return null;
               }
@@ -105,9 +107,9 @@ jobs:
 
             const docSnippets = [];
             for (const url of docUrls) {
-              const snippet = await fetchDocSnippet(url);
-              if (snippet) {
-                docSnippets.push({ url, snippet });
+              const doc = await fetchDocSnippet(url);
+              if (doc) {
+                docSnippets.push(doc);
               }
             }
 
@@ -142,7 +144,7 @@ jobs:
               core.setOutput("risk", "n/a");
               core.setOutput("hard_gate", "passed");
               core.setOutput("docs_reviewed", String(docSnippets.length));
-              core.setOutput("docs_urls", docSnippets.map((d) => d.url).join("\n"));
+              core.setOutput("docs_urls", [...new Set(docSnippets.map((d) => d.url))].join("\n"));
               return;
             }
             if (provider === "openrouter" && !openrouterKey) {
@@ -151,7 +153,7 @@ jobs:
               core.setOutput("risk", "n/a");
               core.setOutput("hard_gate", "passed");
               core.setOutput("docs_reviewed", String(docSnippets.length));
-              core.setOutput("docs_urls", docSnippets.map((d) => d.url).join("\n"));
+              core.setOutput("docs_urls", [...new Set(docSnippets.map((d) => d.url))].join("\n"));
               return;
             }
             if (provider !== "openai" && provider !== "openrouter") {
@@ -160,7 +162,7 @@ jobs:
               core.setOutput("risk", "n/a");
               core.setOutput("hard_gate", "passed");
               core.setOutput("docs_reviewed", String(docSnippets.length));
-              core.setOutput("docs_urls", docSnippets.map((d) => d.url).join("\n"));
+              core.setOutput("docs_urls", [...new Set(docSnippets.map((d) => d.url))].join("\n"));
               return;
             }
 
@@ -207,28 +209,60 @@ jobs:
               headers["X-Title"] = `${owner}/${repo} renovate-ai-automerge`;
             }
 
-            const response = await fetch(endpoint, {
-              method: "POST",
-              headers,
-              body: JSON.stringify({
-                model,
-                temperature: 0,
-                messages: [
-                  { role: "system", content: prompt },
-                  { role: "user", content: userContext }
-                ],
-                response_format: { type: "json_object" }
-              })
+            const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+            const requestBody = JSON.stringify({
+              model,
+              temperature: 0,
+              messages: [
+                { role: "system", content: prompt },
+                { role: "user", content: userContext }
+              ],
+              response_format: { type: "json_object" }
             });
 
-            if (!response.ok) {
-              const body = await response.text();
+            let response = null;
+            let failureStatus = "request_error";
+            let failureBody = "";
+            for (let attempt = 1; attempt <= 3; attempt++) {
+              const controller = new AbortController();
+              const timeout = setTimeout(() => controller.abort(), 30000);
+              try {
+                response = await fetch(endpoint, {
+                  method: "POST",
+                  headers,
+                  signal: controller.signal,
+                  body: requestBody
+                });
+              } catch (err) {
+                clearTimeout(timeout);
+                failureStatus = "network_error";
+                failureBody = String(err);
+                if (attempt < 3) {
+                  await sleep(750 * attempt);
+                  continue;
+                }
+                break;
+              }
+              clearTimeout(timeout);
+              if (response.ok) break;
+
+              failureStatus = String(response.status);
+              failureBody = await response.text();
+              const retryable = response.status === 429 || response.status >= 500;
+              if (retryable && attempt < 3) {
+                await sleep(750 * attempt);
+                continue;
+              }
+              break;
+            }
+
+            if (!response || !response.ok) {
               core.setOutput("decision", "manual");
-              core.setOutput("reason", `AI call failed: ${response.status} ${body.slice(0, 300)}`);
+              core.setOutput("reason", `AI call failed: ${failureStatus} ${failureBody.slice(0, 300)}`);
               core.setOutput("risk", "n/a");
               core.setOutput("hard_gate", "passed");
               core.setOutput("docs_reviewed", String(docSnippets.length));
-              core.setOutput("docs_urls", docSnippets.map((d) => d.url).join("\n"));
+              core.setOutput("docs_urls", [...new Set(docSnippets.map((d) => d.url))].join("\n"));
               return;
             }
 
@@ -243,7 +277,7 @@ jobs:
               core.setOutput("risk", "n/a");
               core.setOutput("hard_gate", "passed");
               core.setOutput("docs_reviewed", String(docSnippets.length));
-              core.setOutput("docs_urls", docSnippets.map((d) => d.url).join("\n"));
+              core.setOutput("docs_urls", [...new Set(docSnippets.map((d) => d.url))].join("\n"));
               return;
             }
 
@@ -254,7 +288,7 @@ jobs:
             core.setOutput("risk", risk);
             core.setOutput("hard_gate", "passed");
             core.setOutput("docs_reviewed", String(docSnippets.length));
-            core.setOutput("docs_urls", docSnippets.map((d) => d.url).join("\n"));
+            core.setOutput("docs_urls", [...new Set(docSnippets.map((d) => d.url))].join("\n"));
             core.setOutput("decision", risk === "low" ? "automerge" : "manual");
 
             await core.summary
