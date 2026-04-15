@@ -74,7 +74,7 @@ jobs:
             const patchText = files
               .map((f) => `FILE: ${f.filename}\n${f.patch || ""}`)
               .join("\n\n---\n\n")
-              .slice(0, 120000);
+              .slice(0, 50000);
 
             // Pull release notes / docs links from PR body (Renovate usually includes these).
             const body = pr.body || "";
@@ -184,81 +184,108 @@ jobs:
             const docContext = docSnippets
               .map((d, idx) => `DOC_${idx + 1}: ${d.url}\n${d.snippet}`)
               .join("\n\n---\n\n")
-              .slice(0, 100000);
+              .slice(0, 30000);
             const userContext = [
               `PR_TITLE: ${pr.title || ""}`,
-              `PR_BODY: ${(pr.body || "").slice(0, 20000)}`,
+              `PR_BODY: ${(pr.body || "").slice(0, 8000)}`,
               `PATCHES:\n${patchText}`,
               `DOCS:\n${docContext || "none"}`
             ].join("\n\n");
 
-            const endpoint = provider === "openrouter"
-              ? "https://openrouter.ai/api/v1/chat/completions"
-              : "https://api.openai.com/v1/chat/completions";
-
-            const model = provider === "openrouter"
-              ? (process.env.OPENROUTER_MODEL || "openai/gpt-4.1-mini")
-              : (process.env.OPENAI_MODEL || "gpt-4.1-mini");
-
-            const headers = {
-              "Authorization": `Bearer ${provider === "openrouter" ? openrouterKey : openaiKey}`,
-              "Content-Type": "application/json"
-            };
-            if (provider === "openrouter") {
-              headers["HTTP-Referer"] = `https://github.com/${owner}/${repo}`;
-              headers["X-Title"] = `${owner}/${repo} renovate-ai-automerge`;
-            }
-
             const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-            const requestBody = JSON.stringify({
-              model,
-              temperature: 0,
-              messages: [
-                { role: "system", content: prompt },
-                { role: "user", content: userContext }
-              ],
-              response_format: { type: "json_object" }
-            });
 
             let response = null;
             let failureStatus = "request_error";
             let failureBody = "";
-            for (let attempt = 1; attempt <= 3; attempt++) {
-              const controller = new AbortController();
-              const timeout = setTimeout(() => controller.abort(), 30000);
-              try {
-                response = await fetch(endpoint, {
-                  method: "POST",
-                  headers,
-                  signal: controller.signal,
-                  body: requestBody
-                });
-              } catch (err) {
+            let usedProvider = provider;
+            let usedModel = provider === "openrouter"
+              ? (process.env.OPENROUTER_MODEL || "openai/gpt-4.1-mini")
+              : (process.env.OPENAI_MODEL || "gpt-4.1-mini");
+            const providerConfigs = provider === "openrouter" && openaiKey
+              ? ["openrouter", "openai"]
+              : [provider];
+
+            for (const currentProvider of providerConfigs) {
+              const endpoint = currentProvider === "openrouter"
+                ? "https://openrouter.ai/api/v1/chat/completions"
+                : "https://api.openai.com/v1/chat/completions";
+              const model = currentProvider === "openrouter"
+                ? (process.env.OPENROUTER_MODEL || "openai/gpt-4.1-mini")
+                : (process.env.OPENAI_MODEL || "gpt-4.1-mini");
+              const headers = {
+                "Authorization": `Bearer ${currentProvider === "openrouter" ? openrouterKey : openaiKey}`,
+                "Content-Type": "application/json"
+              };
+              if (currentProvider === "openrouter") {
+                headers["HTTP-Referer"] = `https://github.com/${owner}/${repo}`;
+                headers["X-OpenRouter-Title"] = `${owner}/${repo} renovate-ai-automerge`;
+              }
+
+              const requestPayload = {
+                model,
+                temperature: 0,
+                max_tokens: 300,
+                messages: [
+                  { role: "system", content: prompt },
+                  { role: "user", content: userContext }
+                ]
+              };
+              if (currentProvider === "openai") {
+                requestPayload.response_format = { type: "json_object" };
+              }
+              const requestBody = JSON.stringify(requestPayload);
+
+              for (let attempt = 1; attempt <= 3; attempt++) {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 30000);
+                try {
+                  response = await fetch(endpoint, {
+                    method: "POST",
+                    headers,
+                    signal: controller.signal,
+                    body: requestBody
+                  });
+                } catch (err) {
+                  clearTimeout(timeout);
+                  failureStatus = `${currentProvider}:network_error`;
+                  failureBody = String(err);
+                  if (attempt < 3) {
+                    await sleep(750 * attempt);
+                    continue;
+                  }
+                  break;
+                }
                 clearTimeout(timeout);
-                failureStatus = "network_error";
-                failureBody = String(err);
-                if (attempt < 3) {
+                if (response.ok) {
+                  usedProvider = currentProvider;
+                  usedModel = model;
+                  break;
+                }
+
+                failureStatus = `${currentProvider}:${String(response.status)}`;
+                failureBody = await response.text();
+                const retryable = response.status === 429 || response.status >= 500;
+                if (retryable && attempt < 3) {
                   await sleep(750 * attempt);
                   continue;
                 }
                 break;
               }
-              clearTimeout(timeout);
-              if (response.ok) break;
-
-              failureStatus = String(response.status);
-              failureBody = await response.text();
-              const retryable = response.status === 429 || response.status >= 500;
-              if (retryable && attempt < 3) {
-                await sleep(750 * attempt);
-                continue;
-              }
-              break;
+              if (response && response.ok) break;
             }
 
             if (!response || !response.ok) {
+              let failureDetails = failureBody;
+              try {
+                const parsedError = JSON.parse(failureBody);
+                const providerName = parsedError?.error?.metadata?.provider_name;
+                const message = parsedError?.error?.message;
+                if (providerName || message) {
+                  failureDetails = `${providerName ? `provider=${providerName}; ` : ""}${message || ""}`.trim();
+                }
+              } catch {}
               core.setOutput("decision", "manual");
-              core.setOutput("reason", `AI call failed: ${failureStatus} ${failureBody.slice(0, 300)}`);
+              core.setOutput("reason", `AI call failed: ${failureStatus} ${failureDetails.slice(0, 300)}`);
               core.setOutput("risk", "n/a");
               core.setOutput("hard_gate", "passed");
               core.setOutput("docs_reviewed", String(docSnippets.length));
@@ -297,7 +324,7 @@ jobs:
                 [{ data: "Decision", header: true }, risk === "low" ? "automerge" : "manual"],
                 [{ data: "Risk", header: true }, risk],
                 [{ data: "Hard gate", header: true }, "passed"],
-                [{ data: "Provider/Model", header: true }, `${provider}/${model}`],
+                [{ data: "Provider/Model", header: true }, `${usedProvider}/${usedModel}`],
                 [{ data: "Files changed", header: true }, String(files.length)],
                 [{ data: "Docs reviewed", header: true }, String(docSnippets.length)]
               ])
