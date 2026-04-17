@@ -5,6 +5,6 @@ resources:
 - ../../base
 images:
 - name: dockerha08/pmhme
-  newTag: "20260415154232"
+  newTag: "20260417181731"
 patches:
 - path: ingress-patch.yaml
