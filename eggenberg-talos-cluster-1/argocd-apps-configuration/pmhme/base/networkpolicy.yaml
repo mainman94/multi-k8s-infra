@@ -10,11 +10,11 @@ spec:
     - Ingress
     - Egress
   ingress:
-    # Allow traffic from Traefik namespace
+    # Allow traffic from Cilium Gateway namespace
     - from:
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: traefik
+              kubernetes.io/metadata.name: cilium
       ports:
         - protocol: TCP
           port: 3000

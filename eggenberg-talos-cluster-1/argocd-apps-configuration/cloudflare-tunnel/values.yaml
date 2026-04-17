@@ -23,16 +23,118 @@ tunnelConfig:
   connectTimeout: 30s
   warpRouting: false
 ingress:
-  #  - hostname: 1234.hauptmann.dev
-  #    service: http://traefik.traefik.svc.cluster.local:80
+  - hostname: "audiobookshelf.hauptmann.dev"
+    service: https://cilium-gateway-public.cilium.svc.cluster.local:443
+    originRequest:
+      originServerName: "audiobookshelf.hauptmann.dev"
+      matchSNItoHost: true
+  - hostname: "auth.hauptmann.dev"
+    service: https://cilium-gateway-public.cilium.svc.cluster.local:443
+    originRequest:
+      originServerName: "auth.hauptmann.dev"
+      matchSNItoHost: true
+  - hostname: "bambuddy.hauptmann.dev"
+    service: https://cilium-gateway-public.cilium.svc.cluster.local:443
+    originRequest:
+      originServerName: "bambuddy.hauptmann.dev"
+      matchSNItoHost: true
+  - hostname: "bookstack.hauptmann.dev"
+    service: https://cilium-gateway-public.cilium.svc.cluster.local:443
+    originRequest:
+      originServerName: "bookstack.hauptmann.dev"
+      matchSNItoHost: true
+  - hostname: "dockhand.hauptmann.dev"
+    service: https://cilium-gateway-public.cilium.svc.cluster.local:443
+    originRequest:
+      originServerName: "dockhand.hauptmann.dev"
+      matchSNItoHost: true
+  - hostname: "firefly-iii.hauptmann.dev"
+    service: https://cilium-gateway-public.cilium.svc.cluster.local:443
+    originRequest:
+      originServerName: "firefly-iii.hauptmann.dev"
+      matchSNItoHost: true
+  - hostname: "git.hauptmann.dev"
+    service: https://cilium-gateway-public.cilium.svc.cluster.local:443
+    originRequest:
+      originServerName: "git.hauptmann.dev"
+      matchSNItoHost: true
+  - hostname: "immich.hauptmann.dev"
+    service: https://cilium-gateway-public.cilium.svc.cluster.local:443
+    originRequest:
+      originServerName: "immich.hauptmann.dev"
+      matchSNItoHost: true
+  - hostname: "jellyfin.hauptmann.dev"
+    service: https://cilium-gateway-public.cilium.svc.cluster.local:443
+    originRequest:
+      originServerName: "jellyfin.hauptmann.dev"
+      matchSNItoHost: true
+  - hostname: "jellystat.hauptmann.dev"
+    service: https://cilium-gateway-public.cilium.svc.cluster.local:443
+    originRequest:
+      originServerName: "jellystat.hauptmann.dev"
+      matchSNItoHost: true
+  - hostname: "lidarr.hauptmann.dev"
+    service: https://cilium-gateway-public.cilium.svc.cluster.local:443
+    originRequest:
+      originServerName: "lidarr.hauptmann.dev"
+      matchSNItoHost: true
+  - hostname: "n8n.hauptmann.dev"
+    service: https://cilium-gateway-public.cilium.svc.cluster.local:443
+    originRequest:
+      originServerName: "n8n.hauptmann.dev"
+      matchSNItoHost: true
+  - hostname: "navidrome.hauptmann.dev"
+    service: https://cilium-gateway-public.cilium.svc.cluster.local:443
+    originRequest:
+      originServerName: "navidrome.hauptmann.dev"
+      matchSNItoHost: true
+  - hostname: "nc.hauptmann.dev"
+    service: https://cilium-gateway-public.cilium.svc.cluster.local:443
+    originRequest:
+      originServerName: "nc.hauptmann.dev"
+      matchSNItoHost: true
+  - hostname: "paperless.hauptmann.dev"
+    service: https://cilium-gateway-public.cilium.svc.cluster.local:443
+    originRequest:
+      originServerName: "paperless.hauptmann.dev"
+      matchSNItoHost: true
+  - hostname: "radarr.hauptmann.dev"
+    service: https://cilium-gateway-public.cilium.svc.cluster.local:443
+    originRequest:
+      originServerName: "radarr.hauptmann.dev"
+      matchSNItoHost: true
+  - hostname: "seerr.hauptmann.dev"
+    service: https://cilium-gateway-public.cilium.svc.cluster.local:443
+    originRequest:
+      originServerName: "seerr.hauptmann.dev"
+      matchSNItoHost: true
+  - hostname: "sonarr.hauptmann.dev"
+    service: https://cilium-gateway-public.cilium.svc.cluster.local:443
+    originRequest:
+      originServerName: "sonarr.hauptmann.dev"
+      matchSNItoHost: true
+  - hostname: "swiparr.hauptmann.dev"
+    service: https://cilium-gateway-public.cilium.svc.cluster.local:443
+    originRequest:
+      originServerName: "swiparr.hauptmann.dev"
+      matchSNItoHost: true
+  - hostname: "umami.hauptmann.dev"
+    service: https://cilium-gateway-public.cilium.svc.cluster.local:443
+    originRequest:
+      originServerName: "umami.hauptmann.dev"
+      matchSNItoHost: true
+  - hostname: "vault.hauptmann.dev"
+    service: https://cilium-gateway-public.cilium.svc.cluster.local:443
+    originRequest:
+      originServerName: "vault.hauptmann.dev"
+      matchSNItoHost: true
+  - hostname: "passwords.hauptmann.dev"
+    service: https://cilium-gateway-public.cilium.svc.cluster.local:443
+    originRequest:
+      originServerName: "passwords.hauptmann.dev"
+      matchSNItoHost: true
   - hostname: "*.hauptmann.dev"
-    service: https://traefik.traefik.svc.cluster.local:443
-    originRequest:
-      originServerName: "*.hauptmann.dev"
-      matchSNItoHost: true
+    service: http://cilium-ingress.kube-system.svc.cluster.local:80
   - hostname: "hauptmann.dev"
-    service: https://traefik.traefik.svc.cluster.local:443
-    originRequest:
-      originServerName: "hauptmann.dev"
-      matchSNItoHost: true
+    service: http://cilium-ingress.kube-system.svc.cluster.local:80
   - service: http_status:404

@@ -125,7 +125,7 @@ containerPorts:
   metrics: 8443
 ingress:
   enabled: false
-  ingressClassName: "traefik"
+  ingressClassName: "cilium"
   hostname: ""
 # Configure dual-stack
 dualStack:

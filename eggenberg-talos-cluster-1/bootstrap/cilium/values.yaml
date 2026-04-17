@@ -34,6 +34,20 @@ gatewayAPI:
   enabled: true
   enableAlpn: true
   enableAppProtocol: true
+ingressController:
+  enabled: true
+  default: true
+  loadbalancerMode: shared
+authentication:
+  enabled: true
+  mutual:
+    spire:
+      enabled: true
+      install:
+        enabled: true
+        server:
+          dataStorage:
+            enabled: false
 l2announcements:
   enabled: true
 hubble:

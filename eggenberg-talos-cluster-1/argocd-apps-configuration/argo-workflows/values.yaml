@@ -2,11 +2,9 @@
 server:
   ingress:
     enabled: true
-    ingressClassName: traefik
+    ingressClassName: cilium
     hosts:
       - argo-workflows-rp.hauptmann.dev
-    annotations:
-      traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
   # SSO via ArgoCD's Dex server (reuses existing Authentik config)
   authModes:
     - sso

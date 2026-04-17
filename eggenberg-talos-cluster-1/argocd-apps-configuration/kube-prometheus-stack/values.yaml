@@ -19,7 +19,7 @@ prometheus:
     type: ClusterIP
   ingress:
     enabled: false
-    ingressClassName: traefik
+    ingressClassName: cilium
     hosts:
       - monitoring.hauptmann.dev
     paths:
@@ -59,7 +59,7 @@ grafana:
   enabled: true
   ingress:
     enabled: true
-    ingressClassName: traefik
+    ingressClassName: cilium
     hosts:
       - grafana.hauptmann.dev
     paths:

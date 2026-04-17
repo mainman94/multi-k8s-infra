@@ -19,12 +19,10 @@ server:
         release: kube-prometheus-stack
   ingress:
     enabled: true
-    ingressClassName: traefik
+    ingressClassName: cilium
     hostname: argo-rp.hauptmann.dev
     path: /
     pathType: Prefix
-    annotations:
-      traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
 global:
   domain: argo-rp.hauptmann.dev
 # yamllint disable rule:line-length

@@ -10,9 +10,7 @@ api:
       "": "https://argo-rp.hauptmann.dev"
   ingress:
     enabled: true
-    ingressClassName: traefik
-    annotations:
-      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    ingressClassName: cilium
     tls:
       enabled: false
   tls:
