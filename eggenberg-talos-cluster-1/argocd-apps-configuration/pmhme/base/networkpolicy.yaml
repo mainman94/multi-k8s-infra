@@ -10,14 +10,11 @@ spec:
     - Ingress
     - Egress
   ingress:
-    # Allow traffic from the actual Cilium gateway data plane pods.
+    # Allow traffic from the Talos node network. Cilium Envoy runs with
+    # hostNetwork, so the source is seen as the node IP rather than a pod IP.
     - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: kube-system
-          podSelector:
-            matchLabels:
-              k8s-app: cilium-envoy
+        - ipBlock:
+            cidr: 192.168.0.0/24
       ports:
         - protocol: TCP
           port: 3000
