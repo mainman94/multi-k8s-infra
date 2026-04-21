@@ -1,0 +1,26 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: public
+  namespace: cilium
+spec:
+  gatewayClassName: cilium
+  listeners:
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: "*.hauptmann.dev"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: cloudflare-origin-cert
+    - name: https-root
+      protocol: HTTPS
+      port: 443
+      hostname: "hauptmann.dev"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: cloudflare-origin-cert

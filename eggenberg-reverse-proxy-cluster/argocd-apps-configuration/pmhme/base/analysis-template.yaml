@@ -8,7 +8,7 @@ spec:
     - name: namespace
   metrics:
     - name: http-health-check
-      initialDelay: 5s
+      initialDelay: 30s
       interval: 5s
       count: 6
       successCondition: result.statusCode == 200

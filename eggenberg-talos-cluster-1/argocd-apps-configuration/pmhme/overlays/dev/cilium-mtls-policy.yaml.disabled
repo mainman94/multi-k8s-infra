@@ -1,0 +1,27 @@
+# Activate by renaming to cilium-mtls-policy.yaml and adding it to kustomization resources.
+# This enforces Cilium mutual authentication for pod-to-pod traffic in portfolio-dev.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: portfolio-dev-mtls-required
+  namespace: portfolio-dev
+spec:
+  endpointSelector:
+    matchLabels:
+      app: portfolio-app
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: portfolio-dev
+      authentication:
+        mode: "required"
+      toPorts:
+        - ports:
+            - port: "3000"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: portfolio-dev
+      authentication:
+        mode: "required"
