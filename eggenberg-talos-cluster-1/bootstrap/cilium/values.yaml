@@ -35,8 +35,8 @@ gatewayAPI:
   enableAlpn: true
   enableAppProtocol: true
 ingressController:
-  enabled: true
-  default: true
+  enabled: false
+  default: false
   loadbalancerMode: shared
 authentication:
   enabled: true
