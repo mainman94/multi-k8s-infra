@@ -5,7 +5,7 @@ resources:
   - service.yaml
   - service-preview.yaml
   - servicemonitor.yaml
-  - ingress.yaml
+  - httproute.yaml
   - analysis-template.yaml
   - pdb.yaml
   - networkpolicy.yaml

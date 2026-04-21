@@ -13,6 +13,9 @@ spec:
       protocol: HTTPS
       port: 443
       hostname: "*.hauptmann.dev"
+      allowedRoutes:
+        namespaces:
+          from: All
       tls:
         mode: Terminate
         certificateRefs:
@@ -22,6 +25,9 @@ spec:
       protocol: HTTPS
       port: 443
       hostname: "hauptmann.dev"
+      allowedRoutes:
+        namespaces:
+          from: All
       tls:
         mode: Terminate
         certificateRefs:

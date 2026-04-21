@@ -9,7 +9,7 @@ api:
     urls:
       "": "https://argo-rp.hauptmann.dev"
   ingress:
-    enabled: true
+    enabled: false
     ingressClassName: cilium
     tls:
       enabled: false

@@ -1,7 +1,7 @@
 # Argo Workflows Server Configuration
 server:
   ingress:
-    enabled: true
+    enabled: false
     ingressClassName: cilium
     hosts:
       - argo-workflows-rp.hauptmann.dev
