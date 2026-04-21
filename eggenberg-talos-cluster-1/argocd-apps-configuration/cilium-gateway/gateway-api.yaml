@@ -15,7 +15,16 @@ spec:
       hostname: "*.hauptmann.dev"
       allowedRoutes:
         namespaces:
-          from: All
+          from: Selector
+          selector:
+            matchExpressions:
+              - key: kubernetes.io/metadata.name
+                operator: In
+                values:
+                  - cilium
+                  - portfolio
+                  - portfolio-dev
+                  - portfolio-test
       tls:
         mode: Terminate
         certificateRefs:
@@ -27,7 +36,16 @@ spec:
       hostname: "hauptmann.dev"
       allowedRoutes:
         namespaces:
-          from: All
+          from: Selector
+          selector:
+            matchExpressions:
+              - key: kubernetes.io/metadata.name
+                operator: In
+                values:
+                  - cilium
+                  - portfolio
+                  - portfolio-dev
+                  - portfolio-test
       tls:
         mode: Terminate
         certificateRefs:
