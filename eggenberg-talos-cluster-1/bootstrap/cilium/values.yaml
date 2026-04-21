@@ -57,12 +57,12 @@ hubble:
     enabled: true
   ui:
     enabled: true
-proxy:
-  prometheus:
-    enabled: true
-  accessLog:
-    enabled: true
-    # This will output Envoy access logs to stdout/file which Alloy can then scrape
+  export:
+    static:
+      enabled: true
+      filePath: /var/run/cilium/hubble/events.log
+      # Wir begrenzen den Export auf HTTP (L7), um das Log-Volumen klein zu halten
+      fieldMask: ["time", "source", "destination", "IP", "HTTP"]
 prometheus:
   metricsService: true
   enabled: true
