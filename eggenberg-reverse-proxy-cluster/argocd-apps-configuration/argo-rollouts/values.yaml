@@ -1,9 +1,0 @@
-dashboard:
-  enabled: false
-  ingress:
-    enabled: false
-    ingressClassName: traefik
-    hosts:
-      - rollouts-reverse-proxy.hauptmann.dev
-controller:
-  replicas: 1

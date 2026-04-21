@@ -1,8 +1,0 @@
-cm:
-  data:
-    cidr-default: 192.168.0.150/24
-#     range-development: 192.168.0.210-192.168.0.219
-
-# Enable loadbalancerClass to only reconcile services that have
-# spec.loadbalancerClass: kube-vip.io/kube-vip-class
-enableloadbalancerClass: false

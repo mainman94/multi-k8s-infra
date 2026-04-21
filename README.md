@@ -1,72 +1,43 @@
-# Multi-K8s Homelab 🏠
+# Talos Homelab 🏠
 
-My personal homelab setup managing two K3s clusters with GitOps. Everything's declarative, ArgoCD syncs it all.
+My personal homelab setup managing a Talos Linux cluster with GitOps. Everything's declarative, ArgoCD syncs it all.
 
 ## What's This?
 
-Two K3s clusters running at home:
-- **eggenberg-reverse-proxy-cluster**: Handles incoming traffic, routing, monitoring
-- **strassgang-backend-cluster**: Runs backend services and storage
+A Kubernetes cluster running on Talos Linux:
+- **eggenberg-talos-cluster-1**: Primary cluster for workloads, monitoring, and storage.
 
 Everything's managed through Git. Push a change, ArgoCD deploys it. Simple.
 
 ## Structure
 
 ```
-├── eggenberg-reverse-proxy-cluster/
+├── eggenberg-talos-cluster-1/
 │   ├── app-of-app/                    # ArgoCD bootstrap
 │   ├── argocd-apps/                   # App definitions
 │   ├── argocd-apps-configuration/     # Helm values
-│   └── bootstrap/                     # Initial cluster setup
-│
-└── strassgang-backend-cluster/
-    ├── app-of-app/
-    ├── argocd-apps/
-    ├── argocd-apps-configuration/
-    └── bootstrap/
+│   └── bootstrap/                     # Initial cluster setup (Cilium, ArgoCD)
 ```
 
 ## What's Running
 
-**Eggenberg (Reverse Proxy)**
-- Traefik - ingress
-- Cilium - networking
-- Cloudflare Tunnel - external access
-- Prometheus + Grafana - monitoring
-- Longhorn - storage
-- Rancher - cluster UI
-- Uptime Kuma - uptime checks
-
-**Strassgang (Backend)**
-- Harbor - container registry
-- Longhorn - storage
-- SeaweedFS - object storage
-- Tailscale - VPN
-- Traefik - routing
-
-Both use Infisical for secrets and ArgoCD for GitOps.
+- **Cilium & Cilium Gateway** - Networking & Ingress
+- **Cloudflare Tunnel** - External access
+- **Cert-Manager** - SSL certificates
+- **Argo Suite** - CD, Workflows, Events, Rollouts
+- **Kargo** - Progressive delivery
+- **Infisical** - Secret management
+- **Kube-Prometheus-Stack & Loki** - Monitoring & Logging
+- **Longhorn** - Distributed block storage
+- **Alloy** - Telemetry collection
+- **Uptime Kuma** - Uptime checks
+- **PMHME** - Custom applications
 
 ## Quick Setup
 
-### Initial Cluster (K3s)
+### Initial Cluster (Talos)
 
-```bash
-# Main node
-curl -sfL https://get.k3s.io | sh -s - server \
-  --flannel-backend=none \
-  --disable-network-policy \
-  --disable-kube-proxy \
-  --disable=traefik \
-  --disable=servicelb \
-  --cluster-init
-```
-
-### Install Cilium (Eggenberg only)
-
-```bash
-helm repo add cilium https://helm.cilium.io
-helm install cilium cilium/cilium -n kube-system -f bootstrap/cilium/values.yaml
-```
+The cluster is provisioned using Talos Linux. Ensure your `talosconfig` is correctly set up.
 
 ### Install ArgoCD
 
@@ -74,25 +45,23 @@ helm install cilium cilium/cilium -n kube-system -f bootstrap/cilium/values.yaml
 helm install argocd oci://ghcr.io/argoproj/argo-helm/argo-cd \
   --namespace argocd \
   --version 9.0.5 \
-  -f bootstrap/argocd/values.yaml \
+  -f eggenberg-talos-cluster-1/bootstrap/argocd/values.yaml \
   --create-namespace
 ```
 
 ### Bootstrap Apps
 
 ```bash
-kubectl apply -f app-of-app/app-of-app.yaml
+kubectl apply -f eggenberg-talos-cluster-1/app-of-app/app-of-apps.yaml
 ```
 
 Done. ArgoCD takes over from here.
 
 ## Making Changes
 
-1. Edit config in `argocd-apps-configuration/<app>/values.yaml`
+1. Edit config in `eggenberg-talos-cluster-1/argocd-apps-configuration/<app>/values.yaml`
 2. Commit and push
 3. ArgoCD syncs automatically
-
-That's it.
 
 ## Access Stuff
 
@@ -109,7 +78,7 @@ kubectl port-forward svc/kube-prometheus-stack-grafana -n kube-prometheus-stack 
 
 ## Secrets
 
-Using Infisical to manage secrets. Set up:
+Using Infisical to manage secrets. Set up the operator credentials:
 
 ```bash
 kubectl create secret generic universal-auth-credentials \
@@ -117,8 +86,6 @@ kubectl create secret generic universal-auth-credentials \
   --from-literal=clientId=<CLIENT_ID> \
   --from-literal=clientSecret=<CLIENT_SECRET>
 ```
-
-Then apply the InfisicalSecret manifests. Secrets sync automatically.
 
 ## Troubleshooting
 
@@ -128,18 +95,12 @@ kubectl get applications -A
 kubectl logs -n argocd deployment/argocd-application-controller
 ```
 
-**Network issues?**
+**Network issues (Cilium)?**
 ```bash
 kubectl get pods -n kube-system
 kubectl exec -it -n kube-system ds/cilium -- cilium status
 ```
 
-**Secrets not working?**
-```bash
-kubectl logs -n infisical-secrets-operator -l app=infisical-secrets-operator
-```
-
 ---
 
 Just a homelab. Nothing fancy. 🏡
-
