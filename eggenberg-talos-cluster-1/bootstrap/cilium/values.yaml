@@ -97,3 +97,4 @@ envoy:
   log:
     path: /dev/stdout
     defaultLevel: info
+  accessLogBufferSize: 65536
