@@ -5,6 +5,9 @@ metadata:
   namespace: cilium
 spec:
   gatewayClassName: cilium
+  infrastructure:
+    labels:
+      vip-pool: services
   listeners:
     - name: https
       protocol: HTTPS
