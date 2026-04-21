@@ -20,6 +20,7 @@ spec:
       vip-pool: services
   interfaces:
     - "^enp0s31f6$"
+    - "^enp5s0f0$"
   loadBalancerIPs: true
   externalIPs: false
 ---
