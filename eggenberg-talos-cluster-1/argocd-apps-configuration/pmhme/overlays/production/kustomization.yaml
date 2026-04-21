@@ -14,3 +14,4 @@ patches:
   target:
     kind: Rollout
     name: portfolio-app
+- path: httproute-patch.yaml
