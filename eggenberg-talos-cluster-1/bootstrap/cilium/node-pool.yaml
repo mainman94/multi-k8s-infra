@@ -21,6 +21,7 @@ spec:
   interfaces:
     - "^enp0s31f6$"
     - "^enp5s0f0$"
+    - "^eno1$"
   loadBalancerIPs: true
   externalIPs: false
 ---
