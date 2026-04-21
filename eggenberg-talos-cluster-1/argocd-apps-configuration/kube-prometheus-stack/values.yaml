@@ -58,7 +58,7 @@ prometheus:
 grafana:
   enabled: true
   ingress:
-    enabled: true
+    enabled: false
     ingressClassName: cilium
     hosts:
       - grafana.hauptmann.dev

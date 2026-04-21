@@ -18,7 +18,7 @@ server:
       additionalLabels:
         release: kube-prometheus-stack
   ingress:
-    enabled: true
+    enabled: false
     ingressClassName: cilium
     hostname: argo-rp.hauptmann.dev
     path: /
