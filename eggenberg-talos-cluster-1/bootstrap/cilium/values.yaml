@@ -57,6 +57,12 @@ hubble:
     enabled: true
   ui:
     enabled: true
+proxy:
+  prometheus:
+    enabled: true
+  accessLog:
+    enabled: true
+    # This will output Envoy access logs to stdout/file which Alloy can then scrape
 prometheus:
   metricsService: true
   enabled: true
