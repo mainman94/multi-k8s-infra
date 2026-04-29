@@ -6,8 +6,8 @@ metadata:
 spec:
   project: default
   sources:
-    - repoURL: oci://registry.gitlab.com/xrow-public/helm-openclaw/charts
-      chart: openclaw
+    - repoURL: oci://registry.gitlab.com/xrow-public/helm-openclaw/charts/openclaw
+      path: .
       targetRevision: 1.14.0
       helm:
         valueFiles:
@@ -17,7 +17,7 @@ spec:
       ref: values
   destination:
     server: https://kubernetes.default.svc
-    namespace: kube-system
+    namespace: openclaw
   syncPolicy:
     automated:
       prune: true
