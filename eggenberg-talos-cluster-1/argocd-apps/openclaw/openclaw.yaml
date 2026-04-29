@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   sources:
-    - repoURL: oci://registry.gitlab.com/xrow-public/helm-openclaw/charts/
+    - repoURL: oci://registry.gitlab.com/xrow-public/helm-openclaw/charts
       chart: openclaw
       targetRevision: 1.14.0
       helm:
