@@ -64,34 +64,33 @@ jobs:
           framework: kubernetes
           quiet: true
           soft_fail: true
-
-  notify:
-    name: Discord Notification
-    runs-on: ubuntu-latest
-    needs: [kubeconform, kube-linter, checkov]
-    if: always()
-    steps:
-      - name: Report to Discord
-        run: |-
-          if [ "${{ needs.kubeconform.result }}" = "success" ] && \
-             [ "${{ needs.kube-linter.result }}" = "success" ] && \
-             [ "${{ needs.checkov.result }}" = "success" ]; then
-            STATUS="✅ Success"
-          else
-            STATUS="❌ Failed (kubeconform: ${{ needs.kubeconform.result }}, kube-linter: ${{ needs.kube-linter.result }}, checkov: ${{ needs.checkov.result }})"
-          fi
-
-          BRANCH=$(echo "${GITHUB_REF}" | sed 's|refs/heads/||')
-          COMMIT_URL="https://github.com/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}"
-
-          MESSAGE="**Workflow:** ${GITHUB_WORKFLOW}
-          **Status:** $STATUS
-          **Branch:** $BRANCH
-          **Commit:** <$COMMIT_URL>
-          **Actor:** ${GITHUB_ACTOR}"
-
-          JSON=$(jq -n --arg content "$MESSAGE" '{content: $content}')
-
-          curl -X POST -H "Content-Type: application/json" \
-            -d "$JSON" \
-            ${{ secrets.DISCORD_WEBHOOK_URL }}
+          #  notify:
+          #    name: Discord Notification
+          #    runs-on: ubuntu-latest
+          #    needs: [kubeconform, kube-linter, checkov]
+          #    if: always()
+          #    steps:
+          #      - name: Report to Discord
+          #        run: |-
+          #          if [ "${{ needs.kubeconform.result }}" = "success" ] && \
+          #             [ "${{ needs.kube-linter.result }}" = "success" ] && \
+          #             [ "${{ needs.checkov.result }}" = "success" ]; then
+          #            STATUS="✅ Success"
+          #          else
+          #            STATUS="❌ Failed (kubeconform: ${{ needs.kubeconform.result }}, kube-linter: ${{ needs.kube-linter.result }}, checkov: ${{ needs.checkov.result }})"
+          #          fi
+          #
+          #          BRANCH=$(echo "${GITHUB_REF}" | sed 's|refs/heads/||')
+          #          COMMIT_URL="https://github.com/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}"
+          #
+          #          MESSAGE="**Workflow:** ${GITHUB_WORKFLOW}
+          #          **Status:** $STATUS
+          #          **Branch:** $BRANCH
+          #          **Commit:** <$COMMIT_URL>
+          #          **Actor:** ${GITHUB_ACTOR}"
+          #
+          #          JSON=$(jq -n --arg content "$MESSAGE" '{content: $content}')
+          #
+          #          curl -X POST -H "Content-Type: application/json" \
+          #            -d "$JSON" \
+          #            ${{ secrets.DISCORD_WEBHOOK_URL }}
