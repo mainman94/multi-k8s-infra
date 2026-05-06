@@ -3,7 +3,7 @@
   "extends": [
     "config:recommended"
   ],
-  "automerge": false,
+  "automerge": true,
   "rebaseWhen": "behind-base-branch",
   "argocd": {
     "managerFilePatterns": [
