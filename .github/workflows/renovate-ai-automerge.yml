@@ -11,8 +11,7 @@ permissions:
 jobs:
   evaluate-and-automerge:
     if: >
-      github.event.pull_request.user.login == 'renovate[bot]' ||
-      startsWith(github.event.pull_request.head.ref, 'renovate/')
+      github.event.pull_request.user.login == 'renovate[bot]' || startsWith(github.event.pull_request.head.ref, 'renovate/')
     runs-on: ubuntu-latest
     steps:
       - name: Evaluate PR risk (rules + AI)
@@ -401,11 +400,18 @@ jobs:
               body
             });
 
+      - name: Fail on manual decision
+        if: steps.evaluate.outputs.decision == 'manual'
+        uses: actions/github-script@v9
+        with:
+          script: |
+            core.setFailed(`Manual review required: ${{ steps.evaluate.outputs.reason }}`);
+
       - name: Enable auto-merge
         if: steps.evaluate.outputs.decision == 'automerge'
         uses: actions/github-script@v9
         with:
-          script: |
+          script: |-
             const prNodeId = context.payload.pull_request.node_id;
             const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
             let lastError = null;
