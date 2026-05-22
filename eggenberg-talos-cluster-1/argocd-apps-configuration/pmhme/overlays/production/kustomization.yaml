@@ -5,7 +5,7 @@ resources:
 - ../../base
 images:
 - name: dockerha08/pmhme
-  newTag: "20260522153136"
+  newTag: "20260522173241"
 patches:
 - patch: |-
     - op: replace
