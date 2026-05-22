@@ -6,6 +6,6 @@ resources:
   - ../../base
 images:
   - name: dockerha08/pmhme
-    newTag: "20260522173241"
+    newTag: "20260522182553"
 patches:
   - path: httproute-patch.yaml
