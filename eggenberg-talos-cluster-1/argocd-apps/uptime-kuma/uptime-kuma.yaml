@@ -8,7 +8,7 @@ spec:
   project: default
   sources:
     - repoURL: https://opensource.ncsa.illinois.edu/charts/
-      targetRevision: 1.5.0
+      targetRevision: 1.6.0
       chart: uptime-kuma
       helm:
         valueFiles:
