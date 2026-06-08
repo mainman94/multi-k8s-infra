@@ -88,23 +88,10 @@ configs:
         - CiliumIdentity
         - CiliumEndpoint
         - CiliumEndpointSlice
-    # Dex/Authentik OIDC
+    # Dex/Pocket ID OIDC
     url: https://argo-rp.hauptmann.dev
     dex.config: |
       connectors:
-        - type: oidc
-          id: authentik
-          name: Authentik
-          config:
-            issuer: https://auth.hauptmann.dev/application/o/argo-cd/
-            clientID: '$argocd-dex-authentik:DEX_AUTHENTIK_CLIENT_ID'
-            clientSecret: '$argocd-dex-authentik:DEX_AUTHENTIK_CLIENT_SECRET'
-            insecureEnableGroups: true
-            scopes:
-              - openid
-              - profile
-              - email
-              - groups
         - type: oidc
           id: pocketid
           name: Pocket ID
@@ -127,10 +114,6 @@ configs:
           secretEnv: ARGO_WORKFLOWS_SSO_CLIENT_SECRET
   rbac:
     policy.csv: |
-      # Authentik ArgoCD Admin group has full admin privileges
-      g, ArgoCD Admin, role:admin
-      # Authentik ArgoCD Users group has read-only access
-      g, ArgoCD Users, role:readonly
       # Pocket ID homelab group has full admin privileges
       g, homelab, role:admin
     policy.default: role:readonly
