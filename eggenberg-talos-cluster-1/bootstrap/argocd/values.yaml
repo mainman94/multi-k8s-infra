@@ -109,7 +109,7 @@ configs:
           id: pocketid
           name: Pocket ID
           config:
-            issuer: https://id.hauptmann.dev/
+            issuer: https://id.hauptmann.dev
             clientID: '$argocd-dex-authentik:DEX_POCKETID_CLIENT_ID'
             clientSecret: '$argocd-dex-authentik:DEX_POCKETID_CLIENT_SECRET'
             insecureEnableGroups: true
@@ -131,6 +131,8 @@ configs:
       g, ArgoCD Admin, role:admin
       # Authentik ArgoCD Users group has read-only access
       g, ArgoCD Users, role:readonly
+      # Pocket ID homelab group has full admin privileges
+      g, homelab, role:admin
     policy.default: role:readonly
     scopes: "[groups, email]"
   secret:
