@@ -41,7 +41,7 @@ spec:
     - name: public
       sectionName: https
   hostnames:
-    - auth.hauptmann.dev
+    - id.hauptmann.dev
   rules:
     - backendRefs:
         - name: pocketid-external
