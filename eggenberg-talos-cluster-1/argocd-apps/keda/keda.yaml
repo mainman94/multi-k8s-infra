@@ -9,7 +9,7 @@ spec:
   sources:
     - repoURL: https://kedacore.github.io/charts
       chart: keda
-      targetRevision: 2.20.0
+      targetRevision: 2.20.1
       helm:
         valueFiles:
           - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/keda/values.yaml
