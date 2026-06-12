@@ -1,20 +1,5 @@
 ingress:
   enabled: false
-  className: cilium
-  hosts:
-    - host: uptime.hauptmann.dev
-      paths:
-        - path: /
-          pathType: Prefix
-    - host: status.hauptmann.dev
-      paths:
-        - path: /
-          pathType: Prefix
-  tls:
-    - secretName: cloudflare-origin-cert
-      hosts:
-        - uptime.hauptmann.dev
-        - status.hauptmann.dev
 persistence:
   enabled: true
   storageClass: "longhorn"
