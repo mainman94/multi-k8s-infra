@@ -28,7 +28,6 @@ jobs:
         run: |
           find . -type f \( -name '*.yaml' -o -name '*.yml' \) \
             -not -path './.github/*' \
-            -not -path '*/imageUpdater-dev.yaml' \
             -not -name 'values.yaml' \
             -not -name '.kube-linter.yaml' \
             -not -name '.pre-commit-config.yaml' \
