@@ -1,5 +1,4 @@
-# Activate by renaming to cilium-mtls-policy.yaml and adding it to kustomization resources.
-# This enforces Cilium mutual authentication for pod-to-pod traffic in portfolio-dev.
+# Enforces Cilium mutual authentication (SPIRE mTLS) for pod-to-pod traffic in portfolio-dev.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:

@@ -1,62 +1,53 @@
-#apiVersion: networking.k8s.io/v1
-#kind: NetworkPolicy
-#metadata:
-#  name: portfolio-app-netpol
-#spec:
-#  podSelector:
-#    matchLabels:
-#      app: portfolio-app
-#  policyTypes:
-#    - Ingress
-#    - Egress
-#  ingress:
-#    # Allow traffic from the Talos node network. Cilium Envoy runs with
-#    # hostNetwork, so the source is seen as the node IP rather than a pod IP.
-#    - from:
-#        - ipBlock:
-#            cidr: 192.168.0.0/24
-#      ports:
-#        - protocol: TCP
-#          port: 3000
-#    # Allow traffic from ArgoCD namespace (for Argo Rollouts analysis)
-#    - from:
-#        - namespaceSelector:
-#            matchLabels:
-#              kubernetes.io/metadata.name: argocd
-#      ports:
-#        - protocol: TCP
-#          port: 3000
-#    # Allow traffic from pods in the same namespace
-#    - from:
-#        - podSelector: {}
-#      ports:
-#        - protocol: TCP
-#          port: 3000
-#    # Allow Prometheus scraping from monitoring namespace
-#    - from:
-#        - namespaceSelector:
-#            matchLabels:
-#              kubernetes.io/metadata.name: monitoring
-#      ports:
-#        - protocol: TCP
-#          port: 3001
-#  egress:
-#    # Allow traffic within the same namespace
-#    - to:
-#        - podSelector: {}
-#    # Allow DNS resolution to kube-system
-#    - to:
-#        - namespaceSelector:
-#            matchLabels:
-#              kubernetes.io/metadata.name: kube-system
-#      ports:
-#        - protocol: TCP
-#          port: 53
-#        - protocol: UDP
-#          port: 53
-#    # Allow HTTP/HTTPS traffic for external requests
-#    - ports:
-#        - protocol: TCP
-#          port: 80
-#        - protocol: TCP
-#          port: 443
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: portfolio-app-netpol
+spec:
+  endpointSelector:
+    matchLabels:
+      app: portfolio-app
+  ingress:
+    # Cilium Gateway traffic arrives from the Envoy proxy (ingress entity);
+    # kubelet probes arrive from the node (host entity).
+    - fromEntities:
+        - ingress
+        - host
+      toPorts:
+        - ports:
+            - port: "3000"
+              protocol: TCP
+    # Argo Rollouts analysis web checks (controller runs in argocd namespace)
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: argocd
+      toPorts:
+        - ports:
+            - port: "3000"
+              protocol: TCP
+    # Prometheus metrics scrape from monitoring namespace
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: monitoring
+      toPorts:
+        - ports:
+            - port: "3001"
+              protocol: TCP
+  egress:
+    # DNS via CoreDNS in kube-system
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+    # External HTTP/HTTPS for server-side fetches
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+            - port: "443"
+              protocol: TCP

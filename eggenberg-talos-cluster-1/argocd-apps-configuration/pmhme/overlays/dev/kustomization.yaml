@@ -3,6 +3,7 @@ kind: Kustomization
 namespace: portfolio-dev
 resources:
   - namespace-mesh-pilot.yaml
+  - cilium-mtls-policy.yaml
   - ../../base
 images:
   - name: dockerha08/pmhme
