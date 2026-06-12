@@ -9,6 +9,7 @@ spec:
   ingress:
     # Cilium Gateway traffic arrives from the Envoy proxy (ingress entity);
     # kubelet probes arrive from the node (host entity).
+    # L7: the portfolio serves read-only content, so only GET/HEAD pass.
     - fromEntities:
         - ingress
         - host
@@ -16,6 +17,10 @@ spec:
         - ports:
             - port: "3000"
               protocol: TCP
+          rules:
+            http:
+              - method: GET
+              - method: HEAD
     # Argo Rollouts analysis web checks (controller runs in argocd namespace)
     - fromEndpoints:
         - matchLabels:
@@ -24,6 +29,10 @@ spec:
         - ports:
             - port: "3000"
               protocol: TCP
+          rules:
+            http:
+              - method: GET
+              - method: HEAD
     # Prometheus metrics scrape from monitoring namespace
     - fromEndpoints:
         - matchLabels:
@@ -32,6 +41,10 @@ spec:
         - ports:
             - port: "3001"
               protocol: TCP
+          rules:
+            http:
+              - method: GET
+                path: /metrics
   egress:
     # DNS via CoreDNS in kube-system
     - toEndpoints:

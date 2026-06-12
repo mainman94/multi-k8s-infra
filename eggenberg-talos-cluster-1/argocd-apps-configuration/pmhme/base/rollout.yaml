@@ -13,6 +13,9 @@ spec:
       labels:
         app: "portfolio-app"
         version: "v1"
+        # Feeds the alloy relabel rule -> Loki "app" log label
+        app.kubernetes.io/name: pmhme-portfolio
+        app.kubernetes.io/part-of: pmhme
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "3001"
