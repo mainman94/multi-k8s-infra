@@ -4,4 +4,4 @@ resources:
   - base
 images:
   - name: dockerha08/pmhme
-    newTag: 1.5.4
+    newTag: 0.1.1
