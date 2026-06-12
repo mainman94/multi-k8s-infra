@@ -13,6 +13,6 @@ spec:
           - eggenberg-talos-cluster-1/argocd-apps-configuration/pmhme/overlays/dev/kustomization.yaml
     - image:
         repoURL: dockerha08/pmhme
-        imageSelectionStrategy: Lexical
-        allowTags: '^\d{14}$'
-        discoveryLimit: 3
+        imageSelectionStrategy: SemVer
+        allowTags: '^([0-9]+\.[0-9]+\.[0-9]+(?:-[a-zA-Z0-9.-]*)?(?:\+[a-zA-Z0-9.-]*)?|\d{14})$'
+        discoveryLimit: 5
