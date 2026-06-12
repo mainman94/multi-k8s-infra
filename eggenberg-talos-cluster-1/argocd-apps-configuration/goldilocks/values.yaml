@@ -1,0 +1,19 @@
+# VPA controller runs cluster-wide already (autoscaler namespace), don't install the subchart
+vpa:
+  enabled: false
+
+controller:
+  flags:
+    on-by-default: "true"
+    exclude-namespaces: "kube-system,goldilocks"
+  resources:
+    requests:
+      cpu: 25m
+      memory: 256Mi
+
+dashboard:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 25m
+      memory: 256Mi
