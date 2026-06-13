@@ -15,8 +15,8 @@ spec:
       - containerName: "*"
         controlledResources: ["cpu", "memory"]
         minAllowed:
-          cpu: 50m
-          memory: 128Mi
+          cpu: 100m
+          memory: 256Mi
         maxAllowed:
           cpu: 1
           memory: 1Gi
