@@ -1,0 +1,3 @@
+updater:
+  extraArgs:
+    - --min-replicas=1
