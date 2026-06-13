@@ -8,8 +8,8 @@ nscd:
   enabled: true
 resources:
   limits:
-    cpu: 1000m
-    memory: 1Gi
+    cpu: 16m
+    memory: 572Mi
   requests:
-    cpu: 100m
-    memory: 512Mi
+    cpu: 12m
+    memory: 380Mi
