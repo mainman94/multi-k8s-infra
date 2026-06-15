@@ -13,3 +13,7 @@ images:
   newTag: 0.1.1
 patches:
 - path: httproute-patch.yaml
+- path: configmap-patch.yaml
+  target:
+    kind: ConfigMap
+    name: portfolio-app-config

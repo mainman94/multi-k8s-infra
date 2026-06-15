@@ -13,4 +13,6 @@ spec:
       protocol: TCP
       port: 80
       targetPort: http
+      appProtocol: http
   type: ClusterIP
+  internalTrafficPolicy: Local

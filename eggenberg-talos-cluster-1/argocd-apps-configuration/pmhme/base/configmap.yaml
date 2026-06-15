@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: portfolio-app-config
+  labels:
+    app: portfolio-app
+data:
+  STAGE: "base"
+  LOG_LEVEL: "info"
+  TELEMETRY_ENABLED: "true"
+  OTEL_SERVICE_NAME: "hauptmann-portfolio"

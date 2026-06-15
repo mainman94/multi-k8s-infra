@@ -20,3 +20,7 @@ patches:
     kind: Rollout
     name: portfolio-app
 - path: httproute-patch.yaml
+- path: configmap-patch.yaml
+  target:
+    kind: ConfigMap
+    name: portfolio-app-config

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: portfolio-app-config
+data:
+  STAGE: "test"
+  LOG_LEVEL: "info"

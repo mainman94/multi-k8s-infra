@@ -8,6 +8,7 @@ labels:
       app.kubernetes.io/part-of: pmhme
     includeTemplates: true
 resources:
+  - configmap.yaml
   - rollout.yaml
   - service.yaml
   - service-preview.yaml
