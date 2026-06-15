@@ -20,7 +20,6 @@ spec:
       targetPort: metrics
       appProtocol: prometheus
   type: ClusterIP
-  internalTrafficPolicy: Local
   sessionAffinity: ClientIP
   sessionAffinityConfig:
     clientIP:
