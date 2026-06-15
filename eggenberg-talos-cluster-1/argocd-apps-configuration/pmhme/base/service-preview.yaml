@@ -15,4 +15,3 @@ spec:
       targetPort: http
       appProtocol: http
   type: ClusterIP
-  internalTrafficPolicy: Local

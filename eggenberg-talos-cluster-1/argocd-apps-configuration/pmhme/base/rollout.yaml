@@ -39,8 +39,8 @@ spec:
               path: /
               port: http
               scheme: HTTP
-            initialDelaySeconds: 0
-            periodSeconds: 3
+            initialDelaySeconds: 15
+            periodSeconds: 5
             timeoutSeconds: 2
             failureThreshold: 20
             successThreshold: 1
