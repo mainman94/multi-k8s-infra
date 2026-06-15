@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: argo-events
   namespace: argocd
+  labels:
+    category: deployment
 spec:
   project: default
   sources:

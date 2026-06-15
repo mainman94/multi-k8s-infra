@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: longhorn
   namespace: argocd
+  labels:
+    category: storage
 spec:
   project: default
   sources:

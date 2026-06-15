@@ -4,6 +4,8 @@ kind: Application
 metadata:
   name: vertical-pod-autoscaler
   namespace: argocd
+  labels:
+    category: scaling
 spec:
   project: default
   sources:

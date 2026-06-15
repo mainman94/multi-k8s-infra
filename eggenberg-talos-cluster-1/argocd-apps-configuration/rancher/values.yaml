@@ -1,6 +1,0 @@
-hostname: rancher.hauptmann.dev
-replicas: 2
-ingress:
-  enabled: true
-  ingressClassName: "cilium"
-tls: external

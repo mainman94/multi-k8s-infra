@@ -4,6 +4,8 @@ kind: Application
 metadata:
   name: spegel
   namespace: argocd
+  labels:
+    category: infrastructure
 spec:
   project: default
   sources:

@@ -4,6 +4,8 @@ kind: Application
 metadata:
   name: pmhme-portfolio-dev
   namespace: argocd
+  labels:
+    category: app
   annotations:
     kargo.akuity.io/authorized-stage: pmhme-portfolio:dev
 spec:
