@@ -17,7 +17,7 @@ jobs:
     name: Schema Validation (kubeconform)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Install kubeconform
         run: |
@@ -43,7 +43,7 @@ jobs:
     name: Best Practices (kube-linter)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Run kube-linter
         uses: stackrox/kube-linter-action@v1
@@ -55,7 +55,7 @@ jobs:
     name: Security Scan (checkov)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Run checkov
         uses: bridgecrewio/checkov-action@v12
