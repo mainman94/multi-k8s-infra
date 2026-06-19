@@ -10,7 +10,7 @@ resources:
 - ../../base
 images:
 - name: dockerha08/pmhme
-  newTag: 0.1.1
+  newTag: 0.1.3
 patches:
 - path: httproute-patch.yaml
 - path: configmap-patch.yaml
