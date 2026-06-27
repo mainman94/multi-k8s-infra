@@ -13,10 +13,13 @@ spec:
           env:
             - name: SMTP_HOST
               value: mailpit
+              valueFrom: null
             - name: SMTP_PORT
               value: "1025"
+              valueFrom: null
             - name: SMTP_USER
               value: ""
+              valueFrom: null
 ---
 apiVersion: apps/v1
 kind: Deployment
