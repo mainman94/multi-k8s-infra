@@ -1,5 +1,5 @@
 # Single-instance Postgres for the contact backend.
-# Namespace + common labels are applied by the production overlay.
+# Namespace + common labels are applied by the including overlay (dev/test/production).
 # contact-api auto-creates the `contact_requests` table on startup
 # (CREATE TABLE IF NOT EXISTS), so no separate migration job is needed.
 apiVersion: apps/v1

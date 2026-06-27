@@ -1,11 +1,10 @@
 # yamllint disable rule:line-length
 # Least-privilege Cilium policies for the contact backend.
 #
-# STAGING NOTE: not referenced by kustomization.yaml yet. Bring the workloads up
-# first with default-allow networking and verify the full flow end-to-end, then
-# add `- netpol.yaml` to backend/kustomization.yaml in a follow-up commit. Once an
-# endpoint is selected by ANY CiliumNetworkPolicy it becomes default-deny for all
-# non-matching traffic, so these must be complete before they are enabled.
+# These are LIVE: referenced by base/kustomization.yaml, so they apply in every
+# overlay (dev/test/production). Once an endpoint is selected by ANY
+# CiliumNetworkPolicy it becomes default-deny for all non-matching traffic, so
+# keep each workload's allowed ingress/egress complete when editing.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
