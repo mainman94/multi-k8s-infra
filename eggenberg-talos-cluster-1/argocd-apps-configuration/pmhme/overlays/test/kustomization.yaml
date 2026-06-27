@@ -2,18 +2,24 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: portfolio-test
 labels:
-- pairs:
-    app.kubernetes.io/environment: test
-  includeTemplates: true
+  - pairs:
+      app.kubernetes.io/environment: test
+    includeTemplates: true
 resources:
-- namespace.yaml
-- ../../base
+  - namespace.yaml
+  - ../../base
 images:
-- name: dockerha08/pmhme
-  newTag: 0.1.3
+  - name: ghcr.io/mainman94/pmhme
+    newTag: 0.1.3
+  - name: ghcr.io/mainman94/contact-api
+    newTag: 0.1.3
+  - name: ghcr.io/mainman94/notifier-telegram
+    newTag: 0.1.3
+  - name: ghcr.io/mainman94/notifier-email
+    newTag: 0.1.3
 patches:
-- path: httproute-patch.yaml
-- path: configmap-patch.yaml
-  target:
-    kind: ConfigMap
-    name: portfolio-app-config
+  - path: httproute-patch.yaml
+  - path: configmap-patch.yaml
+    target:
+      kind: ConfigMap
+      name: portfolio-app-config

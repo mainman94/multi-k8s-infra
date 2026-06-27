@@ -1,0 +1,240 @@
+# yamllint disable rule:line-length
+# Least-privilege Cilium policies for the contact backend.
+#
+# STAGING NOTE: not referenced by kustomization.yaml yet. Bring the workloads up
+# first with default-allow networking and verify the full flow end-to-end, then
+# add `- netpol.yaml` to backend/kustomization.yaml in a follow-up commit. Once an
+# endpoint is selected by ANY CiliumNetworkPolicy it becomes default-deny for all
+# non-matching traffic, so these must be complete before they are enabled.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: contact-api-netpol
+spec:
+  endpointSelector:
+    matchLabels:
+      app: contact-api
+  ingress:
+    # Public form submissions arrive via the Cilium Gateway (ingress entity).
+    # Only POST /api/contact is allowed; /internal/* is NOT reachable this way.
+    - fromEntities:
+        - ingress
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+          rules:
+            http:
+              - method: POST
+                path: "/api/contact"
+    # Internal status callbacks: only the notifiers may reach /internal/*.
+    - fromEndpoints:
+        - matchLabels:
+            app: notifier-telegram
+        - matchLabels:
+            app: notifier-email
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+          rules:
+            http:
+              - method: PATCH
+                path: "/internal/contact/.*/status"
+    # kubelet health probes from the node.
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+          rules:
+            http:
+              - method: GET
+                path: "/healthz"
+              - method: GET
+                path: "/readyz"
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+    - toEndpoints:
+        - matchLabels:
+            app: contact-postgres
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app: contact-nats
+      toPorts:
+        - ports:
+            - port: "4222"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: contact-postgres-netpol
+spec:
+  endpointSelector:
+    matchLabels:
+      app: contact-postgres
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app: contact-api
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: contact-nats-netpol
+spec:
+  endpointSelector:
+    matchLabels:
+      app: contact-nats
+  ingress:
+    # NATS client port: contact-api (publish) + notifiers (subscribe).
+    - fromEndpoints:
+        - matchLabels:
+            app: contact-api
+        - matchLabels:
+            app: notifier-telegram
+        - matchLabels:
+            app: notifier-email
+      toPorts:
+        - ports:
+            - port: "4222"
+              protocol: TCP
+    # kubelet probes hit the monitoring port.
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "8222"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: notifier-telegram-netpol
+spec:
+  endpointSelector:
+    matchLabels:
+      app: notifier-telegram
+  ingress:
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "8081"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+    - toEndpoints:
+        - matchLabels:
+            app: contact-nats
+      toPorts:
+        - ports:
+            - port: "4222"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app: contact-api
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+    # Telegram Bot API (api.telegram.org) over HTTPS.
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: notifier-email-netpol
+spec:
+  endpointSelector:
+    matchLabels:
+      app: notifier-email
+  ingress:
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "8081"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+    - toEndpoints:
+        - matchLabels:
+            app: contact-nats
+      toPorts:
+        - ports:
+            - port: "4222"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app: contact-api
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+    # Outbound SMTP relay (submission/implicit-TLS/legacy). Trim to your relay's port.
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "587"
+              protocol: TCP
+            - port: "465"
+              protocol: TCP
+            - port: "25"
+              protocol: TCP
+              # yamllint enable rule:line-length

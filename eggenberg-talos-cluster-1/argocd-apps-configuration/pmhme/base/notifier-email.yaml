@@ -1,0 +1,98 @@
+# notifier-email (Go): subscribes contact.created, sends an email via SMTP,
+# reports per-channel status back to contact-api /internal.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notifier-email
+  labels:
+    app: notifier-email
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: notifier-email
+  template:
+    metadata:
+      labels:
+        app: notifier-email
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      imagePullSecrets:
+        - name: docker-pull-secret
+      containers:
+        - name: notifier-email
+          image: ghcr.io/mainman94/notifier-email
+          ports:
+            - containerPort: 8081
+              name: health
+              protocol: TCP
+          env:
+            - name: NATS_URL
+              value: nats://contact-nats:4222
+            - name: CONTACT_API_URL
+              value: http://contact-api:8080
+            - name: HEALTH_PORT
+              value: "8081"
+            - name: SMTP_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: contact-backend-secrets
+                  key: SMTP_HOST
+            - name: SMTP_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: contact-backend-secrets
+                  key: SMTP_PORT
+            - name: SMTP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: contact-backend-secrets
+                  key: SMTP_USER
+            - name: SMTP_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: contact-backend-secrets
+                  key: SMTP_PASS
+            - name: SMTP_FROM
+              valueFrom:
+                secretKeyRef:
+                  name: contact-backend-secrets
+                  key: SMTP_FROM
+            - name: CONTACT_TO_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: contact-backend-secrets
+                  key: CONTACT_TO_EMAIL
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: health
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: health
+            initialDelaySeconds: 5
+            periodSeconds: 15
+            timeoutSeconds: 2
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "32Mi"
+            limits:
+              cpu: "100m"
+              memory: "64Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
