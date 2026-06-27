@@ -1,0 +1,38 @@
+# yamllint disable rule:line-length
+# Allow notifier->sink egress in dev/test. Base backend-netpol already permits
+# DNS + nats + contact-api egress; these add the sink targets. (The base
+# world egress for real Telegram/SMTP simply goes unused in dev/test.)
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: notifier-email-sink-egress
+spec:
+  endpointSelector:
+    matchLabels:
+      app: notifier-email
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            app: mailpit
+      toPorts:
+        - ports:
+            - port: "1025"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: notifier-telegram-sink-egress
+spec:
+  endpointSelector:
+    matchLabels:
+      app: notifier-telegram
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            app: telegram-sink
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+              # yamllint enable rule:line-length

@@ -8,6 +8,8 @@ labels:
 resources:
   - namespace.yaml
   - ../../base
+components:
+  - ../../components/notification-sink
 images:
   - name: ghcr.io/mainman94/pmhme
     newTag: 0.1.3
