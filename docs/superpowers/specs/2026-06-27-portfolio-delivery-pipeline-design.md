@@ -190,3 +190,10 @@ RuntimeDefault, readOnlyRootFilesystem where the image allows).
   be implemented/tested independently of the infra changes (the two halves meet only at the agreed
   tag scheme).
 - Implementation may split into **two plans** (portfolio CI; infra pipeline) that share this spec.
+- **Independent discovery ≠ promote-identical-artifact (by design).** The Kargo Warehouse discovers
+  each of the 4 images' newest SemVer tag independently, so a promoted Freight can carry a tag
+  combination that never ran together in dev. This is the accepted consequence of the chosen
+  per-service independent versioning; the dev→test→prod gate validates each env's own serving path
+  (smoke + `/version` on that env's hostname) rather than asserting tag identity with dev. If
+  promote-the-exact-dev-combination is ever required, switch the Warehouse to a git-only
+  subscription on the dev overlay and have stages copy dev's pinned tags.

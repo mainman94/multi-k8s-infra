@@ -64,7 +64,7 @@ spec:
             timeout: 15m0s
           config:
             method: GET
-            url: https://dev.hauptmann.dev/
+            url: https://test.hauptmann.dev/
             successExpression: response.status == 200
         - uses: argocd-update
           as: argo
@@ -80,5 +80,5 @@ spec:
             timeout: 15m0s
           config:
             method: GET
-            url: https://dev.hauptmann.dev/version
+            url: https://test.hauptmann.dev/version
             successExpression: response.status == 200 && response.body.version == '${{ outputs.overlay.deployedTag }}'
