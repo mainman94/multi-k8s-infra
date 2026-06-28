@@ -33,6 +33,9 @@ spec:
               name: smtp
             - containerPort: 8025
               name: ui
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           readinessProbe:
             tcpSocket:
               port: smtp
@@ -51,6 +54,9 @@ spec:
             capabilities:
               drop:
                 - ALL
+      volumes:
+        - name: tmp
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
