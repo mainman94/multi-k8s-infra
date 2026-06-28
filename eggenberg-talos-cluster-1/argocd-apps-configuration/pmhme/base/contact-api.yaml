@@ -18,6 +18,17 @@ spec:
       labels:
         app: contact-api
     spec:
+      # Soft anti-affinity: prefer spreading the 2 replicas across nodes, but
+      # still schedule both on a single-node homelab if needed.
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app: contact-api
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
