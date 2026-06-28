@@ -11,6 +11,15 @@ spec:
   hostnames:
     - hauptmann.dev
   rules:
+    # Public contact form submissions go to the contact-api (same namespace).
+    # Only /api/contact is exposed; /internal/* is never routed.
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/contact
+      backendRefs:
+        - name: contact-api
+          port: 8080
     - matches:
         - path:
             type: PathPrefix

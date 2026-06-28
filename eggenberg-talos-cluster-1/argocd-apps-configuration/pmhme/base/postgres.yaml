@@ -1,0 +1,115 @@
+# Single-instance Postgres for the contact backend.
+# Namespace + common labels are applied by the including overlay (dev/test/production).
+# contact-api auto-creates the `contact_requests` table on startup
+# (CREATE TABLE IF NOT EXISTS), so no separate migration job is needed.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: contact-postgres
+  labels:
+    app: contact-postgres
+spec:
+  serviceName: contact-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: contact-postgres
+  template:
+    metadata:
+      labels:
+        app: contact-postgres
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: postgres
+          # Digest-pinned for immutability; tag kept for readability (Renovate-bumpable).
+          image: docker.io/postgres:17-alpine@sha256:dc17045ccfd343b49600570ea734b9c4991cf1c3f3302e67df51e3b402dd55c4
+          ports:
+            - containerPort: 5432
+              name: postgres
+              protocol: TCP
+          env:
+            - name: POSTGRES_USER
+              value: contact
+            - name: POSTGRES_DB
+              value: contact
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: contact-backend-secrets
+                  key: POSTGRES_PASSWORD
+            # Keep PGDATA in a subdirectory so the volume root (lost+found etc.)
+            # does not collide with initdb.
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: run
+              mountPath: /var/run/postgresql
+            - name: tmp
+              mountPath: /tmp
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "contact", "-d", "contact"]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 6
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "contact", "-d", "contact"]
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+      volumes:
+        - name: run
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: longhorn
+        resources:
+          requests:
+            storage: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: contact-postgres
+  labels:
+    app: contact-postgres
+spec:
+  clusterIP: None
+  selector:
+    app: contact-postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres
+      protocol: TCP

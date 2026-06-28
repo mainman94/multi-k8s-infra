@@ -1,0 +1,81 @@
+# notifier-telegram (Go): subscribes contact.created, sends a Telegram message,
+# reports per-channel status back to contact-api /internal. No Service needed
+# (it is a consumer; the health endpoint is only for kubelet probes).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notifier-telegram
+  labels:
+    app: notifier-telegram
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: notifier-telegram
+  template:
+    metadata:
+      labels:
+        app: notifier-telegram
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      imagePullSecrets:
+        - name: docker-pull-secret
+      containers:
+        - name: notifier-telegram
+          image: ghcr.io/mainman94/notifier-telegram:0.1.3
+          ports:
+            - containerPort: 8081
+              name: health
+              protocol: TCP
+          env:
+            - name: NATS_URL
+              value: nats://contact-nats:4222
+            - name: CONTACT_API_URL
+              value: http://contact-api:8080
+            - name: HEALTH_PORT
+              value: "8081"
+            - name: TELEGRAM_API_BASE
+              value: https://api.telegram.org
+            - name: TELEGRAM_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: contact-backend-secrets
+                  key: TELEGRAM_BOT_TOKEN
+            - name: TELEGRAM_CHAT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: contact-backend-secrets
+                  key: TELEGRAM_CHAT_ID
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: health
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: health
+            initialDelaySeconds: 5
+            periodSeconds: 15
+            timeoutSeconds: 2
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "32Mi"
+            limits:
+              cpu: "100m"
+              memory: "64Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true

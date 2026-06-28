@@ -7,8 +7,6 @@ spec:
   vars:
     - name: gitRepo
       value: https://github.com/mainman94/multi-k8s-infra
-    - name: imageRepo
-      value: dockerha08/pmhme
     - name: repoPath
       value: ./repo
     - name: overlayPath
@@ -37,8 +35,14 @@ spec:
           config:
             path: ${{ vars.repoPath }}/${{ vars.overlayPath }}
             images:
-              - image: ${{ vars.imageRepo }}
-                tag: ${{ quote(imageFrom(vars.imageRepo).Tag) }}
+              - image: ghcr.io/mainman94/pmhme
+                tag: ${{ quote(imageFrom("ghcr.io/mainman94/pmhme").Tag) }}
+              - image: ghcr.io/mainman94/contact-api
+                tag: ${{ quote(imageFrom("ghcr.io/mainman94/contact-api").Tag) }}
+              - image: ghcr.io/mainman94/notifier-telegram
+                tag: ${{ quote(imageFrom("ghcr.io/mainman94/notifier-telegram").Tag) }}
+              - image: ghcr.io/mainman94/notifier-email
+                tag: ${{ quote(imageFrom("ghcr.io/mainman94/notifier-email").Tag) }}
         - uses: git-commit
           as: commit
           config:
@@ -53,14 +57,14 @@ spec:
             path: ${{ vars.repoPath }}/${{ vars.overlayPath }}/kustomization.yaml
             outputs:
               - name: deployedTag
-                fromExpression: filter(images, {.name == "dockerha08/pmhme"})[0].newTag
+                fromExpression: filter(images, {.name == "ghcr.io/mainman94/pmhme"})[0].newTag
         - uses: http
           as: smoke-http-200
           retry:
             timeout: 15m0s
           config:
             method: GET
-            url: https://dev.hauptmann.dev/
+            url: https://test.hauptmann.dev/
             successExpression: response.status == 200
         - uses: argocd-update
           as: argo
@@ -76,5 +80,5 @@ spec:
             timeout: 15m0s
           config:
             method: GET
-            url: https://dev.hauptmann.dev/version
+            url: https://test.hauptmann.dev/version
             successExpression: response.status == 200 && response.body.version == '${{ outputs.overlay.deployedTag }}'

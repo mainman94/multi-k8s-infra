@@ -8,15 +8,34 @@ spec:
   applicationRefs:
     - namePattern: pmhme-portfolio-dev
       images:
-        - alias: portfolio
-          imageName: dockerha08/pmhme
+        - alias: pmhme
+          imageName: ghcr.io/mainman94/pmhme
           commonUpdateSettings:
             updateStrategy: semver
-            # No 14-digit timestamp tags here: Masterminds semver coerces them
-            # to huge major versions that outrank every real semver tag.
             allowTags: regexp:^[0-9]+\.[0-9]+\.[0-9]+(?:-[a-zA-Z0-9.-]+)?(?:\+[a-zA-Z0-9.-]+)?$
             forceUpdate: false
-            pullSecret: pullsecret:argocd/docker-pull-pat
+            pullSecret: pullsecret:argocd/ghcr-pull-pat
+        - alias: contact-api
+          imageName: ghcr.io/mainman94/contact-api
+          commonUpdateSettings:
+            updateStrategy: semver
+            allowTags: regexp:^[0-9]+\.[0-9]+\.[0-9]+(?:-[a-zA-Z0-9.-]+)?(?:\+[a-zA-Z0-9.-]+)?$
+            forceUpdate: false
+            pullSecret: pullsecret:argocd/ghcr-pull-pat
+        - alias: notifier-telegram
+          imageName: ghcr.io/mainman94/notifier-telegram
+          commonUpdateSettings:
+            updateStrategy: semver
+            allowTags: regexp:^[0-9]+\.[0-9]+\.[0-9]+(?:-[a-zA-Z0-9.-]+)?(?:\+[a-zA-Z0-9.-]+)?$
+            forceUpdate: false
+            pullSecret: pullsecret:argocd/ghcr-pull-pat
+        - alias: notifier-email
+          imageName: ghcr.io/mainman94/notifier-email
+          commonUpdateSettings:
+            updateStrategy: semver
+            allowTags: regexp:^[0-9]+\.[0-9]+\.[0-9]+(?:-[a-zA-Z0-9.-]+)?(?:\+[a-zA-Z0-9.-]+)?$
+            forceUpdate: false
+            pullSecret: pullsecret:argocd/ghcr-pull-pat
   writeBackConfig:
     method: "git:secret:argocd/git-credentials"
     gitConfig:

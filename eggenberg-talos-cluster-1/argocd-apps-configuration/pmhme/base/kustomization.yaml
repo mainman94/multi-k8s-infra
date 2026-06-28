@@ -18,3 +18,9 @@ resources:
   - pdb.yaml
   - networkpolicy.yaml
   - cilium-mtls-policy.yaml
+  - postgres.yaml
+  - nats.yaml
+  - contact-api.yaml
+  - notifier-telegram.yaml
+  - notifier-email.yaml
+  - backend-netpol.yaml
