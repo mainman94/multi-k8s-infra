@@ -27,7 +27,7 @@ spec:
         - name: docker-pull-secret
       containers:
         - name: notifier-telegram
-          image: ghcr.io/mainman94/notifier-telegram
+          image: ghcr.io/mainman94/notifier-telegram:0.1.3
           ports:
             - containerPort: 8081
               name: health

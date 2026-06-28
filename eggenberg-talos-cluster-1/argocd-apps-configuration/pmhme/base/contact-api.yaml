@@ -38,7 +38,7 @@ spec:
         - name: docker-pull-secret
       containers:
         - name: contact-api
-          image: ghcr.io/mainman94/contact-api
+          image: ghcr.io/mainman94/contact-api:0.1.3
           ports:
             - containerPort: 8080
               name: http
