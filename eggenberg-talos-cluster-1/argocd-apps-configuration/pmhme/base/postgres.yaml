@@ -29,7 +29,7 @@ spec:
       containers:
         - name: postgres
           # Digest-pinned for immutability; tag kept for readability (Renovate-bumpable).
-          image: docker.io/postgres:17-alpine@sha256:dc17045ccfd343b49600570ea734b9c4991cf1c3f3302e67df51e3b402dd55c4
+          image: docker.io/postgres:18-alpine@sha256:1b1689b20d16a014a3d195653381cf2caa75a41a92d93b255a9d6ea29fd353aa
           ports:
             - containerPort: 5432
               name: postgres
@@ -84,7 +84,10 @@ spec:
             readOnlyRootFilesystem: true
         - name: postgres-exporter
           # Digest-pinned for immutability; tag kept for readability (Renovate-bumpable).
-          image: docker.io/prometheuscommunity/postgres-exporter:v0.15.0@sha256:386b12d19eab2a37d7cd8ca8b4c7491cc7a830d9581f49af6c98a393da9605e6
+          # v0.17.0+ required: PG17 moved checkpoints_timed/checkpoints_req
+          # from pg_stat_bgwriter to pg_stat_checkpointer; older exporter
+          # versions query the removed columns and fail the stat_bgwriter collector.
+          image: docker.io/prometheuscommunity/postgres-exporter:v0.17.1@sha256:38606faa38c54787525fb0ff2fd6b41b4cfb75d455c1df294927c5f611699b17
           ports:
             - containerPort: 9187
               name: metrics
