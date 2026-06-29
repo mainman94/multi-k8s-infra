@@ -79,6 +79,7 @@ metrics:
     namespace: velero
 
 # Kopia configuration for PV backups
+deployNodeAgent: true
 nodeAgent:
   podVolumeBacking:
     enabled: true
