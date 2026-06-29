@@ -5,6 +5,13 @@
 # overlay (dev/test/production). Once an endpoint is selected by ANY
 # CiliumNetworkPolicy it becomes default-deny for all non-matching traffic, so
 # keep each workload's allowed ingress/egress complete when editing.
+#
+# Service mesh: in-cluster app->app edges carry `authentication.mode: required`
+# (Cilium SPIRE mutual auth, enabled cluster-wide in bootstrap/cilium). Auth is
+# scoped to the specific pod-to-pod edges ONLY. DNS (kube-dns), world egress
+# (SMTP/Telegram), kubelet host probes, and Prometheus scrapes are deliberately
+# left unauthenticated — those peers have no SPIFFE identity and requiring mutual
+# auth toward them would drop the traffic.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -16,6 +23,7 @@ spec:
   ingress:
     # Public form submissions arrive via the Cilium Gateway (ingress entity).
     # Only POST /api/contact is allowed; /internal/* is NOT reachable this way.
+    # No mutual auth: external clients carry no SPIFFE identity.
     - fromEntities:
         - ingress
       toPorts:
@@ -27,11 +35,14 @@ spec:
               - method: POST
                 path: "/api/contact"
     # Internal status callbacks: only the notifiers may reach /internal/*.
+    # Meshed edge: require mutual auth from the notifier pods.
     - fromEndpoints:
         - matchLabels:
             app: notifier-telegram
         - matchLabels:
             app: notifier-email
+      authentication:
+        mode: required
       toPorts:
         - ports:
             - port: "8080"
@@ -40,7 +51,7 @@ spec:
             http:
               - method: PATCH
                 path: "/internal/contact/.*/status"
-    # kubelet health probes from the node.
+    # kubelet health probes from the node. No mutual auth (host has no identity).
     - fromEntities:
         - host
       toPorts:
@@ -62,16 +73,22 @@ spec:
         - ports:
             - port: "53"
               protocol: ANY
+    # Meshed edge: contact-api -> contact-postgres.
     - toEndpoints:
         - matchLabels:
             app: contact-postgres
+      authentication:
+        mode: required
       toPorts:
         - ports:
             - port: "5432"
               protocol: TCP
+    # Meshed edge: contact-api -> contact-nats.
     - toEndpoints:
         - matchLabels:
             app: contact-nats
+      authentication:
+        mode: required
       toPorts:
         - ports:
             - port: "4222"
@@ -86,14 +103,18 @@ spec:
     matchLabels:
       app: contact-postgres
   ingress:
+    # Meshed edge: require mutual auth from contact-api.
     - fromEndpoints:
         - matchLabels:
             app: contact-api
+      authentication:
+        mode: required
       toPorts:
         - ports:
             - port: "5432"
               protocol: TCP
-    # Prometheus metrics scrape from monitoring namespace
+    # Prometheus metrics scrape from monitoring namespace.
+    # No mutual auth: keep scraping decoupled from the app mesh.
     - fromEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: monitoring
@@ -125,6 +146,7 @@ spec:
       app: contact-nats
   ingress:
     # NATS client port: contact-api (publish) + notifiers (subscribe).
+    # Meshed edge: require mutual auth from all three clients.
     - fromEndpoints:
         - matchLabels:
             app: contact-api
@@ -132,18 +154,21 @@ spec:
             app: notifier-telegram
         - matchLabels:
             app: notifier-email
+      authentication:
+        mode: required
       toPorts:
         - ports:
             - port: "4222"
               protocol: TCP
-    # kubelet probes hit the monitoring port.
+    # kubelet probes hit the monitoring port. No mutual auth (host has no identity).
     - fromEntities:
         - host
       toPorts:
         - ports:
             - port: "8222"
               protocol: TCP
-    # Prometheus metrics scrape from monitoring namespace (nats-exporter sidecar)
+    # Prometheus metrics scrape from monitoring namespace (nats-exporter sidecar).
+    # No mutual auth.
     - fromEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: monitoring
@@ -189,21 +214,27 @@ spec:
         - ports:
             - port: "53"
               protocol: ANY
+    # Meshed edge: notifier-telegram -> contact-nats.
     - toEndpoints:
         - matchLabels:
             app: contact-nats
+      authentication:
+        mode: required
       toPorts:
         - ports:
             - port: "4222"
               protocol: TCP
+    # Meshed edge: notifier-telegram -> contact-api (internal status callback).
     - toEndpoints:
         - matchLabels:
             app: contact-api
+      authentication:
+        mode: required
       toPorts:
         - ports:
             - port: "8080"
               protocol: TCP
-    # Telegram Bot API (api.telegram.org) over HTTPS.
+    # Telegram Bot API (api.telegram.org) over HTTPS. No mutual auth (world).
     - toEntities:
         - world
       toPorts:
@@ -235,21 +266,27 @@ spec:
         - ports:
             - port: "53"
               protocol: ANY
+    # Meshed edge: notifier-email -> contact-nats.
     - toEndpoints:
         - matchLabels:
             app: contact-nats
+      authentication:
+        mode: required
       toPorts:
         - ports:
             - port: "4222"
               protocol: TCP
+    # Meshed edge: notifier-email -> contact-api (internal status callback).
     - toEndpoints:
         - matchLabels:
             app: contact-api
+      authentication:
+        mode: required
       toPorts:
         - ports:
             - port: "8080"
               protocol: TCP
-    # Outbound SMTP relay (submission/implicit-TLS/legacy). Trim to your relay's port.
+    # Outbound SMTP relay (submission/implicit-TLS/legacy). No mutual auth (world).
     - toEntities:
         - world
       toPorts:
