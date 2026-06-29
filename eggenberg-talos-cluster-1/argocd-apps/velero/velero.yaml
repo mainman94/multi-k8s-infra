@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: velero
+  namespace: argocd
+  labels:
+    category: backup
+spec:
+  project: default
+  sources:
+    - repoURL: https://vmware-tanzu.github.io/helm-charts
+      chart: velero
+      targetRevision: 7.1.3
+      helm:
+        valueFiles:
+          - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/velero/values.yaml
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
+      targetRevision: HEAD
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: velero
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
