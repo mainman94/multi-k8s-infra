@@ -33,11 +33,13 @@ credentials:
 # Backup schedules
 schedules:
   daily:
-    schedule: "0 2 * * *"  # 2 AM daily
+    schedule: "0 2 * * *" # 2 AM daily
     template:
-      ttl: "720h"  # 30 days retention
+      ttl: "48h" # 30 days retention
       includedNamespaces:
-        - "*"
+        - "portfolio"
+        - "uptime-kuma"
+        - "monitoring"
       excludedNamespaces:
         - kube-node-lease
         - kube-public
