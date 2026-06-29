@@ -29,7 +29,7 @@ spec:
       containers:
         - name: postgres
           # Digest-pinned for immutability; tag kept for readability (Renovate-bumpable).
-          image: docker.io/18.4-alpine3.24
+          image: docker.io/postgres:18.4-alpine3.24
           ports:
             - containerPort: 5432
               name: postgres
