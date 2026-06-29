@@ -64,6 +64,39 @@ spec:
               drop:
                 - ALL
             readOnlyRootFilesystem: true
+        - name: nats-exporter
+          # Digest-pinned for immutability; tag kept for readability (Renovate-bumpable).
+          image: docker.io/natsio/prometheus-nats-exporter:0.15.0@sha256:1f6787754b8b083f271adea4bb699b9c9e21279c89d903f1710f7647c604f145
+          args:
+            - "-varz"
+            - "-connz"
+            - "-healthz"
+            - "-p=7777"
+            - "http://localhost:8222"
+          ports:
+            - containerPort: 7777
+              name: metrics
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "32Mi"
+            limits:
+              cpu: "100m"
+              memory: "64Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
 ---
 apiVersion: v1
 kind: Service
@@ -79,3 +112,23 @@ spec:
       port: 4222
       targetPort: client
       protocol: TCP
+    - name: metrics
+      port: 7777
+      targetPort: metrics
+      protocol: TCP
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: contact-nats
+  labels:
+    app: contact-nats
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: contact-nats
+  endpoints:
+    - port: metrics
+      interval: 30s
+      path: /metrics

@@ -93,6 +93,18 @@ spec:
         - ports:
             - port: "5432"
               protocol: TCP
+    # Prometheus metrics scrape from monitoring namespace
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: monitoring
+      toPorts:
+        - ports:
+            - port: "9187"
+              protocol: TCP
+          rules:
+            http:
+              - method: GET
+                path: /metrics
   egress:
     - toEndpoints:
         - matchLabels:
@@ -131,6 +143,18 @@ spec:
         - ports:
             - port: "8222"
               protocol: TCP
+    # Prometheus metrics scrape from monitoring namespace (nats-exporter sidecar)
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: monitoring
+      toPorts:
+        - ports:
+            - port: "7777"
+              protocol: TCP
+          rules:
+            http:
+              - method: GET
+                path: /metrics
   egress:
     - toEndpoints:
         - matchLabels:

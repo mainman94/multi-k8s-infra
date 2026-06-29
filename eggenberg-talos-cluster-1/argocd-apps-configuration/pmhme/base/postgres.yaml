@@ -82,6 +82,43 @@ spec:
               drop:
                 - ALL
             readOnlyRootFilesystem: true
+        - name: postgres-exporter
+          # Digest-pinned for immutability; tag kept for readability (Renovate-bumpable).
+          image: docker.io/prometheuscommunity/postgres-exporter:v0.15.0@sha256:386b12d19eab2a37d7cd8ca8b4c7491cc7a830d9581f49af6c98a393da9605e6
+          ports:
+            - containerPort: 9187
+              name: metrics
+              protocol: TCP
+          env:
+            # Reuses the existing connection string; the exporter runs in the
+            # same pod and reaches Postgres over the loopback-equivalent pod network.
+            - name: DATA_SOURCE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: contact-backend-secrets
+                  key: DATABASE_URL
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "32Mi"
+            limits:
+              cpu: "100m"
+              memory: "64Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65534
       volumes:
         - name: run
           emptyDir: {}
@@ -113,3 +150,23 @@ spec:
       port: 5432
       targetPort: postgres
       protocol: TCP
+    - name: metrics
+      port: 9187
+      targetPort: metrics
+      protocol: TCP
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: contact-postgres
+  labels:
+    app: contact-postgres
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: contact-postgres
+  endpoints:
+    - port: metrics
+      interval: 30s
+      path: /metrics

@@ -24,3 +24,4 @@ resources:
   - notifier-telegram.yaml
   - notifier-email.yaml
   - backend-netpol.yaml
+  - backend-pdb.yaml
