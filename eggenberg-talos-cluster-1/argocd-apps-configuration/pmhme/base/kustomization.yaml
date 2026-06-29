@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# Standard labels on all resources and pod templates (not selectors).
+# app.kubernetes.io/name feeds the alloy->Loki "app" log label.
+labels:
+  - pairs:
+      app.kubernetes.io/name: pmhme-portfolio
+      app.kubernetes.io/part-of: pmhme
+    includeTemplates: true
+resources:
+  - configmap.yaml
+  - rollout.yaml
+  - service.yaml
+  - service-preview.yaml
+  - servicemonitor.yaml
+  - httproute.yaml
+  - analysis-template.yaml
+  - pdb.yaml
+  - networkpolicy.yaml
+  - cilium-mtls-policy.yaml
+  - postgres.yaml
+  - nats.yaml
+  - contact-api.yaml
+  - notifier-telegram.yaml
+  - notifier-email.yaml
+  - backend-netpol.yaml
+  - backend-pdb.yaml

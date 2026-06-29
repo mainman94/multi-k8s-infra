@@ -1,0 +1,65 @@
+# Telegram API sink for dev/test: a static-200 responder. The telegram
+# notifier only checks the HTTP status, never parses the body.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: telegram-sink
+  labels:
+    app: telegram-sink
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: telegram-sink
+  template:
+    metadata:
+      labels:
+        app: telegram-sink
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: whoami
+          image: docker.io/traefik/whoami:v1.10
+          args:
+            - "--port=8080"
+          ports:
+            - containerPort: 8080
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "16Mi"
+            limits:
+              cpu: "50m"
+              memory: "64Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: telegram-sink
+  labels:
+    app: telegram-sink
+spec:
+  selector:
+    app: telegram-sink
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP

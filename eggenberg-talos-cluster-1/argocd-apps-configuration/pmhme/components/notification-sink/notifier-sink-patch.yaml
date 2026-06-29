@@ -1,0 +1,35 @@
+# Redirect notifier egress to the in-cluster sinks. SMTP_USER empty => the
+# email notifier uses an unauthenticated relay (Mailpit). TELEGRAM_API_BASE
+# points the telegram notifier at the static-200 sink.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notifier-email
+spec:
+  template:
+    spec:
+      containers:
+        - name: notifier-email
+          env:
+            - name: SMTP_HOST
+              value: mailpit
+              valueFrom: null
+            - name: SMTP_PORT
+              value: "1025"
+              valueFrom: null
+            - name: SMTP_USER
+              value: ""
+              valueFrom: null
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notifier-telegram
+spec:
+  template:
+    spec:
+      containers:
+        - name: notifier-telegram
+          env:
+            - name: TELEGRAM_API_BASE
+              value: http://telegram-sink

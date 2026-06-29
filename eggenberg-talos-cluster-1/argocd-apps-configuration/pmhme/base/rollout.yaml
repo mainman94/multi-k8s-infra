@@ -1,0 +1,121 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: portfolio-app
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: "portfolio-app"
+  template:
+    metadata:
+      labels:
+        app: "portfolio-app"
+        version: "v1"
+        # Feeds the alloy relabel rule -> Loki "app" log label
+        app.kubernetes.io/name: pmhme-portfolio
+        app.kubernetes.io/part-of: pmhme
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3001"
+    spec:
+      containers:
+        - name: portfolio-app
+          image: ghcr.io/mainman94/pmhme:latest
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: portfolio-app-config
+          ports:
+            - containerPort: 3000
+              name: http
+              protocol: TCP
+            - containerPort: 3001
+              name: metrics
+              protocol: TCP
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 20
+            successThreshold: 1
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 0
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 2
+            successThreshold: 1
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+            successThreshold: 1
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            seccompProfile:
+              type: RuntimeDefault
+            seLinuxOptions:
+              level: "s0:c123,c456"
+      imagePullSecrets:
+        - name: docker-pull-secret
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      automountServiceAccountToken: false
+  strategy:
+    blueGreen:
+      activeService: portfolio-service
+      previewService: portfolio-service-preview
+      autoPromotionEnabled: true
+      autoPromotionSeconds: 30
+      scaleDownDelaySeconds: 30
+      prePromotionAnalysis:
+        templates:
+          - templateName: portfolio-http-check
+        args:
+          - name: service-name
+            value: portfolio-service-preview
+          - name: namespace
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+      postPromotionAnalysis:
+        templates:
+          - templateName: portfolio-http-check
+        args:
+          - name: service-name
+            value: portfolio-service
+          - name: namespace
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace

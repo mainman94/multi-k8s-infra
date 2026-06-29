@@ -1,0 +1,25 @@
+# Enforces Cilium mutual authentication (SPIRE mTLS) for pod-to-pod traffic.
+# Empty fromEndpoints/toEndpoints selectors match all pods in the policy's
+# own namespace, so each overlay gets a same-namespace mesh.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: portfolio-mtls-required
+spec:
+  endpointSelector:
+    matchLabels:
+      app: portfolio-app
+  ingress:
+    - fromEndpoints:
+        - {}
+      authentication:
+        mode: "required"
+      toPorts:
+        - ports:
+            - port: "3000"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - {}
+      authentication:
+        mode: "required"

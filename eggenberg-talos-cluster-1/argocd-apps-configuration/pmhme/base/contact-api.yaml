@@ -1,0 +1,116 @@
+# contact-api (Bun/TS): public POST /api/contact + internal PATCH
+# /internal/contact/:id/status. Persists to Postgres, publishes contact.created
+# to NATS. /internal/* is never exposed via the HTTPRoute (cluster-internal only).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: contact-api
+  labels:
+    app: contact-api
+spec:
+  replicas: 2
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: contact-api
+  template:
+    metadata:
+      labels:
+        app: contact-api
+    spec:
+      # Soft anti-affinity: prefer spreading the 2 replicas across nodes, but
+      # still schedule both on a single-node homelab if needed.
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app: contact-api
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      imagePullSecrets:
+        - name: docker-pull-secret
+      containers:
+        - name: contact-api
+          image: ghcr.io/mainman94/contact-api:0.1.3
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          env:
+            - name: PORT
+              value: "8080"
+            - name: NATS_URL
+              value: nats://contact-nats:4222
+            - name: RATE_LIMIT_PER_MINUTE
+              value: "10"
+            - name: LOG_LEVEL
+              value: info
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: contact-backend-secrets
+                  key: DATABASE_URL
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 3
+            timeoutSeconds: 2
+            failureThreshold: 20
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 2
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            requests:
+              cpu: "25m"
+              memory: "64Mi"
+            limits:
+              cpu: "250m"
+              memory: "192Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: contact-api
+  labels:
+    app: contact-api
+spec:
+  selector:
+    app: contact-api
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      protocol: TCP
+  type: ClusterIP

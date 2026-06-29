@@ -1,0 +1,449 @@
+name: Renovate AI Auto-Merge Gate
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  evaluate-and-automerge:
+    if: >
+      github.event.pull_request.user.login == 'renovate[bot]' || startsWith(github.event.pull_request.head.ref, 'renovate/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Evaluate PR risk (rules + AI)
+        id: evaluate
+        uses: actions/github-script@v9
+        env:
+          AI_PROVIDER: ${{ vars.AI_PROVIDER || 'openai' }}
+          AI_REQUIRE_RELEASE_NOTES: ${{ vars.AI_REQUIRE_RELEASE_NOTES || 'true' }}
+          AI_MAX_DOC_URLS: ${{ vars.AI_MAX_DOC_URLS || '5' }}
+          AI_MAX_DOC_CHARS: ${{ vars.AI_MAX_DOC_CHARS || '12000' }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-4.1-mini' }}
+          OPENROUTER_MODEL: ${{ vars.OPENROUTER_MODEL || 'openai/gpt-4.1-mini' }}
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const prNumber = pr.number;
+            const requireReleaseNotes = (process.env.AI_REQUIRE_RELEASE_NOTES || "true").toLowerCase() === "true";
+            const maxDocUrls = Number(process.env.AI_MAX_DOC_URLS || "5");
+            const maxDocChars = Number(process.env.AI_MAX_DOC_CHARS || "12000");
+
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner,
+              repo,
+              pull_number: prNumber,
+              per_page: 100
+            });
+
+            const changedPaths = files.map((f) => f.filename);
+            const badExt = changedPaths.filter((p) => !p.endsWith(".yaml") && !p.endsWith(".yml"));
+            const forbiddenPaths = changedPaths.filter((p) =>
+              p.startsWith(".github/") ||
+              p.endsWith(".md") ||
+              p.endsWith(".sh") ||
+              p.endsWith(".json") ||
+              p.endsWith(".tf")
+            );
+            const tooManyFiles = files.length > 30;
+
+            // Hard gate: only manifest-like YAML updates from Renovate.
+            if (badExt.length || forbiddenPaths.length || tooManyFiles) {
+              const reason = [
+                badExt.length ? `non-yaml files: ${badExt.join(", ")}` : "",
+                forbiddenPaths.length ? `forbidden paths: ${forbiddenPaths.join(", ")}` : "",
+                tooManyFiles ? `too many changed files: ${files.length}` : ""
+              ].filter(Boolean).join(" | ");
+              core.setOutput("decision", "manual");
+              core.setOutput("reason", `Hard gate failed: ${reason}`);
+              core.setOutput("risk", "n/a");
+              core.setOutput("hard_gate", "failed");
+              core.setOutput("docs_reviewed", "0");
+              core.setOutput("docs_urls", "");
+              return;
+            }
+
+            const patchText = files
+              .map((f) => `FILE: ${f.filename}\n${f.patch || ""}`)
+              .join("\n\n---\n\n")
+              .slice(0, 50000);
+            const diffLines = files
+              .flatMap((f) => (f.patch || "").split("\n"))
+              .filter((line) =>
+                (line.startsWith("+") || line.startsWith("-")) &&
+                !line.startsWith("+++") &&
+                !line.startsWith("---")
+              );
+            const versionLinePatterns = [
+              /^[+-]\s*-?\s*(version|appversion|tag|imagetag|targetrevision|digest)\s*:\s*["']?[^"'\s]+["']?\s*$/i,
+              /^[+-]\s*image\s*:\s*[^"'\s]+:[^"'\s]+["']?\s*$/i
+            ];
+            const riskyChangePattern = /(clusterrole|clusterrolebinding|rolebinding|serviceaccount|networkpolicy|ingress|hostnetwork|privileged|allowprivilegeescalation|capabilities|securitycontext|runasuser|runasnonroot|podsecurity|webhook|rbac)/i;
+            const hasRiskySignals = diffLines.some((line) => riskyChangePattern.test(line.slice(1)));
+            const nonVersionLines = diffLines.filter(
+              (line) => !versionLinePatterns.some((pattern) => pattern.test(line))
+            );
+            const onlyVersionBumps = diffLines.length > 0 && nonVersionLines.length === 0 && !hasRiskySignals;
+
+            // Pull release notes / docs links from PR body (Renovate usually includes these).
+            const body = pr.body || "";
+            const urlMatches = body.match(/https?:\/\/[^\s)\]>"]+/g) || [];
+            const docUrls = [...new Set(urlMatches)].slice(0, maxDocUrls);
+
+            async function fetchDocSnippet(url) {
+              try {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 6000);
+                const res = await fetch(url, { signal: controller.signal, redirect: "follow" });
+                clearTimeout(timeout);
+                if (!res.ok) return null;
+                const resolvedUrl = res.url || url;
+                const ctype = (res.headers.get("content-type") || "").toLowerCase();
+                let text = await res.text();
+                if (ctype.includes("text/html")) {
+                  text = text
+                    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+                    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+                    .replace(/<[^>]+>/g, " ");
+                }
+                text = text.replace(/\s+/g, " ").trim().slice(0, maxDocChars);
+                if (!text) return null;
+                return { url: resolvedUrl, originalUrl: url, snippet: text };
+              } catch {
+                return null;
+              }
+            }
+
+            const docSnippets = [];
+            for (const url of docUrls) {
+              const doc = await fetchDocSnippet(url);
+              if (doc) {
+                docSnippets.push(doc);
+              }
+            }
+
+            if (requireReleaseNotes && docSnippets.length === 0) {
+              core.setOutput("decision", "manual");
+              core.setOutput("reason", "No readable release notes/docs found in PR body links");
+              core.setOutput("risk", "n/a");
+              core.setOutput("hard_gate", "passed");
+              core.setOutput("docs_reviewed", "0");
+              core.setOutput("docs_urls", docUrls.join("\n"));
+              await core.summary
+                .addHeading("Renovate AI Decision")
+                .addTable([
+                  [{ data: "Decision", header: true }, "manual"],
+                  [{ data: "Hard gate", header: true }, "passed"],
+                  [{ data: "Docs required", header: true }, "true"],
+                  [{ data: "Docs reviewed", header: true }, "0"]
+                ])
+                .addRaw("Reason: No readable release notes/docs found in PR body links")
+                .write();
+              return;
+            }
+
+            const provider = (process.env.AI_PROVIDER || "openai").toLowerCase();
+            const openaiKey = process.env.OPENAI_API_KEY;
+            const openrouterKey = process.env.OPENROUTER_API_KEY;
+
+            // Optional AI step. If key is missing, fallback to manual for safety.
+            if (provider === "openai" && !openaiKey) {
+              core.setOutput("decision", "manual");
+              core.setOutput("reason", "OPENAI_API_KEY missing");
+              core.setOutput("risk", "n/a");
+              core.setOutput("hard_gate", "passed");
+              core.setOutput("docs_reviewed", String(docSnippets.length));
+              core.setOutput("docs_urls", [...new Set(docSnippets.map((d) => d.url))].join("\n"));
+              return;
+            }
+            if (provider === "openrouter" && !openrouterKey) {
+              core.setOutput("decision", "manual");
+              core.setOutput("reason", "OPENROUTER_API_KEY missing");
+              core.setOutput("risk", "n/a");
+              core.setOutput("hard_gate", "passed");
+              core.setOutput("docs_reviewed", String(docSnippets.length));
+              core.setOutput("docs_urls", [...new Set(docSnippets.map((d) => d.url))].join("\n"));
+              return;
+            }
+            if (provider !== "openai" && provider !== "openrouter") {
+              core.setOutput("decision", "manual");
+              core.setOutput("reason", `Unsupported AI_PROVIDER: ${provider}`);
+              core.setOutput("risk", "n/a");
+              core.setOutput("hard_gate", "passed");
+              core.setOutput("docs_reviewed", String(docSnippets.length));
+              core.setOutput("docs_urls", [...new Set(docSnippets.map((d) => d.url))].join("\n"));
+              return;
+            }
+
+            const prompt = `
+            You are reviewing a Renovate pull request for Kubernetes GitOps manifests.
+            Classify risk as one of: low, medium, high.
+
+            low = only straightforward dependency/chart/image version bumps with no semantic config change.
+            medium = unclear impact, mixed changes, or broader value changes.
+            high = security-sensitive, privilege/network policy/ingress/auth/rbac changes, removals, or major behavioral shifts.
+
+            Use BOTH sources:
+            1) Git diff itself
+            2) Provided release notes / docs snippets
+
+            Return strict JSON:
+            {"risk":"low|medium|high","summary":"short reason","flags":["..."]}
+            `;
+            const docContext = docSnippets
+              .map((d, idx) => `DOC_${idx + 1}: ${d.url}\n${d.snippet}`)
+              .join("\n\n---\n\n")
+              .slice(0, 30000);
+            const userContext = [
+              `PR_TITLE: ${pr.title || ""}`,
+              `PR_BODY: ${(pr.body || "").slice(0, 8000)}`,
+              `PATCHES:\n${patchText}`,
+              `DOCS:\n${docContext || "none"}`
+            ].join("\n\n");
+
+            const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+            let response = null;
+            let failureStatus = "request_error";
+            let failureBody = "";
+            let usedProvider = provider;
+            let usedModel = provider === "openrouter"
+              ? (process.env.OPENROUTER_MODEL || "openai/gpt-4.1-mini")
+              : (process.env.OPENAI_MODEL || "gpt-4.1-mini");
+            const providerConfigs = provider === "openrouter" && openaiKey
+              ? ["openrouter", "openai"]
+              : [provider];
+
+            for (const currentProvider of providerConfigs) {
+              const endpoint = currentProvider === "openrouter"
+                ? "https://openrouter.ai/api/v1/chat/completions"
+                : "https://api.openai.com/v1/chat/completions";
+              const model = currentProvider === "openrouter"
+                ? (process.env.OPENROUTER_MODEL || "openai/gpt-4.1-mini")
+                : (process.env.OPENAI_MODEL || "gpt-4.1-mini");
+              const headers = {
+                "Authorization": `Bearer ${currentProvider === "openrouter" ? openrouterKey : openaiKey}`,
+                "Content-Type": "application/json"
+              };
+              if (currentProvider === "openrouter") {
+                headers["HTTP-Referer"] = `https://github.com/${owner}/${repo}`;
+                headers["X-OpenRouter-Title"] = `${owner}/${repo} renovate-ai-automerge`;
+              }
+
+              const requestPayload = {
+                model,
+                temperature: 0,
+                max_tokens: 300,
+                messages: [
+                  { role: "system", content: prompt },
+                  { role: "user", content: userContext }
+                ]
+              };
+              if (currentProvider === "openai") {
+                requestPayload.response_format = { type: "json_object" };
+              }
+              const requestBody = JSON.stringify(requestPayload);
+
+              for (let attempt = 1; attempt <= 3; attempt++) {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 30000);
+                try {
+                  response = await fetch(endpoint, {
+                    method: "POST",
+                    headers,
+                    signal: controller.signal,
+                    body: requestBody
+                  });
+                } catch (err) {
+                  clearTimeout(timeout);
+                  failureStatus = `${currentProvider}:network_error`;
+                  failureBody = String(err);
+                  if (attempt < 3) {
+                    await sleep(750 * attempt);
+                    continue;
+                  }
+                  break;
+                }
+                clearTimeout(timeout);
+                if (response.ok) {
+                  usedProvider = currentProvider;
+                  usedModel = model;
+                  break;
+                }
+
+                failureStatus = `${currentProvider}:${String(response.status)}`;
+                failureBody = await response.text();
+                const retryable = response.status === 429 || response.status >= 500;
+                if (retryable && attempt < 3) {
+                  await sleep(750 * attempt);
+                  continue;
+                }
+                break;
+              }
+              if (response && response.ok) break;
+            }
+
+            if (!response || !response.ok) {
+              let failureDetails = failureBody;
+              try {
+                const parsedError = JSON.parse(failureBody);
+                const providerName = parsedError?.error?.metadata?.provider_name;
+                const message = parsedError?.error?.message;
+                if (providerName || message) {
+                  failureDetails = `${providerName ? `provider=${providerName}; ` : ""}${message || ""}`.trim();
+                }
+              } catch {}
+              core.setOutput("decision", "manual");
+              core.setOutput("reason", `AI call failed: ${failureStatus} ${failureDetails.slice(0, 300)}`);
+              core.setOutput("risk", "n/a");
+              core.setOutput("hard_gate", "passed");
+              core.setOutput("docs_reviewed", String(docSnippets.length));
+              core.setOutput("docs_urls", [...new Set(docSnippets.map((d) => d.url))].join("\n"));
+              return;
+            }
+
+            const data = await response.json();
+            const outputText = data?.choices?.[0]?.message?.content || "";
+            const parseCandidates = [];
+            const trimmedOutput = outputText.trim();
+            if (trimmedOutput) parseCandidates.push(trimmedOutput);
+            const fenceMatch = trimmedOutput.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+            if (fenceMatch?.[1]) parseCandidates.push(fenceMatch[1].trim());
+            const firstBrace = trimmedOutput.indexOf("{");
+            const lastBrace = trimmedOutput.lastIndexOf("}");
+            if (firstBrace >= 0 && lastBrace > firstBrace) {
+              parseCandidates.push(trimmedOutput.slice(firstBrace, lastBrace + 1));
+            }
+
+            let parsed = null;
+            let parseError = "";
+            for (const candidate of parseCandidates) {
+              try {
+                parsed = JSON.parse(candidate);
+                break;
+              } catch (e) {
+                parseError = String(e);
+              }
+            }
+
+            if (!parsed) {
+              const lower = trimmedOutput.toLowerCase();
+              let inferredRisk = "medium";
+              if (onlyVersionBumps) inferredRisk = "low";
+              else if (/\bhigh risk\b|\brisk[:=\s-]*high\b/.test(lower)) inferredRisk = "high";
+              else if (/\blow risk\b|\brisk[:=\s-]*low\b/.test(lower)) inferredRisk = "low";
+              else if (/\bmedium risk\b|\brisk[:=\s-]*medium\b/.test(lower)) inferredRisk = "medium";
+
+              const fallbackSummary = trimmedOutput
+                ? `Non-JSON AI output parsed heuristically: ${trimmedOutput.slice(0, 180)}`
+                : "Non-JSON AI output parsed heuristically";
+              const summary = onlyVersionBumps
+                ? "Non-JSON AI output; deterministic diff check found version-only changes"
+                : fallbackSummary;
+              const flags = ["non_json_ai_output"];
+              if (onlyVersionBumps) flags.push("version_only_diff");
+              parsed = { risk: inferredRisk, summary, flags };
+              core.warning(`AI parse fallback used. parse_error=${parseError}`);
+            }
+
+            const risk = parsed.risk || "medium";
+            const summary = parsed.summary || "No summary";
+            const flags = Array.isArray(parsed.flags) ? parsed.flags : [];
+            core.setOutput("reason", `AI risk=${risk}; ${summary}${flags.length ? `; flags=${flags.join(", ")}` : ""}`);
+            core.setOutput("risk", risk);
+            core.setOutput("hard_gate", "passed");
+            core.setOutput("docs_reviewed", String(docSnippets.length));
+            core.setOutput("docs_urls", [...new Set(docSnippets.map((d) => d.url))].join("\n"));
+            core.setOutput("decision", risk === "low" ? "automerge" : "manual");
+
+            await core.summary
+              .addHeading("Renovate AI Decision")
+              .addTable([
+                [{ data: "Decision", header: true }, risk === "low" ? "automerge" : "manual"],
+                [{ data: "Risk", header: true }, risk],
+                [{ data: "Hard gate", header: true }, "passed"],
+                [{ data: "Provider/Model", header: true }, `${usedProvider}/${usedModel}`],
+                [{ data: "Files changed", header: true }, String(files.length)],
+                [{ data: "Docs reviewed", header: true }, String(docSnippets.length)]
+              ])
+              .addRaw(`Reason: ${summary}`)
+              .write();
+
+      - name: Comment decision
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const decision = `${{ steps.evaluate.outputs.decision }}`;
+            const reason = `${{ steps.evaluate.outputs.reason }}`;
+            const risk = `${{ steps.evaluate.outputs.risk }}`;
+            const hardGate = `${{ steps.evaluate.outputs.hard_gate }}`;
+            const docsReviewed = `${{ steps.evaluate.outputs.docs_reviewed }}`;
+            const docsUrlsRaw = `${{ steps.evaluate.outputs.docs_urls }}`;
+            const docsUrls = docsUrlsRaw ? docsUrlsRaw.split("\n").filter(Boolean) : [];
+            const icon = decision === "automerge" ? "✅" : "🛑";
+            const title = decision === "automerge" ? "AI gate passed" : "AI gate requires manual review";
+            const docsList = docsUrls.length
+              ? docsUrls.map((u) => `- ${u}`).join("\n")
+              : "- none";
+            const body = `${icon} **${title}**\n\n- Decision: \`${decision}\`\n- Risk: \`${risk}\`\n- Hard gate: \`${hardGate}\`\n- Docs reviewed: \`${docsReviewed}\`\n- Reason: ${reason}\n\n<details><summary>Reviewed docs</summary>\n\n${docsList}\n\n</details>`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body
+            });
+
+      - name: Fail on manual decision
+        if: steps.evaluate.outputs.decision == 'manual'
+        uses: actions/github-script@v9
+        with:
+          script: |
+            core.setFailed(`Manual review required: ${{ steps.evaluate.outputs.reason }}`);
+
+      - name: Enable auto-merge
+        if: steps.evaluate.outputs.decision == 'automerge'
+        uses: actions/github-script@v9
+        with:
+          script: |-
+            const prNodeId = context.payload.pull_request.node_id;
+            const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+            let lastError = null;
+            for (let attempt = 1; attempt <= 6; attempt++) {
+              try {
+                await github.graphql(
+                  `mutation($pullRequestId: ID!) {
+                    enablePullRequestAutoMerge(input: {
+                      pullRequestId: $pullRequestId,
+                      mergeMethod: SQUASH
+                    }) {
+                      pullRequest { number }
+                    }
+                  }`,
+                  { pullRequestId: prNodeId }
+                );
+                core.info(`Auto-merge enabled (attempt ${attempt}).`);
+                return;
+              } catch (err) {
+                lastError = err;
+                const message = String(err?.message || err);
+                const isUnstable = message.toLowerCase().includes("unstable status");
+                if (isUnstable && attempt < 6) {
+                  core.info(`PR still unstable (attempt ${attempt}/6), retrying...`);
+                  await sleep(5000);
+                  continue;
+                }
+                if (isUnstable) {
+                  core.warning(`Skipped auto-merge for now: ${message}`);
+                  return;
+                }
+                throw err;
+              }
+            }
+            core.warning(`Skipped auto-merge after retries: ${String(lastError?.message || lastError)}`);

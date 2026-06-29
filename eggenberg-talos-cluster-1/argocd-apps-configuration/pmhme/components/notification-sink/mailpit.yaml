@@ -1,0 +1,74 @@
+# SMTP sink for dev/test: catches mail, nothing leaves the cluster.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mailpit
+  labels:
+    app: mailpit
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mailpit
+  template:
+    metadata:
+      labels:
+        app: mailpit
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: mailpit
+          image: docker.io/axllent/mailpit:v1.21
+          env:
+            - name: MP_SMTP_BIND_ADDR
+              value: "0.0.0.0:1025"
+            - name: MP_UI_BIND_ADDR
+              value: "0.0.0.0:8025"
+          ports:
+            - containerPort: 1025
+              name: smtp
+            - containerPort: 8025
+              name: ui
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          readinessProbe:
+            tcpSocket:
+              port: smtp
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "32Mi"
+            limits:
+              cpu: "100m"
+              memory: "128Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mailpit
+  labels:
+    app: mailpit
+spec:
+  selector:
+    app: mailpit
+  ports:
+    - name: smtp
+      port: 1025
+      targetPort: smtp
+      protocol: TCP

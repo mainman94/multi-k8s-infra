@@ -1,0 +1,70 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: public
+  namespace: cilium
+spec:
+  gatewayClassName: cilium
+  infrastructure:
+    labels:
+      vip-pool: services
+  listeners:
+    # Plain-HTTP listeners exist only to redirect to HTTPS (see
+    # redirect-http-to-https.yaml). Do not point cloudflared at port 80,
+    # it would loop on the redirect.
+    - name: http
+      protocol: HTTP
+      port: 80
+      hostname: "*.hauptmann.dev"
+      allowedRoutes:
+        namespaces:
+          from: Same
+    - name: http-root
+      protocol: HTTP
+      port: 80
+      hostname: "hauptmann.dev"
+      allowedRoutes:
+        namespaces:
+          from: Same
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: "*.hauptmann.dev"
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchExpressions:
+              - key: kubernetes.io/metadata.name
+                operator: In
+                values:
+                  - cilium
+                  - portfolio
+                  - portfolio-dev
+                  - portfolio-test
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: cloudflare-origin-cert
+    - name: https-root
+      protocol: HTTPS
+      port: 443
+      hostname: "hauptmann.dev"
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchExpressions:
+              - key: kubernetes.io/metadata.name
+                operator: In
+                values:
+                  - cilium
+                  - portfolio
+                  - portfolio-dev
+                  - portfolio-test
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: cloudflare-origin-cert

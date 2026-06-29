@@ -1,0 +1,107 @@
+# Velero backup solution for cluster disaster recovery and migration
+configuration:
+  # Cloud provider for backup storage (aws for S3-compatible)
+  backupStorageLocation:
+    - provider: aws
+      bucket: pmhme-k8s-backup
+      config:
+        # Backblaze S3-compatible endpoint
+        s3Url: https://s3.eu-central-003.backblazeb2.com
+        # Use path-style URLs for S3-compatible backends
+        s3ForcePathStyle: "true"
+        # Backblaze uses standard TLS
+        insecureSkipTLSVerify: "false"
+
+  # Volume snapshot location (for PV snapshots)
+  volumeSnapshotLocation:
+    - provider: aws
+      config:
+        region: us-east-1
+
+  # Velero server configuration
+  velero:
+    logLevel: info
+    defaultVolumeSnapshotLocations: aws
+    uploaderType: kopia
+
+# AWS S3 plugin required for S3-compatible providers (Backblaze, MinIO, etc.)
+initContainers:
+  - name: velero-plugin-for-aws
+    image: velero/velero-plugin-for-aws:v1.14.2
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+      - mountPath: /target
+        name: plugins
+
+# Credentials for S3-compatible storage
+# Secret created automatically by Infisical operator from APPLICATION_KEY_ID_K8s_BACKUP
+credentials:
+  useSecret: true
+  name: velero-secret
+
+# Backup schedules
+schedules:
+  daily:
+    schedule: "0 2 * * *" # 2 AM daily
+    template:
+      ttl: "48h" # 30 days retention
+      includedNamespaces:
+        - "*"
+      excludedNamespaces:
+        - kube-node-lease
+        - kube-public
+        - kube-system
+        - kube-apiserver
+      includedClusterScopedResources:
+        - "*"
+      excludedClusterScopedResources:
+        - nodes
+        - events
+        - events.events.k8s.io
+      snapshotVolumes: true
+      # Longhorn PVs have no native AWS snapshotter; use kopia fs-backup instead
+      defaultVolumesToFsBackup: true
+
+# Resource requests and limits
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# Enable metrics
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    namespace: velero
+
+# Kopia configuration for PV backups
+deployNodeAgent: true
+nodeAgent:
+  podVolumeBacking:
+    enabled: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+# Node selector for backup operations (optional)
+nodeSelector: {}
+
+# Tolerations for backup operations
+tolerations: []
+
+# RBAC
+rbac:
+  create: true
+
+# Service account
+serviceAccount:
+  create: true
+  name: velero

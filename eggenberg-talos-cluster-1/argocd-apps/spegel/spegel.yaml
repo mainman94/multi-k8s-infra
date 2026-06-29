@@ -1,0 +1,33 @@
+# yamllint disable rule:line-length
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: spegel
+  namespace: argocd
+  labels:
+    category: infrastructure
+spec:
+  project: default
+  sources:
+    - repoURL: oci://ghcr.io/spegel-org/helm-charts/spegel
+      chart: spegel
+      targetRevision: 0.7.1
+      helm:
+        valueFiles:
+          - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/spegel/values.yaml
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
+      targetRevision: HEAD
+      ref: values
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
+      path: eggenberg-talos-cluster-1/argocd-apps-configuration/spegel
+      targetRevision: HEAD
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: spegel
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    # yamllint enable rule:line-length

@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: portfolio-http-check
+spec:
+  args:
+    - name: service-name
+    - name: namespace
+  metrics:
+    - name: http-health-check
+      initialDelay: 45s
+      interval: 5s
+      count: 3
+      successCondition: result.statusCode == 200
+      failureCondition: result.statusCode != 200
+      failureLimit: 3
+      inconclusiveLimit: 2
+      provider:
+        web:
+          url: "http://{{args.service-name}}.{{args.namespace}}.svc.cluster.local"
+          timeoutSeconds: 10
+          insecure: true
+          headers:
+            - key: "User-Agent"
+              value: "Argo-Rollouts-Health-Check"

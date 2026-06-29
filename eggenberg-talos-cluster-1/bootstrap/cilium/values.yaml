@@ -1,0 +1,100 @@
+kubeProxyReplacement: true
+
+ipam:
+  operator:
+    clusterPoolIPv4PodCIDRList: "10.42.0.0/16"
+  mode: kubernetes
+
+k8sServiceHost: localhost
+k8sServicePort: 7445
+
+l7Proxy: true
+
+cgroup:
+  autoMount:
+    enabled: false
+  hostRoot: /sys/fs/cgroup
+
+securityContext:
+  capabilities:
+    ciliumAgent:
+      - CHOWN
+      - KILL
+      - NET_ADMIN
+      - NET_RAW
+      - IPC_LOCK
+      - SYS_ADMIN
+      - SYS_RESOURCE
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    cleanCiliumState:
+      - NET_ADMIN
+      - SYS_ADMIN
+      - SYS_RESOURCE
+
+loadBalancer:
+  enabled: true
+
+operator:
+  replicas: 1
+
+gatewayAPI:
+  enabled: true
+  enableAlpn: true
+  enableAppProtocol: true
+
+ingressController:
+  enabled: false
+  default: false
+  loadbalancerMode: shared
+
+authentication:
+  enabled: true
+  mutual:
+    spire:
+      enabled: true
+      install:
+        enabled: true
+        existingNamespace: true
+        server:
+          dataStorage:
+            enabled: false
+
+l2announcements:
+  enabled: true
+
+hubble:
+  enabled: true
+
+  relay:
+    enabled: true
+
+  ui:
+    enabled: true
+
+  metrics:
+    enabled:
+      - dns
+      - drop
+      - tcp
+      - flow
+      - port-distribution
+      - icmp
+      - http
+
+prometheus:
+  metricsService: true
+  enabled: true
+  port: 9962
+  serviceMonitor:
+    enabled: true
+    labels:
+      release: kube-prometheus-stack
+
+envoy:
+  log:
+    path: /dev/stdout
+    defaultLevel: info
+    accessLogBufferSize: 65536

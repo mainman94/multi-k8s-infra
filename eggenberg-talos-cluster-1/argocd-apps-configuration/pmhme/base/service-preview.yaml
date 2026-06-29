@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: portfolio-service-preview
+  labels:
+    app: portfolio-app
+    role: preview
+spec:
+  selector:
+    app: portfolio-app
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: http
+      appProtocol: http
+  type: ClusterIP

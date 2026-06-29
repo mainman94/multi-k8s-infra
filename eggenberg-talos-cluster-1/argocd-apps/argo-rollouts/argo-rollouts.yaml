@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd-rollouts
+  namespace: argocd
+  labels:
+    category: deployment
+spec:
+  project: default
+  sources:
+    - repoURL: https://argoproj.github.io/argo-helm
+      chart: argo-rollouts
+      targetRevision: 2.41.0
+      helm:
+        valueFiles:
+          - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/argo-rollouts/values.yaml
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
+      targetRevision: HEAD
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kargo
+  namespace: argocd
+  labels:
+    category: deployment
+spec:
+  project: default
+  sources:
+    - repoURL: ghcr.io/akuity/kargo-charts
+      chart: kargo
+      targetRevision: 1.10.8
+      helm:
+        valueFiles:
+          - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/kargo/values.yaml
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
+      targetRevision: HEAD
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kargo
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

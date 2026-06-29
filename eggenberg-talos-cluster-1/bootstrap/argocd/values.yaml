@@ -1,0 +1,167 @@
+applicationSet:
+  metrics:
+    enabled: true
+    service:
+      portName: http-metrics
+    serviceMonitor:
+      enabled: true
+      additionalLabels:
+        release: kube-prometheus-stack
+server:
+  metrics:
+    enabled: true
+    service:
+      portName: http-metrics
+    serviceMonitor:
+      enabled: true
+      interval: 30s
+      additionalLabels:
+        release: kube-prometheus-stack
+  ingress:
+    enabled: false
+    ingressClassName: cilium
+    hostname: argo-rp.hauptmann.dev
+    path: /
+    pathType: Prefix
+global:
+  domain: argo-rp.hauptmann.dev
+# yamllint disable rule:line-length
+configs:
+  params:
+    server.insecure: true
+    timeout.reconciliation: 30s
+  cm:
+    resource.customizations.ignoreDifferences.apiextensions.k8s.io_CustomResourceDefinition:
+      |
+      jsonPointers:
+      - /spec/preserveUnknownFields
+    resource.exclusions: |
+      - apiGroups:
+        - ""
+        kinds:
+        - Endpoints
+      - apiGroups:
+        - coordination.k8s.io
+        kinds:
+        - Lease
+      - apiGroups:
+        - authentication.k8s.io
+        kinds:
+        - SelfSubjectReview
+        - TokenReview
+      - apiGroups:
+        - authorization.k8s.io
+        kinds:
+        - LocalSubjectAccessReview
+        - SelfSubjectAccessReview
+        - SelfSubjectRulesReview
+        - SubjectAccessReview
+      - apiGroups:
+        - certificates.k8s.io
+        kinds:
+        - CertificateSigningRequest
+      - apiGroups:
+        - wgpolicyk8s.io
+        kinds:
+        - PolicyReport
+        - ClusterPolicyReport
+      - apiGroups:
+        - cert-manager.io
+        kinds:
+        - CertificateRequest
+      - apiGroups:
+        - reports.kyverno.io
+        kinds:
+        - EphemeralReport
+        - ClusterEphemeralReport
+        - AdmissionReport
+        - ClusterAdmissionReport
+        - BackgroundScanReport
+        - ClusterBackgroundScanReport
+      - apiGroups:
+        - kyverno.io
+        kinds:
+        - UpdateRequest
+      - apiGroups:
+        - cilium.io
+        kinds:
+        - CiliumIdentity
+        - CiliumEndpoint
+        - CiliumEndpointSlice
+    # Dex/Pocket ID OIDC
+    url: https://argo-rp.hauptmann.dev
+    dex.config: |
+      connectors:
+        - type: oidc
+          id: pocketid
+          name: Pocket ID
+          config:
+            issuer: https://id.hauptmann.dev
+            clientID: '$argocd-dex-authentik:DEX_POCKETID_CLIENT_ID'
+            clientSecret: '$argocd-dex-authentik:DEX_POCKETID_CLIENT_SECRET'
+            insecureEnableGroups: true
+            scopes:
+              - openid
+              - profile
+              - email
+              - groups
+      # Static client for Argo Workflows SSO
+      staticClients:
+        - id: argo-workflows
+          name: Argo Workflows
+          redirectURIs:
+            - https://argo-workflows-rp.hauptmann.dev/oauth2/callback
+          secretEnv: ARGO_WORKFLOWS_SSO_CLIENT_SECRET
+  rbac:
+    policy.csv: |
+      # Pocket ID homelab group has full admin privileges
+      g, homelab, role:admin
+    policy.default: role:readonly
+    scopes: "[groups, email]"
+  secret:
+    argocdServerAdminPasswordMtime: "2024-01-01T00:00:00Z"
+# yamllint enable rule:line-length
+
+redis:
+  metrics:
+    enabled: true
+    service:
+      portName: http-metrics
+    serviceMonitor:
+      enabled: true
+      additionalLabels:
+        release: kube-prometheus-stack
+controller:
+  metrics:
+    enabled: true
+    service:
+      portName: http-metrics
+    serviceMonitor:
+      enabled: true
+      additionalLabels:
+        release: kube-prometheus-stack
+repoServer:
+  metrics:
+    enabled: true
+    service:
+      portName: http-metrics
+    serviceMonitor:
+      enabled: true
+      additionalLabels:
+        release: kube-prometheus-stack
+dex:
+  enabled: true
+  env:
+    - name: ARGO_WORKFLOWS_SSO_CLIENT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: argocd-dex-authentik
+          key: ARGO_WORKFLOWS_SSO_CLIENT_SECRET
+  metrics:
+    enabled: true
+    service:
+      portName: http-metrics
+    serviceMonitor:
+      enabled: true
+      additionalLabels:
+        release: kube-prometheus-stack

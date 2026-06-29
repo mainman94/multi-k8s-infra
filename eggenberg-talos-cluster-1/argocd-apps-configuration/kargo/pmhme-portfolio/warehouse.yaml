@@ -1,0 +1,33 @@
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Warehouse
+metadata:
+  name: pmhme-portfolio
+  namespace: pmhme-portfolio
+spec:
+  subscriptions:
+    - git:
+        repoURL: https://github.com/mainman94/multi-k8s-infra.git
+        branch: main
+        commitSelectionStrategy: NewestFromBranch
+        includePaths:
+          - eggenberg-talos-cluster-1/argocd-apps-configuration/pmhme/overlays/dev/kustomization.yaml
+    - image:
+        repoURL: ghcr.io/mainman94/pmhme
+        imageSelectionStrategy: SemVer
+        allowTags: '^[0-9]+\.[0-9]+\.[0-9]+(?:-[a-zA-Z0-9.-]+)?(?:\+[a-zA-Z0-9.-]+)?$'
+        discoveryLimit: 5
+    - image:
+        repoURL: ghcr.io/mainman94/contact-api
+        imageSelectionStrategy: SemVer
+        allowTags: '^[0-9]+\.[0-9]+\.[0-9]+(?:-[a-zA-Z0-9.-]+)?(?:\+[a-zA-Z0-9.-]+)?$'
+        discoveryLimit: 5
+    - image:
+        repoURL: ghcr.io/mainman94/notifier-telegram
+        imageSelectionStrategy: SemVer
+        allowTags: '^[0-9]+\.[0-9]+\.[0-9]+(?:-[a-zA-Z0-9.-]+)?(?:\+[a-zA-Z0-9.-]+)?$'
+        discoveryLimit: 5
+    - image:
+        repoURL: ghcr.io/mainman94/notifier-email
+        imageSelectionStrategy: SemVer
+        allowTags: '^[0-9]+\.[0-9]+\.[0-9]+(?:-[a-zA-Z0-9.-]+)?(?:\+[a-zA-Z0-9.-]+)?$'
+        discoveryLimit: 5

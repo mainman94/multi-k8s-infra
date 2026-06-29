@@ -1,0 +1,134 @@
+# Core NATS broker for the contact backend (no JetStream/persistence — the
+# notifiers use queue-group subscriptions and tolerate at-most-once delivery).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: contact-nats
+  labels:
+    app: contact-nats
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: contact-nats
+  template:
+    metadata:
+      labels:
+        app: contact-nats
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: nats
+          # Digest-pinned for immutability; tag kept for readability (Renovate-bumpable).
+          image: docker.io/nats:2-alpine@sha256:952d157e28d5394a211229bd57a7b37ff9f184e58e2c8486a08fa909fd254e32
+          # Enable the HTTP monitoring endpoint for health probes.
+          args:
+            - "--http_port=8222"
+          ports:
+            - containerPort: 4222
+              name: client
+              protocol: TCP
+            - containerPort: 8222
+              name: monitor
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: monitor
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: monitor
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            timeoutSeconds: 2
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "25m"
+              memory: "64Mi"
+            limits:
+              cpu: "250m"
+              memory: "128Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+        - name: nats-exporter
+          # Digest-pinned for immutability; tag kept for readability (Renovate-bumpable).
+          image: docker.io/natsio/prometheus-nats-exporter:0.15.0@sha256:1f6787754b8b083f271adea4bb699b9c9e21279c89d903f1710f7647c604f145
+          args:
+            - "-varz"
+            - "-connz"
+            - "-healthz"
+            - "-p=7777"
+            - "http://localhost:8222"
+          ports:
+            - containerPort: 7777
+              name: metrics
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "32Mi"
+            limits:
+              cpu: "100m"
+              memory: "64Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: contact-nats
+  labels:
+    app: contact-nats
+spec:
+  selector:
+    app: contact-nats
+  ports:
+    - name: client
+      port: 4222
+      targetPort: client
+      protocol: TCP
+    - name: metrics
+      port: 7777
+      targetPort: metrics
+      protocol: TCP
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: contact-nats
+  labels:
+    app: contact-nats
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: contact-nats
+  endpoints:
+    - port: metrics
+      interval: 30s
+      path: /metrics

@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kube-prometheus-stack
+  namespace: argocd
+  labels:
+    category: monitoring
+spec:
+  project: default
+  sources:
+    - repoURL: https://prometheus-community.github.io/helm-charts
+      chart: kube-prometheus-stack
+      targetRevision: 87.3.0
+      helm:
+        valueFiles:
+          - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/kube-prometheus-stack/values.yaml
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
+      targetRevision: HEAD
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  ignoreDifferences:
+    # Ignore auto-generated Grafana admin password
+    - group: ""
+      kind: Secret
+      name: kube-prometheus-stack-grafana
+      jsonPointers:
+        - /data/admin-password
+    # Ignore checksum annotation that changes with secret
+    - group: apps
+      kind: Deployment
+      name: kube-prometheus-stack-grafana
+      jsonPointers:
+        - /spec/template/metadata/annotations/checksum~1secret
+  syncPolicy:
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+        pod-security.kubernetes.io/audit: privileged
+        pod-security.kubernetes.io/warn: privileged
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

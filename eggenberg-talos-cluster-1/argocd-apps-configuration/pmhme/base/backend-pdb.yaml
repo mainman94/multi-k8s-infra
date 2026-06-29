@@ -1,0 +1,13 @@
+# Only contact-api runs >1 replica; postgres/nats/notifiers are
+# single-replica so a PDB on them would just block node drains for no
+# availability gain.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: contact-api-pdb
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: contact-api
+  unhealthyPodEvictionPolicy: IfHealthyBudget

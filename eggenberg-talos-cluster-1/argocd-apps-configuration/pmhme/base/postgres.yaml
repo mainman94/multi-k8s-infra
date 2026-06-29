@@ -1,0 +1,180 @@
+# Single-instance Postgres for the contact backend.
+# Namespace + common labels are applied by the including overlay (dev/test/production).
+# contact-api auto-creates the `contact_requests` table on startup
+# (CREATE TABLE IF NOT EXISTS), so no separate migration job is needed.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: contact-postgres
+  labels:
+    app: contact-postgres
+spec:
+  serviceName: contact-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: contact-postgres
+  template:
+    metadata:
+      labels:
+        app: contact-postgres
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: postgres
+          # Digest-pinned for immutability; tag kept for readability (Renovate-bumpable).
+          image: docker.io/postgres:18-alpine@sha256:1b1689b20d16a014a3d195653381cf2caa75a41a92d93b255a9d6ea29fd353aa
+          ports:
+            - containerPort: 5432
+              name: postgres
+              protocol: TCP
+          env:
+            - name: POSTGRES_USER
+              value: contact
+            - name: POSTGRES_DB
+              value: contact
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: contact-backend-secrets
+                  key: POSTGRES_PASSWORD
+            # Keep PGDATA in a subdirectory so the volume root (lost+found etc.)
+            # does not collide with initdb.
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: run
+              mountPath: /var/run/postgresql
+            - name: tmp
+              mountPath: /tmp
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "contact", "-d", "contact"]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 6
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "contact", "-d", "contact"]
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+        - name: postgres-exporter
+          # Digest-pinned for immutability; tag kept for readability (Renovate-bumpable).
+          # v0.17.0+ required: PG17 moved checkpoints_timed/checkpoints_req
+          # from pg_stat_bgwriter to pg_stat_checkpointer; older exporter
+          # versions query the removed columns and fail the stat_bgwriter collector.
+          image: docker.io/prometheuscommunity/postgres-exporter:v0.17.1@sha256:38606faa38c54787525fb0ff2fd6b41b4cfb75d455c1df294927c5f611699b17
+          ports:
+            - containerPort: 9187
+              name: metrics
+              protocol: TCP
+          env:
+            # Built from separate vars (not the shared DATABASE_URL) so we can
+            # force sslmode=disable: the pq driver defaults to requiring SSL,
+            # but this Postgres has no SSL configured.
+            - name: DATA_SOURCE_USER
+              value: contact
+            - name: DATA_SOURCE_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: contact-backend-secrets
+                  key: POSTGRES_PASSWORD
+            - name: DATA_SOURCE_URI
+              value: "contact-postgres:5432/contact?sslmode=disable"
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "32Mi"
+            limits:
+              cpu: "100m"
+              memory: "64Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65534
+      volumes:
+        - name: run
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: longhorn
+        resources:
+          requests:
+            storage: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: contact-postgres
+  labels:
+    app: contact-postgres
+spec:
+  clusterIP: None
+  selector:
+    app: contact-postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres
+      protocol: TCP
+    - name: metrics
+      port: 9187
+      targetPort: metrics
+      protocol: TCP
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: contact-postgres
+  labels:
+    app: contact-postgres
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: contact-postgres
+  endpoints:
+    - port: metrics
+      interval: 30s
+      path: /metrics

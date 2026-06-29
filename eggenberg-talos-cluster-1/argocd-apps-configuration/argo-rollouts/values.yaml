@@ -1,0 +1,9 @@
+dashboard:
+  enabled: false
+  ingress:
+    enabled: false
+    ingressClassName: cilium
+    hosts:
+      - rollouts-reverse-proxy.hauptmann.dev
+controller:
+  replicas: 1

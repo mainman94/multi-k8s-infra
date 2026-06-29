@@ -1,0 +1,15 @@
+ingress:
+  enabled: false
+persistence:
+  enabled: true
+  storageClass: "longhorn"
+  #accessMode: ReadWriteOnce
+nscd:
+  enabled: true
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 100m
+    memory: 512Mi
