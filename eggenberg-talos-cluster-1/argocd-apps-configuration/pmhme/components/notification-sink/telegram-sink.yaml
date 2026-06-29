@@ -23,7 +23,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: whoami
-          image: docker.io/traefik/whoami:v1.10
+          image: docker.io/traefik/whoami:v1.11
           args:
             - "--port=8080"
           ports:
