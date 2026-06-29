@@ -90,13 +90,18 @@ spec:
               name: metrics
               protocol: TCP
           env:
-            # Reuses the existing connection string; the exporter runs in the
-            # same pod and reaches Postgres over the loopback-equivalent pod network.
-            - name: DATA_SOURCE_NAME
+            # Built from separate vars (not the shared DATABASE_URL) so we can
+            # force sslmode=disable: the pq driver defaults to requiring SSL,
+            # but this Postgres has no SSL configured.
+            - name: DATA_SOURCE_USER
+              value: contact
+            - name: DATA_SOURCE_PASS
               valueFrom:
                 secretKeyRef:
                   name: contact-backend-secrets
-                  key: DATABASE_URL
+                  key: POSTGRES_PASSWORD
+            - name: DATA_SOURCE_URI
+              value: "contact-postgres:5432/contact?sslmode=disable"
           readinessProbe:
             httpGet:
               path: /metrics
