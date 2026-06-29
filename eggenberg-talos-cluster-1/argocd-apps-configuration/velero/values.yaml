@@ -59,6 +59,8 @@ schedules:
         - events
         - events.events.k8s.io
       snapshotVolumes: true
+      # Longhorn PVs have no native AWS snapshotter; use kopia fs-backup instead
+      defaultVolumesToFsBackup: true
 
 # Resource requests and limits
 resources:
