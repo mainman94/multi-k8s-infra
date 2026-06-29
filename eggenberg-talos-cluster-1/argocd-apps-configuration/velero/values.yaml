@@ -2,38 +2,33 @@
 configuration:
   # Cloud provider for backup storage (aws for S3-compatible)
   backupStorageLocation:
-    provider: aws
-    bucket: pmhme-k8s-backup
-    config:
-      # Backblaze S3-compatible endpoint
-      s3Url: https://s3.eu-central-003.backblazeb2.com
-      # Use path-style URLs for S3-compatible backends
-      s3ForcePathStyle: "true"
-      # Backblaze uses standard TLS
-      insecureSkipTLSVerify: "false"
+    - provider: aws
+      bucket: pmhme-k8s-backup
+      config:
+        # Backblaze S3-compatible endpoint
+        s3Url: https://s3.eu-central-003.backblazeb2.com
+        # Use path-style URLs for S3-compatible backends
+        s3ForcePathStyle: "true"
+        # Backblaze uses standard TLS
+        insecureSkipTLSVerify: "false"
 
   # Volume snapshot location (for PV snapshots)
   volumeSnapshotLocation:
-    provider: aws
-    config:
-      region: us-east-1
+    - provider: aws
+      config:
+        region: us-east-1
 
   # Velero server configuration
   velero:
     logLevel: info
-    # Backup all namespaces by default
-    defaultVolumesToRestic: true
-    # Upload progress timeout (for large backups)
-    uploaderType: restic
+    defaultVolumeSnapshotLocations: aws
+    uploaderType: kopia
 
 # Credentials for S3-compatible storage
+# Secret created automatically by Infisical operator from APPLICATION_KEY_ID_K8s_BACKUP
 credentials:
   useSecret: true
   name: velero-secret
-  # Create secret with:
-  # kubectl create secret generic velero-secret -n velero \
-  #   --from-literal=aws_access_key_id=YOUR_KEY \
-  #   --from-literal=aws_secret_access_key=YOUR_SECRET
 
 # Backup schedules
 schedules:
@@ -55,8 +50,8 @@ schedules:
         - events
         - events.events.k8s.io
       snapshotVolumes: true
-      # For Longhorn: use restic for PV backup
-      defaultVolumesToRestic: true
+      # For Longhorn: use kopia for PV backup
+      useVolumeSnapshots: true
 
 # Resource requests and limits
 resources:
@@ -74,8 +69,8 @@ metrics:
     enabled: true
     namespace: velero
 
-# Restic configuration for PV backups
-restic:
+# Kopia configuration for PV backups
+nodeAgent:
   podVolumeBacking:
     enabled: true
   resources:
