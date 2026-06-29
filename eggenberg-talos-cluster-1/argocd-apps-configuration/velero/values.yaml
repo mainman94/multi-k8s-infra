@@ -24,6 +24,15 @@ configuration:
     defaultVolumeSnapshotLocations: aws
     uploaderType: kopia
 
+# AWS S3 plugin required for S3-compatible providers (Backblaze, MinIO, etc.)
+initContainers:
+  - name: velero-plugin-for-aws
+    image: velero/velero-plugin-for-aws:v1.11.0
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+      - mountPath: /target
+        name: plugins
+
 # Credentials for S3-compatible storage
 # Secret created automatically by Infisical operator from APPLICATION_KEY_ID_K8s_BACKUP
 credentials:
@@ -45,9 +54,9 @@ schedules:
         - kube-public
         - kube-system
         - kube-apiserver
-      includedClusterResources:
+      includedClusterScopedResources:
         - "*"
-      excludedClusterResources:
+      excludedClusterScopedResources:
         - nodes
         - events
         - events.events.k8s.io
