@@ -61,8 +61,6 @@ schedules:
         - events
         - events.events.k8s.io
       snapshotVolumes: true
-      # For Longhorn: use kopia for PV backup
-      useVolumeSnapshots: true
 
 # Resource requests and limits
 resources:
