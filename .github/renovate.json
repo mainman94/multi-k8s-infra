@@ -9,5 +9,10 @@
     "managerFilePatterns": [
       "**/*.yaml"
     ]
+  },
+  "kubernetes": {
+    "managerFilePatterns": [
+      "**/*.yaml"
+    ]
   }
 }
