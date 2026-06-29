@@ -66,7 +66,7 @@ spec:
             readOnlyRootFilesystem: true
         - name: nats-exporter
           # Digest-pinned for immutability; tag kept for readability (Renovate-bumpable).
-          image: docker.io/natsio/prometheus-nats-exporter:0.15.0@sha256:1f6787754b8b083f271adea4bb699b9c9e21279c89d903f1710f7647c604f145
+          image: docker.io/natsio/prometheus-nats-exporter:0.20.1@sha256:4fbf6dacb84780a45a1c3af9b1080c69451a288d20902deae671b80717bb8f61
           args:
             - "-varz"
             - "-connz"
