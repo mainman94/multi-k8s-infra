@@ -46,9 +46,7 @@ schedules:
     template:
       ttl: "48h" # 30 days retention
       includedNamespaces:
-        - "portfolio"
-        - "uptime-kuma"
-        - "monitoring"
+        - "*"
       excludedNamespaces:
         - kube-node-lease
         - kube-public
