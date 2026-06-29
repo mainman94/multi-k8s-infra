@@ -10,7 +10,7 @@ resources:
 - ../../base
 images:
 - name: ghcr.io/mainman94/contact-api
-  newTag: 0.2.1
+  newTag: 0.2.2
 - name: ghcr.io/mainman94/notifier-email
   newTag: 0.1.4
 - name: ghcr.io/mainman94/notifier-telegram
