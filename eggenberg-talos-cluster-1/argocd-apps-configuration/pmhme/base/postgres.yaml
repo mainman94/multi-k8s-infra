@@ -87,7 +87,7 @@ spec:
           # v0.17.0+ required: PG17 moved checkpoints_timed/checkpoints_req
           # from pg_stat_bgwriter to pg_stat_checkpointer; older exporter
           # versions query the removed columns and fail the stat_bgwriter collector.
-          image: docker.io/prometheuscommunity/postgres-exporter:v0.17.1@sha256:38606faa38c54787525fb0ff2fd6b41b4cfb75d455c1df294927c5f611699b17
+          image: docker.io/prometheuscommunity/postgres-exporter:v0.19.1@sha256:e96064f876226d94bb6ce48a4c4b3dd76edba91168ec1ab024e5c4b959310b0f
           ports:
             - containerPort: 9187
               name: metrics
