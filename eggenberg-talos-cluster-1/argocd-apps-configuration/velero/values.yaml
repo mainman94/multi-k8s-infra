@@ -11,6 +11,8 @@ configuration:
         s3ForcePathStyle: "true"
         # Backblaze uses standard TLS
         insecureSkipTLSVerify: "false"
+        # AWS SDK v2 plugin requires region even with custom endpoint
+        region: us-east-1
 
   # Volume snapshot location (for PV snapshots)
   volumeSnapshotLocation:
