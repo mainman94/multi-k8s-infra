@@ -24,7 +24,7 @@ spec:
       containers:
         - name: nats
           # Digest-pinned for immutability; tag kept for readability (Renovate-bumpable).
-          image: docker.io/nats:2-alpine@sha256:952d157e28d5394a211229bd57a7b37ff9f184e58e2c8486a08fa909fd254e32
+          image: docker.io/nats:2-alpine@sha256:c11af972c99ae542de8925e6a7d9c533aa1eb039660420d2074beed6089b3bf0
           # Enable the HTTP monitoring endpoint for health probes.
           args:
             - "--http_port=8222"
