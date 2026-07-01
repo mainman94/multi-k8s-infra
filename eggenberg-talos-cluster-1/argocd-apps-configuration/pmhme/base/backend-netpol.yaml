@@ -64,6 +64,18 @@ spec:
                 path: "/healthz"
               - method: GET
                 path: "/readyz"
+    # Prometheus metrics scrape from monitoring namespace.
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: monitoring
+      toPorts:
+        - ports:
+            - port: "9090"
+              protocol: TCP
+          rules:
+            http:
+              - method: GET
+                path: /metrics
   egress:
     - toEndpoints:
         - matchLabels:

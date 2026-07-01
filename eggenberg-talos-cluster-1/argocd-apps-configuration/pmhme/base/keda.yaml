@@ -1,0 +1,21 @@
+# KEDA ScaledObject: scales contact-api horizontally based on HTTP request rate
+# scraped from Prometheus. Idle (< 10 req/s): 1 replica. Burst: up to 4.
+# Prometheus trigger queries the contact-api_http_requests_total counter which
+# the contact-api OTel SDK exposes on :9090/metrics.
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: contact-api-scaledobject
+spec:
+  scaleTargetRef:
+    name: contact-api
+  minReplicaCount: 1
+  maxReplicaCount: 4
+  cooldownPeriod: 60
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+        metricName: contact_api_http_requests_rate
+        query: rate(contact_api_http_requests_total[2m])
+        threshold: "10"

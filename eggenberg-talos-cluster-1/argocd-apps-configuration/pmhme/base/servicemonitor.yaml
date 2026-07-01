@@ -13,3 +13,19 @@ spec:
     - port: metrics
       interval: 30s
       path: /metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: contact-api
+  labels:
+    app: contact-api
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: contact-api
+  endpoints:
+    - port: metrics
+      interval: 30s
+      path: /metrics

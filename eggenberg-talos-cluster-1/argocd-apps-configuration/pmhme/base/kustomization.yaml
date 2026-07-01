@@ -26,3 +26,6 @@ resources:
   - notifier-email.yaml
   - backend-netpol.yaml
   - backend-pdb.yaml
+  - portfolio-vpa.yaml
+  - backend-vpa.yaml
+  - keda.yaml
