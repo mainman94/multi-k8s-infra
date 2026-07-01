@@ -1,5 +1,5 @@
-# Core NATS broker for the contact backend (no JetStream/persistence — the
-# notifiers use queue-group subscriptions and tolerate at-most-once delivery).
+# Core NATS broker for the contact backend — JetStream enabled (memory storage),
+# CONTACTS stream with WorkQueue retention, durable consumers per notifier.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -28,6 +28,7 @@ spec:
           # Enable the HTTP monitoring endpoint for health probes.
           args:
             - "--http_port=8222"
+            - "-js"
           ports:
             - containerPort: 4222
               name: client
