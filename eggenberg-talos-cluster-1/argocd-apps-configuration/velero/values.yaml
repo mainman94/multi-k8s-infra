@@ -54,6 +54,7 @@ schedules:
         - kube-public
         - kube-system
         - kube-apiserver
+        - monitoring
       includedClusterScopedResources:
         - "*"
       excludedClusterScopedResources:
