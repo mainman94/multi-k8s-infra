@@ -30,4 +30,10 @@ spec:
       namespace: portfolio-dev
       jsonPointers:
         - /spec/template/spec/containers/0/resources
+    - group: apps
+      kind: Deployment
+      name: contact-api
+      namespace: portfolio-dev
+      jsonPointers:
+        - /spec/replicas
       # yamllint enable rule:line-length
