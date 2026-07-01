@@ -20,6 +20,7 @@ resources:
   - cilium-mtls-policy.yaml
   - postgres.yaml
   - nats.yaml
+  - valkey.yaml
   - contact-api.yaml
   - notifier-telegram.yaml
   - notifier-email.yaml

@@ -1,0 +1,86 @@
+# Valkey instance for contact-api rate limiting. Single replica — counters are
+# ephemeral; a restart resets windows, which is acceptable for a contact form.
+# No persistence: rate limit state does not need to survive pod restarts.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: contact-valkey
+  labels:
+    app: contact-valkey
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: contact-valkey
+  template:
+    metadata:
+      labels:
+        app: contact-valkey
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: valkey
+          # Digest-pinned for immutability; tag kept for readability (Renovate-bumpable).
+          image: docker.io/valkey/valkey:9.1-alpine3.23@sha256:11dfc5d3ce9c570a516760935053687aea8e938be51b17cf112f71ab573e6f7b
+          args:
+            - "--save"
+            - ""
+            - "--appendonly"
+            - "no"
+          ports:
+            - containerPort: 6379
+              name: redis
+              protocol: TCP
+          readinessProbe:
+            exec:
+              command: ["valkey-cli", "ping"]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            exec:
+              command: ["valkey-cli", "ping"]
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            timeoutSeconds: 2
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "32Mi"
+            limits:
+              cpu: "100m"
+              memory: "64Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: contact-valkey
+  labels:
+    app: contact-valkey
+spec:
+  selector:
+    app: contact-valkey
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: redis
+      protocol: TCP
+  type: ClusterIP

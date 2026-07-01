@@ -93,6 +93,16 @@ spec:
         - ports:
             - port: "4222"
               protocol: TCP
+    # Meshed edge: contact-api -> contact-valkey (rate limit counters).
+    - toEndpoints:
+        - matchLabels:
+            app: contact-valkey
+      authentication:
+        mode: required
+      toPorts:
+        - ports:
+            - port: "6379"
+              protocol: TCP
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -298,3 +308,39 @@ spec:
             - port: "25"
               protocol: TCP
               # yamllint enable rule:line-length
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: contact-valkey-netpol
+spec:
+  endpointSelector:
+    matchLabels:
+      app: contact-valkey
+  ingress:
+    # Meshed edge: only contact-api may reach Valkey.
+    - fromEndpoints:
+        - matchLabels:
+            app: contact-api
+      authentication:
+        mode: required
+      toPorts:
+        - ports:
+            - port: "6379"
+              protocol: TCP
+    # kubelet health probes from the node.
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "6379"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY

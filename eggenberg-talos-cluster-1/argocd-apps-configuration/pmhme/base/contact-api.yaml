@@ -48,6 +48,8 @@ spec:
               value: "8080"
             - name: NATS_URL
               value: nats://contact-nats:4222
+            - name: VALKEY_URL
+              value: redis://contact-valkey:6379
             - name: RATE_LIMIT_PER_MINUTE
               value: "10"
             - name: LOG_LEVEL
