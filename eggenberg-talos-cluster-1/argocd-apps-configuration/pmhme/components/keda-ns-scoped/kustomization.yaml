@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+# Injects the overlay namespace into the KEDA ScaledObject Prometheus query.
+# Sources metadata.name from the overlay's Namespace resource (namespace.yaml)
+# and replaces NAMESPACE_PLACEHOLDER in the query string via delimiter split.
+replacements:
+  - source:
+      kind: Namespace
+      fieldPath: metadata.name
+    targets:
+      - select:
+          kind: ScaledObject
+          name: contact-api-scaledobject
+        fieldPaths:
+          - spec.triggers.0.metadata.query
+        options:
+          delimiter: '"'
+          index: 1

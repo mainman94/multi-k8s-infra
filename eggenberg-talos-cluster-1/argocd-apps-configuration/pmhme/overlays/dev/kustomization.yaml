@@ -10,6 +10,7 @@ resources:
   - ../../base
 components:
   - ../../components/notification-sink
+  - ../../components/keda-ns-scoped
 images:
   - name: ghcr.io/mainman94/pmhme
     newTag: 0.2.0

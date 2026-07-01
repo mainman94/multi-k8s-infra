@@ -17,5 +17,5 @@ spec:
       metadata:
         serverAddress: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
         metricName: contact_api_http_requests_rate
-        query: rate(contact_api_http_requests_total[2m])
+        query: sum(rate(contact_api_http_requests_total{namespace="NAMESPACE_PLACEHOLDER"}[2m]))
         threshold: "10"
