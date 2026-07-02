@@ -34,8 +34,6 @@ spec:
           env:
             - name: NATS_URL
               value: nats://contact-nats:4222
-            - name: CONTACT_API_URL
-              value: http://contact-api:8080
             - name: HEALTH_PORT
               value: "8081"
             - name: SMTP_HOST
