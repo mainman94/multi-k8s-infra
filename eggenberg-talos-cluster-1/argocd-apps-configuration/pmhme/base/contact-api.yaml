@@ -1,8 +1,8 @@
 # contact-api (Bun/TS): public POST /api/contact + internal PATCH
 # /internal/contact/:id/status. Persists to Postgres, publishes contact.created
 # to NATS. /internal/* is never exposed via the HTTPRoute (cluster-internal only).
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
   name: contact-api
   labels:
@@ -98,6 +98,24 @@ spec:
       volumes:
         - name: tmp
           emptyDir: {}
+  strategy:
+    canary:
+      steps:
+        - setWeight: 20
+        - pause:
+            duration: 2m
+        - setWeight: 50
+        - pause:
+            duration: 2m
+      analysis:
+        templates:
+          - templateName: contact-api-error-rate
+        startingStep: 1
+        args:
+          - name: namespace
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
 ---
 apiVersion: v1
 kind: Service

@@ -8,6 +8,8 @@ metadata:
   name: contact-api-scaledobject
 spec:
   scaleTargetRef:
+    apiVersion: argoproj.io/v1alpha1
+    kind: Rollout
     name: contact-api
   minReplicaCount: 1
   maxReplicaCount: 4

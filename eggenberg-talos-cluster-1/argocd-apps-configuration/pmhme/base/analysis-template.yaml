@@ -1,6 +1,28 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AnalysisTemplate
 metadata:
+  name: contact-api-error-rate
+spec:
+  args:
+    - name: namespace
+  metrics:
+    - name: error-rate
+      interval: 30s
+      failureLimit: 1
+      inconclusiveLimit: 10
+      successCondition: isNaN(result) || result < 0.05
+      failureCondition: "!isNaN(result) && result >= 0.05"
+      provider:
+        prometheus:
+          address: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+          query: >-
+            sum(rate(contact_api_http_requests_total{namespace="{{args.namespace}}",status=~"5.*"}[2m]))
+            /
+            sum(rate(contact_api_http_requests_total{namespace="{{args.namespace}}"}[2m]))
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
   name: portfolio-http-check
 spec:
   args:

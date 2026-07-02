@@ -6,8 +6,8 @@ metadata:
   name: contact-api-vpa
 spec:
   targetRef:
-    apiVersion: apps/v1
-    kind: Deployment
+    apiVersion: argoproj.io/v1alpha1
+    kind: Rollout
     name: contact-api
   updatePolicy:
     updateMode: InPlaceOrRecreate

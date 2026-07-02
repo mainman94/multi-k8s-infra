@@ -34,23 +34,6 @@ spec:
             http:
               - method: POST
                 path: "/api/contact"
-    # Internal status callbacks: only the notifiers may reach /internal/*.
-    # Meshed edge: require mutual auth from the notifier pods.
-    - fromEndpoints:
-        - matchLabels:
-            app: notifier-telegram
-        - matchLabels:
-            app: notifier-email
-      authentication:
-        mode: required
-      toPorts:
-        - ports:
-            - port: "8080"
-              protocol: TCP
-          rules:
-            http:
-              - method: PATCH
-                path: "/internal/contact/.*/status"
     # kubelet health probes from the node. No mutual auth (host has no identity).
     - fromEntities:
         - host
@@ -246,16 +229,6 @@ spec:
         - ports:
             - port: "4222"
               protocol: TCP
-    # Meshed edge: notifier-telegram -> contact-api (internal status callback).
-    - toEndpoints:
-        - matchLabels:
-            app: contact-api
-      authentication:
-        mode: required
-      toPorts:
-        - ports:
-            - port: "8080"
-              protocol: TCP
     # Telegram Bot API (api.telegram.org) over HTTPS. No mutual auth (world).
     - toEntities:
         - world
@@ -297,16 +270,6 @@ spec:
       toPorts:
         - ports:
             - port: "4222"
-              protocol: TCP
-    # Meshed edge: notifier-email -> contact-api (internal status callback).
-    - toEndpoints:
-        - matchLabels:
-            app: contact-api
-      authentication:
-        mode: required
-      toPorts:
-        - ports:
-            - port: "8080"
               protocol: TCP
     # Outbound SMTP relay (submission/implicit-TLS/legacy). No mutual auth (world).
     - toEntities:
