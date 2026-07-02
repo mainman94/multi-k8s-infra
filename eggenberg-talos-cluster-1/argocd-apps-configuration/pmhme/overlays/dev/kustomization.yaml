@@ -17,9 +17,9 @@ images:
   - name: ghcr.io/mainman94/contact-api
     newTag: 0.4.0
   - name: ghcr.io/mainman94/notifier-telegram
-    newTag: 0.1.7
+    newTag: 0.2.0
   - name: ghcr.io/mainman94/notifier-email
-    newTag: 0.1.7
+    newTag: 0.2.0
 patches:
   - path: httproute-patch.yaml
   - path: configmap-patch.yaml
