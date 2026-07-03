@@ -1,14 +1,19 @@
 # notifier-telegram (Go): subscribes contact.created, sends a Telegram message,
 # reports per-channel status back to contact-api /internal. No Service needed
 # (it is a consumer; the health endpoint is only for kubelet probes).
-apiVersion: apps/v1
-kind: Deployment
+#
+# Argo Rollout (not Deployment): replica count is owned by the KEDA
+# ScaledObject (keda-notifiers.yaml), which scales on NATS JetStream consumer
+# lag. No `replicas` field here — KEDA is the sole authority. The canary
+# strategy has no traffic routing (this is a queue consumer, not an HTTP
+# service); its steps gate a new version by pausing between replica-set shifts.
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
   name: notifier-telegram
   labels:
     app: notifier-telegram
 spec:
-  replicas: 1
   revisionHistoryLimit: 3
   selector:
     matchLabels:
@@ -32,11 +37,16 @@ spec:
             - containerPort: 8081
               name: health
               protocol: TCP
+            - containerPort: 9090
+              name: metrics
+              protocol: TCP
           env:
             - name: NATS_URL
               value: nats://contact-nats:4222
             - name: HEALTH_PORT
               value: "8081"
+            - name: METRICS_PORT
+              value: "9090"
             - name: TELEGRAM_API_BASE
               value: https://api.telegram.org
             - name: TELEGRAM_BOT_TOKEN
@@ -77,3 +87,23 @@ spec:
               drop:
                 - ALL
             readOnlyRootFilesystem: true
+  strategy:
+    canary:
+      steps:
+        - setWeight: 50
+        - pause:
+            duration: 60
+      # Gate promotion on the send-failure ratio scraped from the notifier's
+      # own OTel metrics (:9090). Starts after the first pause so a bad new
+      # version is caught while only half the replicas run it.
+      analysis:
+        templates:
+          - templateName: notifier-failure-rate
+        startingStep: 1
+        args:
+          - name: namespace
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: channel
+            value: telegram

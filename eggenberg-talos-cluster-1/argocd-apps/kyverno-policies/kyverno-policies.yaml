@@ -1,0 +1,35 @@
+# yamllint disable rule:line-length
+# Baseline Kyverno ClusterPolicies. sync-wave 1 so it applies after the kyverno
+# app (wave 0) has installed the CRDs. If ArgoCD reaches this before the CRDs
+# exist it will error and self-heal-retry, so ordering is best-effort insurance.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kyverno-policies
+  namespace: argocd
+  labels:
+    category: security
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/mainman94/multi-k8s-infra
+    targetRevision: HEAD
+    path: eggenberg-talos-cluster-1/argocd-apps-configuration/kyverno-policies
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kyverno
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
+    retry:
+      limit: 10
+      backoff:
+        duration: 15s
+        factor: 2
+        maxDuration: 5m
+        # yamllint enable rule:line-length

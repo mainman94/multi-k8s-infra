@@ -1,6 +1,6 @@
-# Only contact-api is KEDA-scaled (1-4 replicas); postgres/nats/notifiers are
-# single-replica so a PDB on them would just block node drains for no
-# availability gain. maxUnavailable:1 allows drain at min scale (1 replica)
+# contact-api and both notifiers are KEDA-scaled (1-4 replicas); postgres/nats/
+# valkey stay single-replica (a PDB there would just block node drains for no
+# availability gain). maxUnavailable:1 allows a drain at min scale (1 replica)
 # while limiting disruption when scaled out.
 apiVersion: policy/v1
 kind: PodDisruptionBudget
@@ -11,4 +11,26 @@ spec:
   selector:
     matchLabels:
       app: contact-api
+  unhealthyPodEvictionPolicy: IfHealthyBudget
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: notifier-telegram-pdb
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: notifier-telegram
+  unhealthyPodEvictionPolicy: IfHealthyBudget
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: notifier-email-pdb
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: notifier-email
   unhealthyPodEvictionPolicy: IfHealthyBudget

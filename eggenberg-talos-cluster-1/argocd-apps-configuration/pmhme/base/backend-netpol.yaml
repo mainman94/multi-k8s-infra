@@ -172,6 +172,16 @@ spec:
         - ports:
             - port: "8222"
               protocol: TCP
+    # KEDA operator polls the JetStream monitoring endpoint (:8222 /jsz) to read
+    # per-consumer lag for the notifier ScaledObjects. No mutual auth: KEDA has
+    # no SPIFFE identity, same rationale as the Prometheus scrape below.
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: keda
+      toPorts:
+        - ports:
+            - port: "8222"
+              protocol: TCP
     # Prometheus metrics scrape from monitoring namespace (nats-exporter sidecar).
     # No mutual auth.
     - fromEndpoints:
@@ -210,6 +220,18 @@ spec:
         - ports:
             - port: "8081"
               protocol: TCP
+    # Prometheus metrics scrape from monitoring namespace. No mutual auth.
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: monitoring
+      toPorts:
+        - ports:
+            - port: "9090"
+              protocol: TCP
+          rules:
+            http:
+              - method: GET
+                path: /metrics
   egress:
     - toEndpoints:
         - matchLabels:
@@ -252,6 +274,18 @@ spec:
         - ports:
             - port: "8081"
               protocol: TCP
+    # Prometheus metrics scrape from monitoring namespace. No mutual auth.
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: monitoring
+      toPorts:
+        - ports:
+            - port: "9090"
+              protocol: TCP
+          rules:
+            http:
+              - method: GET
+                path: /metrics
   egress:
     - toEndpoints:
         - matchLabels:

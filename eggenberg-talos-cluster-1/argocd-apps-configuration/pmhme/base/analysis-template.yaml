@@ -1,3 +1,4 @@
+# yamllint disable rule:line-length
 apiVersion: argoproj.io/v1alpha1
 kind: AnalysisTemplate
 metadata:
@@ -16,9 +17,31 @@ spec:
         prometheus:
           address: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
           query: >-
-            sum(rate(contact_api_http_requests_total{namespace="{{args.namespace}}",status=~"5.*"}[2m]))
-            /
-            sum(rate(contact_api_http_requests_total{namespace="{{args.namespace}}"}[2m]))
+            sum(rate(contact_api_http_requests_total{namespace="{{args.namespace}}",status=~"5.*"}[2m])) / sum(rate(contact_api_http_requests_total{namespace="{{args.namespace}}"}[2m]))
+---
+# Send-failure ratio for a notifier channel, from its OTel counter
+# notifier_notifications_total{channel,result}. isNaN (no traffic yet) passes so
+# a quiet notifier isn't blocked from promoting.
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: notifier-failure-rate
+spec:
+  args:
+    - name: namespace
+    - name: channel
+  metrics:
+    - name: failure-rate
+      interval: 30s
+      failureLimit: 1
+      inconclusiveLimit: 10
+      successCondition: isNaN(result) || result < 0.10
+      failureCondition: "!isNaN(result) && result >= 0.10"
+      provider:
+        prometheus:
+          address: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+          query: >-
+            sum(rate(notifier_notifications_total{namespace="{{args.namespace}}",channel="{{args.channel}}",result="failed"}[2m])) / sum(rate(notifier_notifications_total{namespace="{{args.namespace}}",channel="{{args.channel}}"}[2m]))
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: AnalysisTemplate

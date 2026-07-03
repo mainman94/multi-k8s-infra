@@ -1,0 +1,50 @@
+# Kyverno Helm chart values.
+# https://github.com/kyverno/kyverno/tree/main/charts/kyverno
+#
+# Single-node homelab: one replica per controller (no HA). The admission
+# controller is the enforcement path; background/reports/cleanup run the async
+# policy report and cleanup work. Resource requests kept modest.
+admissionController:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 384Mi
+  # Expose controller metrics to the existing kube-prometheus-stack.
+  serviceMonitor:
+    enabled: true
+    additionalLabels:
+      release: kube-prometheus-stack
+
+backgroundController:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+reportsController:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+cleanupController:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi

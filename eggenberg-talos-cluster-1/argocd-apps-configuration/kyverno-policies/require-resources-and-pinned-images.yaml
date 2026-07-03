@@ -1,0 +1,73 @@
+# yamllint disable rule:line-length
+# Resource governance + image hygiene. Audit only (see baseline-pod-security.yaml
+# for the rationale on Audit-first). Note the portfolio Rollout intentionally
+# uses ...:latest, so disallow-latest-tag will report it until that image is
+# pinned — that visibility is the point of running this in Audit mode first.
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: pmhme-require-resource-requests
+  annotations:
+    policies.kyverno.io/title: Require Resource Requests
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >-
+      Every container must declare CPU and memory requests so the scheduler can place it and autoscalers (KEDA/VPA) have a baseline. Audit only.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: require-cpu-memory-requests
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "CPU and memory requests are required on every container."
+        pattern:
+          spec:
+            containers:
+              - resources:
+                  requests:
+                    cpu: "?*"
+                    memory: "?*"
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: pmhme-disallow-latest-tag
+  annotations:
+    policies.kyverno.io/title: Disallow Latest Tag
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >-
+      Images must use an explicit tag or digest, never :latest or an untagged reference, so deployments are reproducible. Audit only.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: require-image-tag
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "An explicit image tag or digest is required ('latest' is not allowed)."
+        pattern:
+          spec:
+            containers:
+              - image: "*:*"
+    - name: disallow-latest-tag
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "Using a mutable ':latest' tag is not allowed; pin a version or digest."
+        pattern:
+          spec:
+            containers:
+              - image: "!*:latest"
