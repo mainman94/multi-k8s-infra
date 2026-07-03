@@ -1,8 +1,13 @@
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
-# Injects the overlay namespace into the KEDA ScaledObject Prometheus query.
-# Sources metadata.name from the overlay's Namespace resource (namespace.yaml)
-# and replaces NAMESPACE_PLACEHOLDER in the query string via delimiter split.
+# Injects the overlay namespace into the KEDA ScaledObjects. Sources
+# metadata.name from the overlay's Namespace resource (namespace.yaml).
+#
+#  - contact-api: replaces NAMESPACE_PLACEHOLDER inside the Prometheus query
+#    string (delimiter '"', so the namespace lands between the quotes at index 1).
+#  - notifier-{telegram,email}: replaces the placeholder segment of the NATS
+#    JetStream monitoring endpoint contact-nats.NAMESPACE_PLACEHOLDER.svc...
+#    (delimiter '.', the placeholder is the 2nd dotted segment -> index 1).
 replacements:
   - source:
       kind: Namespace
@@ -15,4 +20,20 @@ replacements:
           - spec.triggers.0.metadata.query
         options:
           delimiter: '"'
+          index: 1
+      - select:
+          kind: ScaledObject
+          name: notifier-telegram-scaledobject
+        fieldPaths:
+          - spec.triggers.0.metadata.natsServerMonitoringEndpoint
+        options:
+          delimiter: '.'
+          index: 1
+      - select:
+          kind: ScaledObject
+          name: notifier-email-scaledobject
+        fieldPaths:
+          - spec.triggers.0.metadata.natsServerMonitoringEndpoint
+        options:
+          delimiter: '.'
           index: 1

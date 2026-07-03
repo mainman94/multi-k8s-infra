@@ -1,0 +1,91 @@
+# yamllint disable rule:line-length
+# Baseline pod-security ClusterPolicy.
+#
+# validationFailureAction: Audit — reports violations into PolicyReports/Grafana
+# WITHOUT blocking admission. Deliberately not Enforce: the portfolio Rollout
+# runs image ...:latest (disallow-latest-tag rule below would reject it), and
+# Audit-first is the correct rollout order for a new admission engine. Flip
+# individual rules to Enforce once the reports are clean.
+#
+# validate.podSecurity is not used here so each control can be tuned/enforced
+# independently and reads clearly in reports.
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: pmhme-baseline-pod-security
+  annotations:
+    policies.kyverno.io/title: Baseline Pod Security
+    policies.kyverno.io/category: Pod Security Standards
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >-
+      Baseline hardening for workloads: no privilege escalation, run as non-root, read-only root filesystem, all Linux capabilities dropped. Audit only.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: disallow-privilege-escalation
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "allowPrivilegeEscalation must be set to false."
+        pattern:
+          spec:
+            =(ephemeralContainers):
+              - securityContext:
+                  allowPrivilegeEscalation: "false"
+            =(initContainers):
+              - securityContext:
+                  allowPrivilegeEscalation: "false"
+            containers:
+              - securityContext:
+                  allowPrivilegeEscalation: "false"
+
+    - name: require-run-as-non-root
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "runAsNonRoot must be true (pod or every container)."
+        anyPattern:
+          - spec:
+              securityContext:
+                runAsNonRoot: "true"
+          - spec:
+              containers:
+                - securityContext:
+                    runAsNonRoot: "true"
+
+    - name: require-read-only-root-fs
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "readOnlyRootFilesystem must be set to true."
+        pattern:
+          spec:
+            containers:
+              - securityContext:
+                  readOnlyRootFilesystem: "true"
+
+    - name: require-drop-all-capabilities
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "Containers must drop ALL Linux capabilities."
+        pattern:
+          spec:
+            containers:
+              - securityContext:
+                  capabilities:
+                    drop:
+                      - ALL

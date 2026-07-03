@@ -1,0 +1,64 @@
+# yamllint disable rule:line-length
+# KEDA ScaledObjects for the notifier workers, using the native NATS JetStream
+# scaler. KEDA polls the NATS monitoring endpoint (:8222 /jsz) and reads the
+# number of pending messages for each durable consumer on the CONTACTS stream.
+# The Go notifiers create those durable consumers on startup (Durable ==
+# consumer name below), so a backlog of unprocessed contact.created events
+# scales the matching worker out.
+#
+# minReplicaCount is 1 (not 0): the durable consumer only exists while a notifier
+# has run at least once, and KEDA can't read lag for a consumer that was never
+# created. Keeping one replica warm avoids that bootstrap deadlock and keeps
+# first-message latency low; bursts scale up to 4.
+#
+# natsServerMonitoringEndpoint carries a namespace placeholder that the
+# keda-ns-scoped kustomize component rewrites to the overlay namespace (the KEDA
+# operator runs in the `keda` namespace, so it needs the fully-qualified name).
+# The contact-nats CiliumNetworkPolicy is opened for the keda namespace on :8222.
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: notifier-telegram-scaledobject
+spec:
+  scaleTargetRef:
+    apiVersion: argoproj.io/v1alpha1
+    kind: Rollout
+    name: notifier-telegram
+  minReplicaCount: 1
+  maxReplicaCount: 4
+  pollingInterval: 15
+  cooldownPeriod: 60
+  triggers:
+    - type: nats-jetstream
+      metadata:
+        natsServerMonitoringEndpoint: contact-nats.NAMESPACE_PLACEHOLDER.svc.cluster.local:8222
+        account: "$G"
+        stream: CONTACTS
+        consumer: notifier-telegram
+        lagThreshold: "10"
+        activationLagThreshold: "1"
+        useHttps: "false"
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: notifier-email-scaledobject
+spec:
+  scaleTargetRef:
+    apiVersion: argoproj.io/v1alpha1
+    kind: Rollout
+    name: notifier-email
+  minReplicaCount: 1
+  maxReplicaCount: 4
+  pollingInterval: 15
+  cooldownPeriod: 60
+  triggers:
+    - type: nats-jetstream
+      metadata:
+        natsServerMonitoringEndpoint: contact-nats.NAMESPACE_PLACEHOLDER.svc.cluster.local:8222
+        account: "$G"
+        stream: CONTACTS
+        consumer: notifier-email
+        lagThreshold: "10"
+        activationLagThreshold: "1"
+        useHttps: "false"

@@ -1,0 +1,69 @@
+# yamllint disable rule:line-length
+# Metrics Services + ServiceMonitors for the notifier workers. The Go notifiers
+# expose an OTel/Prometheus endpoint on :9090 (METRICS_PORT). These headless-ish
+# ClusterIP services exist only so kube-prometheus-stack can scrape every pod
+# (stable + canary replicaset share the `app` selector); notifiers take no
+# inbound app traffic otherwise. The scrape edge is opened in backend-netpol.yaml.
+apiVersion: v1
+kind: Service
+metadata:
+  name: notifier-telegram-metrics
+  labels:
+    app: notifier-telegram
+spec:
+  selector:
+    app: notifier-telegram
+  clusterIP: None
+  ports:
+    - name: metrics
+      port: 9090
+      targetPort: metrics
+      protocol: TCP
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: notifier-telegram
+  labels:
+    app: notifier-telegram
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: notifier-telegram
+  endpoints:
+    - port: metrics
+      interval: 30s
+      path: /metrics
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notifier-email-metrics
+  labels:
+    app: notifier-email
+spec:
+  selector:
+    app: notifier-email
+  clusterIP: None
+  ports:
+    - name: metrics
+      port: 9090
+      targetPort: metrics
+      protocol: TCP
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: notifier-email
+  labels:
+    app: notifier-email
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: notifier-email
+  endpoints:
+    - port: metrics
+      interval: 30s
+      path: /metrics

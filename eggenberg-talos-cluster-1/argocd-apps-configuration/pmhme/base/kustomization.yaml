@@ -24,8 +24,10 @@ resources:
   - contact-api.yaml
   - notifier-telegram.yaml
   - notifier-email.yaml
+  - notifier-observability.yaml
   - backend-netpol.yaml
   - backend-pdb.yaml
   - portfolio-vpa.yaml
   - backend-vpa.yaml
   - keda.yaml
+  - keda-notifiers.yaml

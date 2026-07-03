@@ -1,8 +1,10 @@
 # Redirect notifier egress to the in-cluster sinks. SMTP_USER empty => the
 # email notifier uses an unauthenticated relay (Mailpit). TELEGRAM_API_BASE
 # points the telegram notifier at the static-200 sink.
-apiVersion: apps/v1
-kind: Deployment
+# Targets Rollouts (notifiers are Argo Rollouts, KEDA-scaled) — keep the GVK in
+# sync with base/notifier-*.yaml.
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
   name: notifier-email
 spec:
@@ -21,8 +23,8 @@ spec:
               value: ""
               valueFrom: null
 ---
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
   name: notifier-telegram
 spec:
