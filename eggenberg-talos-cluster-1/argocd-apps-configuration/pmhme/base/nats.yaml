@@ -119,6 +119,12 @@ spec:
       port: 4222
       targetPort: client
       protocol: TCP
+    # HTTP monitoring port (/jsz, /healthz). Published on the Service so the KEDA
+    # nats-jetstream scaler can reach it via the Service FQDN to read consumer lag.
+    - name: monitor
+      port: 8222
+      targetPort: monitor
+      protocol: TCP
     - name: metrics
       port: 7777
       targetPort: metrics
