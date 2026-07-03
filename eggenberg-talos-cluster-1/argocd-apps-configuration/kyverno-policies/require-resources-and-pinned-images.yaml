@@ -15,7 +15,9 @@ metadata:
       Every container must declare CPU and memory requests so the scheduler can place it and autoscalers (KEDA/VPA) have a baseline. Audit only.
 spec:
   validationFailureAction: Audit
+  admission: true
   background: true
+  emitWarning: false
   rules:
     - name: require-cpu-memory-requests
       match:
@@ -45,7 +47,9 @@ metadata:
       Images must use an explicit tag or digest, never :latest or an untagged reference, so deployments are reproducible. Audit only.
 spec:
   validationFailureAction: Audit
+  admission: true
   background: true
+  emitWarning: false
   rules:
     - name: require-image-tag
       match:

@@ -21,7 +21,11 @@ metadata:
       Baseline hardening for workloads: no privilege escalation, run as non-root, read-only root filesystem, all Linux capabilities dropped. Audit only.
 spec:
   validationFailureAction: Audit
+  # admission/emitWarning are Kyverno-defaulted; set explicitly so the stored
+  # policy matches git and ArgoCD stays Synced (no drift from the webhook).
+  admission: true
   background: true
+  emitWarning: false
   rules:
     - name: disallow-privilege-escalation
       match:
