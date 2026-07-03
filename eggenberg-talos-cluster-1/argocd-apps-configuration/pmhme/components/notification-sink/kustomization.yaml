@@ -1,8 +1,75 @@
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
+# yamllint disable rule:line-length
+# Redirect notifier egress to the in-cluster sinks for dev/test.
+#
+# The notifiers are Argo Rollouts (a CRD). kustomize has no merge-key schema for
+# CRD container lists, so a strategic-merge patch would REPLACE the whole
+# containers array — dropping image/ports/probes and leaving an invalid Rollout.
+# Instead we JSON6902-replace only the container env array with the full desired
+# set (base env + sink overrides): SMTP_* -> Mailpit (empty SMTP_USER => nil auth),
+# TELEGRAM_API_BASE -> the static-200 telegram-sink.
 resources:
   - mailpit.yaml
   - telegram-sink.yaml
   - sink-netpol.yaml
 patches:
-  - path: notifier-sink-patch.yaml
+  - target:
+      kind: Rollout
+      name: notifier-email
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/env
+        value:
+          - name: NATS_URL
+            value: nats://contact-nats:4222
+          - name: HEALTH_PORT
+            value: "8081"
+          - name: METRICS_PORT
+            value: "9090"
+          - name: SMTP_HOST
+            value: mailpit
+          - name: SMTP_PORT
+            value: "1025"
+          - name: SMTP_USER
+            value: ""
+          - name: SMTP_PASS
+            valueFrom:
+              secretKeyRef:
+                name: contact-backend-secrets
+                key: SMTP_PASS
+          - name: SMTP_FROM
+            valueFrom:
+              secretKeyRef:
+                name: contact-backend-secrets
+                key: SMTP_FROM
+          - name: CONTACT_TO_EMAIL
+            valueFrom:
+              secretKeyRef:
+                name: contact-backend-secrets
+                key: CONTACT_TO_EMAIL
+  - target:
+      kind: Rollout
+      name: notifier-telegram
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/env
+        value:
+          - name: NATS_URL
+            value: nats://contact-nats:4222
+          - name: HEALTH_PORT
+            value: "8081"
+          - name: METRICS_PORT
+            value: "9090"
+          - name: TELEGRAM_API_BASE
+            value: http://telegram-sink
+          - name: TELEGRAM_BOT_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: contact-backend-secrets
+                key: TELEGRAM_BOT_TOKEN
+          - name: TELEGRAM_CHAT_ID
+            valueFrom:
+              secretKeyRef:
+                name: contact-backend-secrets
+                key: TELEGRAM_CHAT_ID
