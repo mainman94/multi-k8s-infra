@@ -11,13 +11,16 @@ spec:
       interval: 30s
       failureLimit: 1
       inconclusiveLimit: 10
+      # scalar() coerces the result to a single float64 (empty vector -> NaN);
+      # without it, a query returning no series (e.g. zero 5xx traffic) yields a
+      # []float64 and isNaN(result) errors "cannot use []float64 ... to call isNaN".
       successCondition: isNaN(result) || result < 0.05
       failureCondition: "!isNaN(result) && result >= 0.05"
       provider:
         prometheus:
           address: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
           query: >-
-            sum(rate(contact_api_http_requests_total{namespace="{{args.namespace}}",status=~"5.*"}[2m])) / sum(rate(contact_api_http_requests_total{namespace="{{args.namespace}}"}[2m]))
+            scalar(sum(rate(contact_api_http_requests_total{namespace="{{args.namespace}}",status=~"5.*"}[2m])) / sum(rate(contact_api_http_requests_total{namespace="{{args.namespace}}"}[2m])))
 ---
 # Send-failure ratio for a notifier channel, from its OTel counter
 # notifier_notifications_total{channel,result}. isNaN (no traffic yet) passes so
@@ -35,13 +38,14 @@ spec:
       interval: 30s
       failureLimit: 1
       inconclusiveLimit: 10
+      # scalar() coerces to float64 (empty vector -> NaN); see contact-api-error-rate.
       successCondition: isNaN(result) || result < 0.10
       failureCondition: "!isNaN(result) && result >= 0.10"
       provider:
         prometheus:
           address: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
           query: >-
-            sum(rate(notifier_notifications_total{namespace="{{args.namespace}}",channel="{{args.channel}}",result="failed"}[2m])) / sum(rate(notifier_notifications_total{namespace="{{args.namespace}}",channel="{{args.channel}}"}[2m]))
+            scalar(sum(rate(notifier_notifications_total{namespace="{{args.namespace}}",channel="{{args.channel}}",result="failed"}[2m])) / sum(rate(notifier_notifications_total{namespace="{{args.namespace}}",channel="{{args.channel}}"}[2m])))
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: AnalysisTemplate
