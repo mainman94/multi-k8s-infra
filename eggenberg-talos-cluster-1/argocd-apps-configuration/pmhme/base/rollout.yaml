@@ -3,7 +3,11 @@ kind: Rollout
 metadata:
   name: portfolio-app
 spec:
-  replicas: 1
+  # 2 (not 1) so a VPA recreate / node drain / rollout never leaves zero warm
+  # pods behind the PDB (minAvailable:1). A single replica cold-starts on every
+  # such event, which is what made the first page load slow. Prod overlay
+  # overrides this to 3.
+  replicas: 2
   revisionHistoryLimit: 3
   selector:
     matchLabels:
@@ -39,7 +43,10 @@ spec:
               path: /
               port: http
               scheme: HTTP
-            initialDelaySeconds: 15
+            # App serves as soon as the page cache is built (PDF pre-render is
+            # now deferred off the boot path), so a fresh pod is ready in ~1-2s.
+            # A fixed 15s delay needlessly kept recreated pods out of rotation.
+            initialDelaySeconds: 2
             periodSeconds: 5
             timeoutSeconds: 2
             failureThreshold: 20
@@ -66,7 +73,9 @@ spec:
             successThreshold: 1
           resources:
             requests:
-              cpu: "50m"
+              # 100m (not 50m) so the Bun + OTel + render cold-boot burst isn't
+              # CPU-throttled, keeping first-request latency down after a start.
+              cpu: "100m"
               memory: "128Mi"
             limits:
               cpu: "500m"

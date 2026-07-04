@@ -8,7 +8,11 @@ spec:
     kind: Rollout
     name: portfolio-app
   updatePolicy:
-    updateMode: InPlaceOrRecreate
+    # Initial (not InPlaceOrRecreate): only set requests at pod creation, never
+    # evict a running pod to resize it. The recreate fallback was cold-starting
+    # the web tier and making the first page load slow. VPA still right-sizes on
+    # the next natural pod creation (deploy, scale, node move).
+    updateMode: Initial
   resourcePolicy:
     containerPolicies:
       - containerName: "*"
@@ -16,7 +20,8 @@ spec:
           - cpu
           - memory
         minAllowed:
-          cpu: 50m
+          # Floor at 100m so VPA never sizes the pod below its cold-boot need.
+          cpu: 100m
           memory: 64Mi
         maxAllowed:
           cpu: 2

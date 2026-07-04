@@ -10,7 +10,10 @@ spec:
     kind: Rollout
     name: contact-api
   updatePolicy:
-    updateMode: InPlaceOrRecreate
+    # Initial (not InPlaceOrRecreate): don't evict/recreate a running pod to
+    # resize it. A recreate cold-starts contact-api, which runs db.migrate() +
+    # NATS connect before serving, making the first contact message slow.
+    updateMode: Initial
   resourcePolicy:
     containerPolicies:
       - containerName: contact-api
