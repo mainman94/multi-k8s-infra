@@ -55,6 +55,16 @@ spec:
         - ports:
             - port: "53"
               protocol: ANY
+    # Platform page: read cluster metrics from kube-prometheus-stack.
+    # No mutual auth (Prometheus has no SPIFFE identity), same trust boundary
+    # as the metrics-scrape ingress rule above (monitoring namespace).
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: monitoring
+      toPorts:
+        - ports:
+            - port: "9090"
+              protocol: TCP
     # External HTTP/HTTPS for server-side fetches
     - toEntities:
         - world
