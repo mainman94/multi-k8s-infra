@@ -59,6 +59,22 @@ spec:
             http:
               - method: GET
                 path: /metrics
+    # Platform page "run load test": portfolio-app drives /healthz to scale
+    # contact-api via KEDA. Meshed edge (mutual auth); GET /healthz only, so it
+    # cannot reach /api/contact or /internal/* through this rule.
+    - fromEndpoints:
+        - matchLabels:
+            app: portfolio-app
+      authentication:
+        mode: required
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+          rules:
+            http:
+              - method: GET
+                path: "/healthz"
   egress:
     - toEndpoints:
         - matchLabels:

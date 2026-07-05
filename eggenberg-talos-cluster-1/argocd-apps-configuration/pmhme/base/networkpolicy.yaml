@@ -65,6 +65,21 @@ spec:
         - ports:
             - port: "9090"
               protocol: TCP
+    # Platform page "run load test": drive contact-api /healthz so KEDA scales
+    # it. Meshed same-namespace edge (both carry SPIFFE identities).
+    - toEndpoints:
+        - matchLabels:
+            app: contact-api
+      authentication:
+        mode: required
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+          rules:
+            http:
+              - method: GET
+                path: /healthz
     # External HTTP/HTTPS for server-side fetches
     - toEntities:
         - world
