@@ -19,7 +19,7 @@ images:
 - name: ghcr.io/mainman94/notifier-telegram
   newTag: 0.2.0
 - name: ghcr.io/mainman94/pmhme
-  newTag: 0.4.0
+  newTag: 0.4.1
 patches:
 - path: httproute-patch.yaml
 - path: configmap-patch.yaml
