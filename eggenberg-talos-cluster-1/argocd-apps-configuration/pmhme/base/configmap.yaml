@@ -9,3 +9,6 @@ data:
   LOG_LEVEL: "info"
   TELEMETRY_ENABLED: "true"
   OTEL_SERVICE_NAME: "hauptmann-portfolio"
+  # Platform page: server-side Prometheus read for /platform cluster metrics.
+  PROMETHEUS_URL: "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090"
+  OPS_NAMESPACE: "portfolio"
