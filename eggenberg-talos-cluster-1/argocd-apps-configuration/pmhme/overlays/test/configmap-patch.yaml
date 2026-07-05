@@ -5,3 +5,5 @@ metadata:
 data:
   STAGE: "test"
   LOG_LEVEL: "info"
+  # /platform page reads this env's own namespace (button scales it too).
+  OPS_NAMESPACE: "portfolio-test"
