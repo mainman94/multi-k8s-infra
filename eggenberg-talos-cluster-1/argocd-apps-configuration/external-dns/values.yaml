@@ -15,12 +15,12 @@ sources:
 domainFilters:
   - hauptmann.dev
 
-# upsert-only = create/update but NEVER delete, so it can't wipe the existing
-# wildcard / tunnel records while migrating off Terraform. Flip to `sync` once
-# verified, to let ExternalDNS fully own the zone (incl. pruning stale records).
-policy: upsert-only
+# sync = full ownership: create, update AND delete. ExternalDNS prunes records
+# whose HTTPRoute is gone, fully replacing Terraform-managed DNS. Scoped to
+# records it owns via the TXT registry below — foreign records stay untouched.
+policy: sync
 
-# Ownership registry so this instance only touches records it created.
+# Ownership registry so this instance only touches/deletes records it created.
 registry: txt
 txtOwnerId: external-dns-eggenberg
 
