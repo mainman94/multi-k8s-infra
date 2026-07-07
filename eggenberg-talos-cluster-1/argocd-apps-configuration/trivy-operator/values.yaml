@@ -35,11 +35,13 @@ trivy:
 serviceMonitor:
   enabled: true
 
+# Operator controller. Memory scales with the number of scanned workloads (informer
+# cache + report objects) — 256Mi OOMKilled on a full-cluster scan, so give it headroom.
 resources:
   requests:
     cpu: 100m
-    memory: 128Mi
+    memory: 256Mi
   limits:
     cpu: 500m
-    memory: 256Mi
+    memory: 1Gi
     # yamllint enable rule:line-length
