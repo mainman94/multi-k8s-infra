@@ -3,6 +3,11 @@ kind: Gateway
 metadata:
   name: public
   namespace: cilium
+  annotations:
+    # ExternalDNS target: the public IP, not the internal Cilium VIP that lands in
+    # the Gateway status. All HTTPRoutes attached to this Gateway get A records ->
+    # this IP (proxied via Cloudflare).
+    external-dns.alpha.kubernetes.io/target: "84.115.110.237"
 spec:
   gatewayClassName: cilium
   infrastructure:

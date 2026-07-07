@@ -1,0 +1,52 @@
+# yamllint disable rule:line-length
+# ExternalDNS -> Cloudflare, driven by Gateway API HTTPRoutes.
+
+provider:
+  name: cloudflare
+
+# Watch HTTPRoutes only (cluster uses Gateway API, zero Ingress). ExternalDNS
+# derives the record target from the parent Gateway's status address = the
+# Cilium Gateway public VIP.
+sources:
+  - gateway-httproute
+
+# Scope strictly to the managed zone. Single Cloudflare zone, so domainFilters
+# is enough (zone-id filtering not needed).
+domainFilters:
+  - hauptmann.dev
+
+# upsert-only = create/update but NEVER delete, so it can't wipe the existing
+# wildcard / tunnel records while migrating off Terraform. Flip to `sync` once
+# verified, to let ExternalDNS fully own the zone (incl. pruning stale records).
+policy: upsert-only
+
+# Ownership registry so this instance only touches records it created.
+registry: txt
+txtOwnerId: external-dns-eggenberg
+
+# Proxy through Cloudflare (orange cloud) — the Gateway HTTPS listener terminates
+# with a Cloudflare origin cert, which requires proxied records.
+extraArgs:
+  - --cloudflare-proxied
+
+# Cloudflare API token, provisioned from Infisical (CLOUDFLARE_API_KEY) into the
+# external-dns namespace by the central InfisicalSecret.
+env:
+  - name: CF_API_TOKEN
+    valueFrom:
+      secretKeyRef:
+        name: cloudflare-api-token
+        key: CF_API_TOKEN
+
+# Metrics into the existing kube-prometheus-stack.
+serviceMonitor:
+  enabled: true
+
+resources:
+  requests:
+    cpu: 25m
+    memory: 64Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
+    # yamllint enable rule:line-length

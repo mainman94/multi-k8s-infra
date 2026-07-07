@@ -1,0 +1,33 @@
+# yamllint disable rule:line-length
+# ExternalDNS. Watches Gateway API HTTPRoutes and syncs matching hauptmann.dev
+# records to Cloudflare (A -> Cilium Gateway public VIP, proxied). Replaces the
+# previous Terraform-managed DNS. Same multi-source pattern as the kyverno app.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: external-dns
+  namespace: argocd
+  labels:
+    category: networking
+spec:
+  project: default
+  sources:
+    - repoURL: https://kubernetes-sigs.github.io/external-dns/
+      chart: external-dns
+      targetRevision: 1.21.1
+      helm:
+        valueFiles:
+          - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/external-dns/values.yaml
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
+      targetRevision: HEAD
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: external-dns
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    # yamllint enable rule:line-length
