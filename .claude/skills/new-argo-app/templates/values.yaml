@@ -1,0 +1,11 @@
+# Helm values for NAME. Override chart defaults here.
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+# persistence:
+#   enabled: true
+#   storageClass: "longhorn"

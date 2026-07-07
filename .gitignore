@@ -1,4 +1,9 @@
-.claude
+.claude/*
+!.claude/settings.json
+!.claude/hooks/
+!.claude/skills/
+!.claude/agents/
+
 .idea
 .vscode
 *.log
