@@ -23,7 +23,6 @@ spec:
     - name: public
       sectionName: https
   hostnames:
-    - uptime.hauptmann.dev
     - status.hauptmann.dev
   rules:
     - backendRefs:
