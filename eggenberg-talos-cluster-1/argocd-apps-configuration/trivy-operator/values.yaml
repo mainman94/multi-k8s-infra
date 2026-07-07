@@ -1,0 +1,45 @@
+# yamllint disable rule:line-length
+# Trivy Operator config. Cluster-wide scanning of running workloads.
+
+# Scan every namespace (empty = all). Exclude noisy platform namespaces if needed.
+targetNamespaces: ""
+excludeNamespaces: "kube-system,trivy-system"
+
+operator:
+  # Vulnerability + config-audit scanning on. SBOM off (noisy, enable later if wanted).
+  vulnerabilityScannerEnabled: true
+  configAuditScannerEnabled: true
+  rbacAssessmentScannerEnabled: true
+  infraAssessmentScannerEnabled: true
+  exposedSecretScannerEnabled: true
+  sbomGenerationEnabled: false
+  # Rescan cadence + report retention.
+  scannerReportTTL: "24h"
+  metricsFindingsEnabled: true
+
+trivy:
+  # Standalone mode: each scan job pulls DBs itself. Simple, no extra trivy-server.
+  mode: Standalone
+  # Only report actionable severities.
+  severity: "HIGH,CRITICAL"
+  ignoreUnfixed: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Expose metrics to the existing kube-prometheus-stack (picks up all ServiceMonitors).
+serviceMonitor:
+  enabled: true
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+    # yamllint enable rule:line-length

@@ -1,0 +1,37 @@
+# yamllint disable rule:line-length
+# Trivy Operator. Continuously scans running workloads for vulnerabilities and
+# config-audit issues, emitting VulnerabilityReport / ConfigAuditReport CRDs and
+# Prometheus metrics. Same multi-source pattern as the kyverno app. sync-wave 1
+# so its CRDs settle after core controllers are up.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: trivy-operator
+  namespace: argocd
+  labels:
+    category: security
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: default
+  sources:
+    - repoURL: https://aquasecurity.github.io/helm-charts/
+      chart: trivy-operator
+      targetRevision: 0.33.2
+      helm:
+        valueFiles:
+          - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/trivy-operator/values.yaml
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
+      targetRevision: HEAD
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: trivy-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    # yamllint enable rule:line-length
