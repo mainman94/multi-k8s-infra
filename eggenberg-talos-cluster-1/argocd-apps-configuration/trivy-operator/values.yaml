@@ -2,7 +2,7 @@
 # Trivy Operator config. Cluster-wide scanning of running workloads.
 
 # Scan every namespace (empty = all). Exclude noisy platform namespaces if needed.
-targetNamespaces: ""
+targetNamespaces: "portfolio,portfolio-dev,portfolio-test"
 excludeNamespaces: "kube-system,trivy-system"
 
 operator:
