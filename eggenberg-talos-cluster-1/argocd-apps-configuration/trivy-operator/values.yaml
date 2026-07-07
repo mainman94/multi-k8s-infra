@@ -16,13 +16,18 @@ operator:
   # Rescan cadence + report retention.
   scannerReportTTL: "24h"
   metricsFindingsEnabled: true
+  # Run a built-in central Trivy server (ClientServer mode). Scan jobs query it
+  # instead of each downloading + locking the vuln DB — fixes the "cache lock
+  # timeout" failures and cuts registry pulls. Overrides trivy.mode + serverURL.
+  builtInTrivyServer: true
 
 trivy:
-  # Standalone mode: each scan job pulls DBs itself. Simple, no extra trivy-server.
-  mode: Standalone
   # Only report actionable severities.
   severity: "HIGH,CRITICAL"
   ignoreUnfixed: true
+  # Persist the built-in server's vuln DB on Longhorn so it survives restarts.
+  storageClassEnabled: true
+  storageClassName: longhorn
   resources:
     requests:
       cpu: 100m
