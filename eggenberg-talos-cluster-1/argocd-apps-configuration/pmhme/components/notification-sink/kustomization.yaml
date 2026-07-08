@@ -36,17 +36,17 @@ patches:
           - name: SMTP_PASS
             valueFrom:
               secretKeyRef:
-                name: contact-backend-secrets
+                name: contact-smtp
                 key: SMTP_PASS
           - name: SMTP_FROM
             valueFrom:
               secretKeyRef:
-                name: contact-backend-secrets
+                name: contact-smtp
                 key: SMTP_FROM
           - name: CONTACT_TO_EMAIL
             valueFrom:
               secretKeyRef:
-                name: contact-backend-secrets
+                name: contact-smtp
                 key: CONTACT_TO_EMAIL
   - target:
       kind: Rollout

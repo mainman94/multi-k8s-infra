@@ -24,6 +24,8 @@ resources:
   - contact-api.yaml
   - notifier-telegram.yaml
   - notifier-email.yaml
+  - contact-smtp-externalsecret.yaml
+  - contact-db-externalsecret.yaml
   - notifier-observability.yaml
   - backend-netpol.yaml
   - backend-pdb.yaml

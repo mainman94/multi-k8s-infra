@@ -3,6 +3,7 @@
 !.claude/hooks/
 !.claude/skills/
 !.claude/agents/
+mind.mv2.lock
 
 .idea
 .vscode

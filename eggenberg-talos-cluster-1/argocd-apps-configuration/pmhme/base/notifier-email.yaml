@@ -49,32 +49,32 @@ spec:
             - name: SMTP_HOST
               valueFrom:
                 secretKeyRef:
-                  name: contact-backend-secrets
+                  name: contact-smtp
                   key: SMTP_HOST
             - name: SMTP_PORT
               valueFrom:
                 secretKeyRef:
-                  name: contact-backend-secrets
+                  name: contact-smtp
                   key: SMTP_PORT
             - name: SMTP_USER
               valueFrom:
                 secretKeyRef:
-                  name: contact-backend-secrets
+                  name: contact-smtp
                   key: SMTP_USER
             - name: SMTP_PASS
               valueFrom:
                 secretKeyRef:
-                  name: contact-backend-secrets
+                  name: contact-smtp
                   key: SMTP_PASS
             - name: SMTP_FROM
               valueFrom:
                 secretKeyRef:
-                  name: contact-backend-secrets
+                  name: contact-smtp
                   key: SMTP_FROM
             - name: CONTACT_TO_EMAIL
               valueFrom:
                 secretKeyRef:
-                  name: contact-backend-secrets
+                  name: contact-smtp
                   key: CONTACT_TO_EMAIL
           readinessProbe:
             httpGet:

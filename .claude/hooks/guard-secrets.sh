@@ -9,6 +9,10 @@ case "$f" in
   # This is exactly where secret wiring belongs — allow.
   *infisicalsecret*|*infisical-secret*)
     exit 0 ;;
+  # ExternalSecret / *store manifests are the reference layer too (remoteRef
+  # pointers into OpenBao, no plaintext) — allow, same as Infisical templates.
+  *externalsecret*|*external-secret*|*clustersecretstore*|*secretstore*)
+    exit 0 ;;
   *settings.local.json)
     echo "Blocked: settings.local.json holds local credentials — edit it manually, not via Claude." >&2
     exit 2 ;;
