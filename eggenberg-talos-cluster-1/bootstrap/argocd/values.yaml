@@ -96,8 +96,8 @@ configs:
           name: Pocket ID
           config:
             issuer: https://id.hauptmann.dev
-            clientID: '$argocd-dex-authentik:DEX_POCKETID_CLIENT_ID'
-            clientSecret: '$argocd-dex-authentik:DEX_POCKETID_CLIENT_SECRET'
+            clientID: '$argocd-dex-pocketid:DEX_POCKETID_CLIENT_ID'
+            clientSecret: '$argocd-dex-pocketid:DEX_POCKETID_CLIENT_SECRET'
             insecureEnableGroups: true
             scopes:
               - openid
@@ -154,7 +154,7 @@ dex:
     - name: ARGO_WORKFLOWS_SSO_CLIENT_SECRET
       valueFrom:
         secretKeyRef:
-          name: argocd-dex-authentik
+          name: argocd-dex-pocketid
           key: ARGO_WORKFLOWS_SSO_CLIENT_SECRET
   metrics:
     enabled: true

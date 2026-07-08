@@ -36,7 +36,7 @@ spec:
 
 - Everything is YAML. Formatted by `yamlfmt` (`.yamlfmt`), linted by `kube-linter` (`.kube-linter.yaml`, excludes `dangling-service` for Rollouts-backed services).
 - Validate before commit: `pre-commit run --all-files` and `/preflight`.
-- Secrets via Infisical — never commit plaintext secrets.
+- Secrets via External Secrets Operator + OpenBao — never commit plaintext secrets.
 - Backups: Velero + Kopia → Backblaze S3.
 
 ## Tooling notes

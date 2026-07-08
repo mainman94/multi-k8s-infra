@@ -36,7 +36,7 @@ initContainers:
         name: plugins
 
 # Credentials for S3-compatible storage
-# Secret created automatically by Infisical operator from APPLICATION_KEY_ID_K8s_BACKUP
+# Secret created automatically by External Secrets Operator from OpenBao.
 credentials:
   useSecret: true
   name: velero-secret

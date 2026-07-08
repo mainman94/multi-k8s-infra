@@ -29,8 +29,7 @@ txtOwnerId: external-dns-eggenberg
 extraArgs:
   - --cloudflare-proxied
 
-# Cloudflare API token, provisioned from Infisical (CLOUDFLARE_API_KEY) into the
-# external-dns namespace by the central InfisicalSecret.
+# Cloudflare API token, provisioned from OpenBao by External Secrets Operator.
 env:
   - name: CF_API_TOKEN
     valueFrom:

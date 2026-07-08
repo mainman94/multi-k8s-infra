@@ -26,7 +26,7 @@ Everything's managed through Git. Push a change, ArgoCD deploys it. Simple.
 - **Cert-Manager** - SSL certificates
 - **Argo Suite** - CD, Workflows, Events, Rollouts
 - **Kargo** - Progressive delivery
-- **Infisical** - Secret management
+- **External Secrets Operator + OpenBao** - Secret management
 - **Kube-Prometheus-Stack & Loki** - Monitoring & Logging
 - **Longhorn** - Distributed block storage
 - **Alloy** - Telemetry collection
@@ -78,14 +78,8 @@ kubectl port-forward svc/kube-prometheus-stack-grafana -n kube-prometheus-stack 
 
 ## Secrets
 
-Using Infisical to manage secrets. Set up the operator credentials:
-
-```bash
-kubectl create secret generic universal-auth-credentials \
-  -n infisical-secrets-operator \
-  --from-literal=clientId=<CLIENT_ID> \
-  --from-literal=clientSecret=<CLIENT_SECRET>
-```
+Secrets are managed by External Secrets Operator against OpenBao at
+`https://vault.hauptmann.dev`. Never commit plaintext secrets.
 
 ## Troubleshooting
 

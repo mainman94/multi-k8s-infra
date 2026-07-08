@@ -5,7 +5,7 @@ server:
     ingressClassName: cilium
     hosts:
       - argo-workflows-rp.hauptmann.dev
-  # SSO via ArgoCD's Dex server (reuses existing Authentik config)
+  # SSO via ArgoCD's Dex server.
   authModes:
     - sso
   sso:
