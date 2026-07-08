@@ -1,0 +1,9 @@
+# External Secrets Operator (chart external-secrets 2.7.0 / app v2.7.0).
+# Defaults are sufficient:
+#   - installCRDs: true  -> installs the ClusterSecretStore CRD this app also
+#     consumes (see SkipDryRunOnMissingResource in the Application).
+#   - serviceAccount.name defaults to the release name "external-secrets" in ns
+#     "external-secrets" -> matches the OpenBao kubernetes-auth role "eso"
+#     (bound SA external-secrets / ns external-secrets), configured in the
+#     homelab repo's terraform/openbao.
+{}
