@@ -20,12 +20,14 @@ spec:
   emitWarning: false
   rules:
     - name: require-cpu-memory-requests
+      skipBackgroundRequests: true
       match:
         any:
           - resources:
               kinds:
                 - Pod
       validate:
+        allowExistingViolations: true
         message: "CPU and memory requests are required on every container."
         pattern:
           spec:
@@ -52,24 +54,28 @@ spec:
   emitWarning: false
   rules:
     - name: require-image-tag
+      skipBackgroundRequests: true
       match:
         any:
           - resources:
               kinds:
                 - Pod
       validate:
+        allowExistingViolations: true
         message: "An explicit image tag or digest is required ('latest' is not allowed)."
         pattern:
           spec:
             containers:
               - image: "*:*"
     - name: disallow-latest-tag
+      skipBackgroundRequests: true
       match:
         any:
           - resources:
               kinds:
                 - Pod
       validate:
+        allowExistingViolations: true
         message: "Using a mutable ':latest' tag is not allowed; pin a version or digest."
         pattern:
           spec:

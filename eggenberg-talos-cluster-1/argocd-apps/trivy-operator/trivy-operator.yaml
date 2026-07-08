@@ -28,6 +28,12 @@ spec:
     server: https://kubernetes.default.svc
     namespace: trivy-system
   syncPolicy:
+    managedNamespaceMetadata:
+      labels:
+        # Infra assessment node-collector jobs need hostPID and hostPath mounts.
+        pod-security.kubernetes.io/enforce: privileged
+        pod-security.kubernetes.io/audit: privileged
+        pod-security.kubernetes.io/warn: privileged
     automated:
       prune: true
       selfHeal: true

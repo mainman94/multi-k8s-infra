@@ -28,12 +28,14 @@ spec:
   emitWarning: false
   rules:
     - name: disallow-privilege-escalation
+      skipBackgroundRequests: true
       match:
         any:
           - resources:
               kinds:
                 - Pod
       validate:
+        allowExistingViolations: true
         message: "allowPrivilegeEscalation must be set to false."
         pattern:
           spec:
@@ -48,12 +50,14 @@ spec:
                   allowPrivilegeEscalation: "false"
 
     - name: require-run-as-non-root
+      skipBackgroundRequests: true
       match:
         any:
           - resources:
               kinds:
                 - Pod
       validate:
+        allowExistingViolations: true
         message: "runAsNonRoot must be true (pod or every container)."
         anyPattern:
           - spec:
@@ -65,12 +69,14 @@ spec:
                     runAsNonRoot: "true"
 
     - name: require-read-only-root-fs
+      skipBackgroundRequests: true
       match:
         any:
           - resources:
               kinds:
                 - Pod
       validate:
+        allowExistingViolations: true
         message: "readOnlyRootFilesystem must be set to true."
         pattern:
           spec:
@@ -79,12 +85,14 @@ spec:
                   readOnlyRootFilesystem: "true"
 
     - name: require-drop-all-capabilities
+      skipBackgroundRequests: true
       match:
         any:
           - resources:
               kinds:
                 - Pod
       validate:
+        allowExistingViolations: true
         message: "Containers must drop ALL Linux capabilities."
         pattern:
           spec:
