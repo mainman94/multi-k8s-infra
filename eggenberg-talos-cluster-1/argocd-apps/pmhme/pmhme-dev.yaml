@@ -7,7 +7,7 @@ metadata:
   labels:
     category: app
   annotations:
-    kargo.akuity.io/authorized-stage: pmhme-portfolio:dev
+    kargo.akuity.io/authorized-stage: portfolio-kargo:dev
 spec:
   project: default
   sources:

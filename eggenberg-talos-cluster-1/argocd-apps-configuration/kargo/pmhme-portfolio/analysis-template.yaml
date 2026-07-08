@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: AnalysisTemplate
 metadata:
   name: pmhme-portfolio-http-check
-  namespace: pmhme-portfolio
+  namespace: portfolio-kargo
 spec:
   args:
     - name: service-name

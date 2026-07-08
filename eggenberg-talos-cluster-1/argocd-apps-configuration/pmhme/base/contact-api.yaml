@@ -32,8 +32,6 @@ spec:
         runAsUser: 1000
         seccompProfile:
           type: RuntimeDefault
-      imagePullSecrets:
-        - name: docker-pull-secret
       containers:
         - name: contact-api
           image: ghcr.io/mainman94/contact-api:0.1.3

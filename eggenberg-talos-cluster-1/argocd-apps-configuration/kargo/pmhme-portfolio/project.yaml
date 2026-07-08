@@ -1,13 +1,13 @@
 apiVersion: kargo.akuity.io/v1alpha1
 kind: Project
 metadata:
-  name: pmhme-portfolio
+  name: portfolio-kargo
 ---
 apiVersion: kargo.akuity.io/v1alpha1
 kind: ProjectConfig
 metadata:
-  name: pmhme-portfolio
-  namespace: pmhme-portfolio
+  name: portfolio-kargo
+  namespace: portfolio-kargo
 spec:
   promotionPolicies:
     - stageSelector:
