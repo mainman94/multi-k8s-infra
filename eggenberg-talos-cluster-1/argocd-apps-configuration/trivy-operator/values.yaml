@@ -36,6 +36,52 @@ trivy:
       cpu: 500m
       memory: 512Mi
 
+# Node-collector (infra/CIS assessment). Talos has no systemd, so the chart's
+# default /etc/systemd + /lib/systemd host mounts don't exist. With the enforced
+# readOnlyRootFilesystem, containerd can't create those mount points in the
+# container rootfs -> CreateContainerError "mkdir /etc/systemd: read-only file
+# system". Re-declare the mount lists (Helm replaces lists wholesale) without the
+# two systemd entries.
+nodeCollector:
+  volumeMounts:
+    - name: var-lib-etcd
+      mountPath: /var/lib/etcd
+      readOnly: true
+    - name: var-lib-kubelet
+      mountPath: /var/lib/kubelet
+      readOnly: true
+    - name: var-lib-kube-scheduler
+      mountPath: /var/lib/kube-scheduler
+      readOnly: true
+    - name: var-lib-kube-controller-manager
+      mountPath: /var/lib/kube-controller-manager
+      readOnly: true
+    - name: etc-kubernetes
+      mountPath: /etc/kubernetes
+      readOnly: true
+    - name: etc-cni-netd
+      mountPath: /etc/cni/net.d/
+      readOnly: true
+  volumes:
+    - name: var-lib-etcd
+      hostPath:
+        path: /var/lib/etcd
+    - name: var-lib-kubelet
+      hostPath:
+        path: /var/lib/kubelet
+    - name: var-lib-kube-scheduler
+      hostPath:
+        path: /var/lib/kube-scheduler
+    - name: var-lib-kube-controller-manager
+      hostPath:
+        path: /var/lib/kube-controller-manager
+    - name: etc-kubernetes
+      hostPath:
+        path: /etc/kubernetes
+    - name: etc-cni-netd
+      hostPath:
+        path: /etc/cni/net.d/
+
 # Expose metrics to the existing kube-prometheus-stack (picks up all ServiceMonitors).
 serviceMonitor:
   enabled: true
