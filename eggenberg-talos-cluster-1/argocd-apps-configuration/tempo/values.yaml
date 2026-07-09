@@ -1,0 +1,25 @@
+tempo:
+  # Keep traces for two days; homelab-sized retention.
+  retention: 48h
+  storage:
+    trace:
+      backend: local
+      local:
+        path: /var/tempo/traces
+      wal:
+        path: /var/tempo/wal
+  # Narrow ingest to OTLP only (drop the chart's default jaeger/opencensus
+  # receivers). Apps push traces to tempo.monitoring.svc:4317 (gRPC) / :4318
+  # (HTTP).
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: "0.0.0.0:4317"
+        http:
+          endpoint: "0.0.0.0:4318"
+# Persist WAL + trace blocks so restarts don't lose data.
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClassName: longhorn

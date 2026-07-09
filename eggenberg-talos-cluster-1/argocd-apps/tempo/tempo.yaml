@@ -1,0 +1,39 @@
+# Grafana Tempo, single-binary trace backend. Receives OTLP and stores traces
+# on a Longhorn PVC. A sibling ConfigMap registers the Grafana datasource, which
+# the kube-prometheus-stack Grafana sidecar auto-loads (label grafana_datasource).
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tempo
+  namespace: argocd
+  labels:
+    category: monitoring
+spec:
+  project: default
+  sources:
+    - repoURL: https://grafana.github.io/helm-charts
+      chart: tempo
+      targetRevision: 1.24.4
+      helm:
+        valueFiles:
+          - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/tempo/values.yaml
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
+      targetRevision: HEAD
+      ref: values
+    - repoURL: https://github.com/mainman94/multi-k8s-infra/
+      path: "eggenberg-talos-cluster-1/argocd-apps-configuration/tempo"
+      targetRevision: HEAD
+      directory:
+        # Apply the Grafana datasource ConfigMap; the sibling values.yaml is a
+        # Helm input, not a manifest.
+        include: "grafana-datasource.yaml"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

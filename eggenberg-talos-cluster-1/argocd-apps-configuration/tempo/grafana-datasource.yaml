@@ -1,0 +1,23 @@
+# Registers Tempo as a Grafana datasource. The kube-prometheus-stack Grafana
+# sidecar watches the monitoring namespace for ConfigMaps carrying the
+# grafana_datasource label and loads them without a Grafana restart.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tempo-grafana-datasource
+  namespace: monitoring
+  labels:
+    grafana_datasource: "1"
+data:
+  tempo-datasource.yaml: |-
+    apiVersion: 1
+    datasources:
+      - name: Tempo
+        type: tempo
+        uid: tempo
+        access: proxy
+        url: http://tempo.monitoring.svc.cluster.local:3200
+        isDefault: false
+        # Trace-to-logs correlation (jump from a span to its Loki logs) and the
+        # service map (needs Tempo's metrics-generator + Prometheus remote-write)
+        # are deliberately left off for now — add once those are wired.
