@@ -19,7 +19,7 @@ images:
 - name: ghcr.io/mainman94/notifier-telegram
   newTag: 0.2.0
 - name: ghcr.io/mainman94/pmhme
-  newTag: 0.5.1
+  newTag: 0.6.0
 patches:
 - patch: |-
     - op: replace
