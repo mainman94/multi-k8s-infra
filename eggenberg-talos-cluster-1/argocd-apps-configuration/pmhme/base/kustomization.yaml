@@ -26,6 +26,7 @@ resources:
   - notifier-email.yaml
   - contact-smtp-externalsecret.yaml
   - contact-db-externalsecret.yaml
+  - docker-pull-secret-externalsecret.yaml
   - notifier-observability.yaml
   - backend-netpol.yaml
   - backend-pdb.yaml

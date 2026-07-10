@@ -23,6 +23,8 @@ spec:
       labels:
         app: notifier-telegram
     spec:
+      imagePullSecrets:
+        - name: docker-pull-secret
       securityContext:
         runAsNonRoot: true
         runAsUser: 65532

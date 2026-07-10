@@ -17,6 +17,8 @@ spec:
       labels:
         app: contact-api
     spec:
+      imagePullSecrets:
+        - name: docker-pull-secret
       # Soft anti-affinity: prefer spreading replicas across nodes (KEDA controls count).
       affinity:
         podAntiAffinity:
