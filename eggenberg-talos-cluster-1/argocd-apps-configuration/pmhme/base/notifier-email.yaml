@@ -22,6 +22,8 @@ spec:
       labels:
         app: notifier-email
     spec:
+      imagePullSecrets:
+        - name: docker-pull-secret
       securityContext:
         runAsNonRoot: true
         runAsUser: 65532
