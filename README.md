@@ -21,17 +21,37 @@ Everything's managed through Git. Push a change, ArgoCD deploys it. Simple.
 
 ## What's Running
 
-- **Cilium & Cilium Gateway** - Networking & Ingress
-- **Cloudflare Tunnel** - External access
+**Networking & ingress**
+- **Cilium & Cilium Gateway** - CNI (kube-proxy replacement), Gateway API, L2 announcements, SPIRE mTLS, Hubble
+- **Cloudflare Tunnel** - External access (`*.hauptmann.dev`)
 - **Cert-Manager** - SSL certificates
-- **Argo Suite** - CD, Workflows, Events, Rollouts
-- **Kargo** - Progressive delivery
+- **ExternalDNS** - Cloudflare DNS records driven by Gateway API HTTPRoutes
+
+**Delivery & GitOps**
+- **Argo Suite** - CD, Workflows, Events, Rollouts (blue/green + canary)
+- **Kargo** - Progressive delivery (dev → test → prod)
+- **argocd-image-updater** - Dev-overlay image bumps
 - **External Secrets Operator + OpenBao** - Secret management
-- **Kube-Prometheus-Stack & Loki** - Monitoring & Logging
-- **Longhorn** - Distributed block storage
-- **Alloy** - Telemetry collection
+
+**Observability**
+- **Kube-Prometheus-Stack** - Metrics, Grafana, Alertmanager
+- **Loki + Alloy** - Log aggregation & collection
+- **Tempo** - Distributed tracing (OTLP)
 - **Uptime Kuma** - Uptime checks
-- **PMHME** - Custom applications
+
+**Security & policy**
+- **Kyverno** - Admission policies (pod-security, resource/image hygiene — Audit mode)
+- **Trivy Operator** - Vulnerability & config scanning
+
+**Storage, scaling & resilience**
+- **Longhorn** - Distributed block storage (default `longhorn` SC)
+- **KEDA** - Event-driven autoscaling
+- **Vertical Pod Autoscaler** - Right-sizing pod requests
+- **Spegel** - P2P image cache
+- **Velero + Kopia** - Backups to Backblaze S3 (daily)
+
+**Apps**
+- **PMHME** - Custom portfolio app + contact backend (`hauptmann.dev`)
 
 ## Quick Setup
 
@@ -60,8 +80,11 @@ Done. ArgoCD takes over from here.
 ## Making Changes
 
 1. Edit config in `eggenberg-talos-cluster-1/argocd-apps-configuration/<app>/values.yaml`
-2. Commit and push
-3. ArgoCD syncs automatically
+2. Validate first: `pre-commit run --all-files` (yamlfmt) and `/preflight` (kube-lint + `kubectl kustomize` build of every overlay)
+3. Commit and push
+4. ArgoCD syncs automatically
+
+Custom apps (`pmhme`) use Kustomize (`base/` + `overlays/{dev,test,production}` + `components/`) instead of raw Helm values. Never `kubectl apply` app changes, and don't hand-edit image tags managed by argocd-image-updater / Kargo.
 
 ## Access Stuff
 
