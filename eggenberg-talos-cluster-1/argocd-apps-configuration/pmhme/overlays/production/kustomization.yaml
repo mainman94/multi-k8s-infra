@@ -12,7 +12,7 @@ components:
 - ../../components/keda-ns-scoped
 images:
 - name: ghcr.io/mainman94/contact-api
-  newTag: 0.4.1
+  newTag: 0.5.0
 - name: ghcr.io/mainman94/notifier-email
   newTag: 0.2.1
 - name: ghcr.io/mainman94/notifier-telegram
