@@ -14,6 +14,9 @@ spec:
       interval: 30s
       path: /metrics
 ---
+# NOTE: below is contact-api. It is scraped every 10s (not 30s) so the KEDA
+# rate() metric and the /platform live panel react to the "run load test"
+# button within seconds instead of jumping in 30s staircase steps.
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -27,5 +30,5 @@ spec:
       app: contact-api
   endpoints:
     - port: metrics
-      interval: 30s
+      interval: 10s
       path: /metrics

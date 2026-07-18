@@ -1,8 +1,10 @@
 # KEDA ScaledObject: scales contact-api horizontally based on HTTP request rate
 # scraped from Prometheus. Idle (< 3 req/s avg): 1 replica. Burst: up to 4.
 # Tuned to be responsive so the /platform "run load test" button visibly drives
-# a 1->4 scale-up and back: low threshold, 1m rate window, 15s polling, and an
-# aggressive scale-up / fast (30s) scale-down HPA behavior.
+# a 1->4 scale-up and back: low threshold, 40s rate window (contact-api is
+# scraped every 10s -> 4 samples), 15s polling, and an aggressive scale-up /
+# fast (30s) scale-down HPA behavior. A shorter rate() window reacts faster to
+# load starting and drains faster when it stops, so scale-down isn't delayed.
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
@@ -36,5 +38,5 @@ spec:
       metadata:
         serverAddress: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
         metricName: contact_api_http_requests_rate
-        query: sum(rate(contact_api_http_requests_total{namespace="NAMESPACE_PLACEHOLDER"}[1m]))
+        query: sum(rate(contact_api_http_requests_total{namespace="NAMESPACE_PLACEHOLDER"}[40s]))
         threshold: "3"
