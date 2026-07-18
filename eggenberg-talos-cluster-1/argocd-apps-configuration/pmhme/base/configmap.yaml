@@ -12,3 +12,8 @@ data:
   # Platform page: server-side Prometheus read for /platform cluster metrics.
   PROMETHEUS_URL: "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090"
   OPS_NAMESPACE: "portfolio"
+  # Origin for canonical/OG URLs. Overridden per env so dev/test self-canonicalise.
+  SITE_URL: "https://hauptmann.dev"
+  # Analytics: shipped only when both are set. dev/test blank them to opt out.
+  UMAMI_SCRIPT_URL: "https://umami.hauptmann.dev/script.js"
+  UMAMI_WEBSITE_ID: "06b02831-8ba7-4603-a821-9fa473ac1c08"

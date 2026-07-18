@@ -7,3 +7,7 @@ data:
   LOG_LEVEL: "info"
   # /platform page reads this env's own namespace (button scales it too).
   OPS_NAMESPACE: "portfolio-test"
+  SITE_URL: "https://test.hauptmann.dev"
+  # No analytics in non-prod — blank both so umami stays off (keeps prod stats clean).
+  UMAMI_SCRIPT_URL: ""
+  UMAMI_WEBSITE_ID: ""
