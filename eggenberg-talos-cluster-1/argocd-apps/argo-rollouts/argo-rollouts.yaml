@@ -10,7 +10,7 @@ spec:
   sources:
     - repoURL: https://argoproj.github.io/argo-helm
       chart: argo-rollouts
-      targetRevision: 2.41.0
+      targetRevision: 2.41.1
       helm:
         valueFiles:
           - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/argo-rollouts/values.yaml
