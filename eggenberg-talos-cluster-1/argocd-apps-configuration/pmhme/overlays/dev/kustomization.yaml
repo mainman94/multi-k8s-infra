@@ -19,7 +19,7 @@ images:
   - name: ghcr.io/mainman94/notifier-telegram
     newTag: 0.2.2
   - name: ghcr.io/mainman94/notifier-email
-    newTag: 0.2.1
+    newTag: 0.2.2
 patches:
   - patch: |-
       - op: replace
