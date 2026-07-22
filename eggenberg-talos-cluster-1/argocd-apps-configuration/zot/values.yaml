@@ -24,7 +24,11 @@ configFiles:
           }
         }
       },
-      "log": { "level": "info" }
+      "log": { "level": "info" },
+      "extensions": {
+        "search": { "enable": true },
+        "ui": { "enable": true }
+      }
     }
 # Mount the ESO-managed Secret (zot-secret-externalsecret.yaml, from OpenBao) at
 # /secret so htpasswd lands at /secret/htpasswd. Using externalSecrets (not
