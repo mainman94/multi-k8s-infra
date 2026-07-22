@@ -1,0 +1,18 @@
+# Routed via Cilium Gateway HTTPRoute (see cilium-gateway/service_zot.yaml), not
+# the chart ingress. ClusterIP so only the Gateway reaches it.
+service:
+  type: ClusterIP
+  port: 5000
+persistence: true
+pvc:
+  create: true
+  accessModes: ["ReadWriteOnce"]
+  storage: 20Gi
+  storageClassName: longhorn
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 100m
+    memory: 256Mi

@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: zot
+  namespace: argocd
+  labels:
+    category: infrastructure
+spec:
+  # yamllint disable rule:line-length
+  project: default
+  sources:
+    - repoURL: https://zotregistry.dev/helm-charts
+      targetRevision: 0.1.122
+      chart: zot
+      helm:
+        valueFiles:
+          - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/zot/values.yaml
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
+      targetRevision: HEAD
+      ref: values
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
+      targetRevision: HEAD
+      path: "eggenberg-talos-cluster-1/argocd-apps-configuration/zot"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: zot
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    # yamllint enable rule:line-length
