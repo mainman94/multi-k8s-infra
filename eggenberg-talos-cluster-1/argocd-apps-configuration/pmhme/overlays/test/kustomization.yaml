@@ -13,13 +13,13 @@ components:
 - ../../components/keda-ns-scoped
 images:
 - name: ghcr.io/mainman94/contact-api
-  newTag: 0.5.0
+  newTag: 0.5.1
 - name: ghcr.io/mainman94/notifier-email
   newTag: 0.2.2
 - name: ghcr.io/mainman94/notifier-telegram
   newTag: 0.2.2
 - name: ghcr.io/mainman94/pmhme
-  newTag: 0.8.0
+  newTag: 0.8.1
 patches:
 - patch: |-
     - op: replace
