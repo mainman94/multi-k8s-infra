@@ -27,7 +27,27 @@ configFiles:
       "log": { "level": "info" },
       "extensions": {
         "search": { "enable": true },
-        "ui": { "enable": true }
+        "ui": { "enable": true },
+        "sync": {
+          "enable": true,
+          "registries": [
+            {
+              "urls": ["https://registry-1.docker.io"],
+              "onDemand": true,
+              "tlsVerify": true,
+              "maxRetries": 3,
+              "retryDelay": "10m"
+            },
+            {
+              "urls": ["https://ghcr.io"],
+              "onDemand": true,
+              "tlsVerify": true,
+              "maxRetries": 3,
+              "retryDelay": "10m"
+            }
+          ]
+        },
+        "metrics": { "enable": true, "prometheus": { "path": "/metrics" } }
       }
     }
 # Mount the ESO-managed Secret (zot-secret-externalsecret.yaml, from OpenBao) at
