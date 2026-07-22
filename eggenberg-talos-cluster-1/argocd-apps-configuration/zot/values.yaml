@@ -3,6 +3,35 @@
 service:
   type: ClusterIP
   port: 5000
+# htpasswd auth. mountConfig replaces /etc/zot entirely, so config.json is the
+# full config (storage/http). No anonymous access; only 'admin' (from the
+# htpasswd) gets access. Probes hit /livez,/readyz,/startupz which are unauthed,
+# so no authHeader is needed.
+mountConfig: true
+configFiles:
+  config.json: |-
+    {
+      "storage": { "rootDirectory": "/var/lib/registry" },
+      "http": {
+        "address": "0.0.0.0",
+        "port": "5000",
+        "auth": { "htpasswd": { "path": "/secret/htpasswd" } },
+        "accessControl": {
+          "repositories": { "**": { "defaultPolicy": [] } },
+          "adminPolicy": {
+            "users": ["admin"],
+            "actions": ["read", "create", "update", "delete"]
+          }
+        }
+      },
+      "log": { "level": "info" }
+    }
+# Mount the ESO-managed Secret (zot-secret-externalsecret.yaml, from OpenBao) at
+# /secret so htpasswd lands at /secret/htpasswd. Using externalSecrets (not
+# mountSecret) so the chart does NOT create its own default admin:admin secret.
+externalSecrets:
+  - secretName: zot-secret
+    mountPath: /secret
 persistence: true
 pvc:
   create: true
