@@ -55,6 +55,7 @@ schedules:
         - kube-system
         - kube-apiserver
         - monitoring
+        - trivy-system
       includedClusterScopedResources:
         - "*"
       excludedClusterScopedResources:
