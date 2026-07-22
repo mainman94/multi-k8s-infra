@@ -20,11 +20,11 @@ server:
   ingress:
     enabled: false
     ingressClassName: cilium
-    hostname: argo-rp.hauptmann.dev
+    hostname: argo.hauptmann.dev
     path: /
     pathType: Prefix
 global:
-  domain: argo-rp.hauptmann.dev
+  domain: argo.hauptmann.dev
 # yamllint disable rule:line-length
 configs:
   params:
@@ -88,7 +88,7 @@ configs:
         - CiliumEndpoint
         - CiliumEndpointSlice
     # Dex/Pocket ID OIDC
-    url: https://argo-rp.hauptmann.dev
+    url: https://argo.hauptmann.dev
     dex.config: |
       connectors:
         - type: oidc

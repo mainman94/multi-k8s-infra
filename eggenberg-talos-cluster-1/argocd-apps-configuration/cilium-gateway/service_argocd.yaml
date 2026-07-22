@@ -23,7 +23,7 @@ spec:
     - name: public
       sectionName: https
   hostnames:
-    - argo-rp.hauptmann.dev
+    - argo.hauptmann.dev
   rules:
     - backendRefs:
         - name: argocd-server

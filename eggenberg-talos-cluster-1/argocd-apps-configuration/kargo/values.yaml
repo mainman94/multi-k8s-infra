@@ -7,7 +7,7 @@ api:
     enabled: true
   argocd:
     urls:
-      "": "https://argo-rp.hauptmann.dev"
+      "": "https://argo.hauptmann.dev"
   ingress:
     enabled: false
     ingressClassName: cilium

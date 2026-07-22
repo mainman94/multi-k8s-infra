@@ -10,7 +10,7 @@ server:
     - sso
   sso:
     enabled: true
-    issuer: https://argo-rp.hauptmann.dev/api/dex
+    issuer: https://argo.hauptmann.dev/api/dex
     clientId:
       name: argo-workflows-sso
       key: client-id
