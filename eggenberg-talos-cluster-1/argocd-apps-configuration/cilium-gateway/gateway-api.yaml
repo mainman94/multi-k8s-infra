@@ -51,7 +51,7 @@ spec:
         mode: Terminate
         certificateRefs:
           - kind: Secret
-            name: cloudflare-origin-cert
+            name: hauptmann-dev-tls
     - name: https-root
       protocol: HTTPS
       port: 443
@@ -72,4 +72,4 @@ spec:
         mode: Terminate
         certificateRefs:
           - kind: Secret
-            name: cloudflare-origin-cert
+            name: hauptmann-dev-tls

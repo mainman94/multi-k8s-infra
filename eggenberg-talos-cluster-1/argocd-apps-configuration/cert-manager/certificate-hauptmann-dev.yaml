@@ -1,0 +1,15 @@
+# Wildcard + apex Let's Encrypt cert for hauptmann.dev. Lives in the cilium ns
+# so the public Gateway can reference the resulting hauptmann-dev-tls Secret.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: hauptmann-dev
+  namespace: cilium
+spec:
+  secretName: hauptmann-dev-tls
+  issuerRef:
+    name: letsencrypt-cloudflare
+    kind: ClusterIssuer
+  dnsNames:
+    - hauptmann.dev
+    - "*.hauptmann.dev"
