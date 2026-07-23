@@ -82,9 +82,13 @@ nodeCollector:
       hostPath:
         path: /etc/cni/net.d/
 
-# Expose metrics to the existing kube-prometheus-stack (picks up all ServiceMonitors).
+# Expose metrics to the existing kube-prometheus-stack. Its Prometheus only
+# selects ServiceMonitors labeled release=kube-prometheus-stack, so set it here —
+# without this label the SM is created but never scraped (dashboard shows no data).
 serviceMonitor:
   enabled: true
+  labels:
+    release: kube-prometheus-stack
 
 # Operator controller. Memory scales with the number of scanned workloads (informer
 # cache + report objects) — 256Mi OOMKilled on a full-cluster scan, so give it headroom.
