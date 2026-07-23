@@ -2,10 +2,9 @@
 # Baseline pod-security ClusterPolicy.
 #
 # validationFailureAction: Audit — reports violations into PolicyReports/Grafana
-# WITHOUT blocking admission. Deliberately not Enforce: the portfolio Rollout
-# runs image ...:latest (disallow-latest-tag rule below would reject it), and
-# Audit-first is the correct rollout order for a new admission engine. Flip
-# individual rules to Enforce once the reports are clean.
+# WITHOUT blocking admission. Audit-first is the correct rollout order for a new
+# admission engine: observe the reports across all namespaces, then flip
+# individual rules to Enforce once they are clean.
 #
 # validate.podSecurity is not used here so each control can be tuned/enforced
 # independently and reads clearly in reports.

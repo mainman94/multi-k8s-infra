@@ -49,7 +49,7 @@ schedules:
   daily:
     schedule: "0 2 * * *" # 2 AM daily
     template:
-      ttl: "48h" # 30 days retention
+      ttl: "48h" # 2 days retention
       includedNamespaces:
         - "*"
       excludedNamespaces:

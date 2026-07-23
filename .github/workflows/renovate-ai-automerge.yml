@@ -10,8 +10,14 @@ permissions:
 
 jobs:
   evaluate-and-automerge:
+    # SECURITY: pull_request_target runs with write perms + secrets. Require the
+    # PR branch to live in THIS repo (not a fork) — only a writer can push a
+    # renovate/ branch here, so a fork PR can't spoof the branch name to get
+    # auto-merged. Renovate (github-hosted app or self-hosted) pushes branches
+    # into the repo, so its real PRs still qualify.
     if: >
-      github.event.pull_request.user.login == 'renovate[bot]' || startsWith(github.event.pull_request.head.ref, 'renovate/')
+      github.event.pull_request.head.repo.full_name == github.repository && (github.event.pull_request.user.login == 'renovate[bot]' ||
+       startsWith(github.event.pull_request.head.ref, 'renovate/'))
     runs-on: ubuntu-latest
     steps:
       - name: Evaluate PR risk (rules + AI)

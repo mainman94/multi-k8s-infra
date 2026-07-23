@@ -64,7 +64,7 @@ The cluster is provisioned using Talos Linux. Ensure your `talosconfig` is corre
 ```bash
 helm install argocd oci://ghcr.io/argoproj/argo-helm/argo-cd \
   --namespace argocd \
-  --version 9.0.5 \
+  --version 10.2.0 \
   -f eggenberg-talos-cluster-1/bootstrap/argocd/values.yaml \
   --create-namespace
 ```

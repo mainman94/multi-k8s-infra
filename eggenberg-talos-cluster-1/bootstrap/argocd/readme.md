@@ -31,7 +31,7 @@ Installiere ArgoCD mit einer benutzerdefinierten `values.yaml`-Datei:
 ```bash
 helm install argocd oci://ghcr.io/argoproj/argo-helm/argo-cd \
   --namespace argocd \
-  --version 9.0.5 \
+  --version 10.2.0 \
   -f values.yaml
 ```
 

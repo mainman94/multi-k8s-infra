@@ -1,8 +1,8 @@
 # yamllint disable rule:line-length
 # Resource governance + image hygiene. Audit only (see baseline-pod-security.yaml
-# for the rationale on Audit-first). Note the portfolio Rollout intentionally
-# uses ...:latest, so disallow-latest-tag will report it until that image is
-# pinned — that visibility is the point of running this in Audit mode first.
+# for the rationale on Audit-first). All pmhme images are pinned to explicit tags
+# (base seed + overlay images.newTag), so disallow-latest-tag should report clean
+# for the portfolio — a good candidate to flip to Enforce first.
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
