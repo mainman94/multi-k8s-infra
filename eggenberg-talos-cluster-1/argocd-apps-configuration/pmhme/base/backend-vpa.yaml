@@ -84,27 +84,5 @@ spec:
         maxAllowed:
           cpu: 100m
           memory: 64Mi
----
-apiVersion: autoscaling.k8s.io/v1
-kind: VerticalPodAutoscaler
-metadata:
-  name: contact-postgres-vpa
-spec:
-  targetRef:
-    apiVersion: apps/v1
-    kind: StatefulSet
-    name: contact-postgres
-  updatePolicy:
-    updateMode: InPlaceOrRecreate
-  resourcePolicy:
-    containerPolicies:
-      - containerName: "*"
-        controlledResources:
-          - cpu
-          - memory
-        minAllowed:
-          cpu: 25m
-          memory: 64Mi
-        maxAllowed:
-          cpu: 500m
-          memory: 512Mi
+          # contact-postgres has no VPA: CNPG owns instance pod resources (set in the
+          # Cluster spec) and manages its own rollout — a VPA would fight the operator.

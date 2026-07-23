@@ -1,0 +1,38 @@
+# CloudNativePG operator. Cluster-scoped; installs the postgresql.cnpg.io CRDs
+# consumed by the pmhme contact-postgres Cluster. Third source applies the
+# dedicated longhorn-cnpg StorageClass (single-owner cluster-scoped resource).
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudnative-pg
+  namespace: argocd
+  labels:
+    category: storage
+spec:
+  project: default
+  sources:
+    - repoURL: https://cloudnative-pg.io/charts
+      chart: cloudnative-pg
+      targetRevision: 0.29.0
+      helm:
+        valueFiles:
+          - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/cloudnative-pg/values.yaml
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
+      targetRevision: HEAD
+      ref: values
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
+      targetRevision: HEAD
+      path: "eggenberg-talos-cluster-1/argocd-apps-configuration/cloudnative-pg"
+      directory:
+        # Apply the StorageClass; the sibling values.yaml is a Helm input.
+        include: "storageclass-longhorn-cnpg.yaml"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cnpg-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

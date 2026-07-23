@@ -1,170 +1,65 @@
-# Single-instance Postgres for the contact backend.
-# Namespace + common labels are applied by the including overlay (dev/test/production).
+# CloudNativePG cluster for the contact backend. Replaces the hand-rolled
+# single-replica StatefulSet: 1 primary + 1 replica with streaming replication
+# and automatic failover, managed by the CNPG operator (cnpg-system).
+#
+# Services created by the operator: contact-postgres-rw (primary, read/write),
+# contact-postgres-ro (replicas), contact-postgres-r (any). contact-api targets
+# contact-postgres-rw (see contact-db-externalsecret.yaml DATABASE_URL).
+#
 # contact-api auto-creates the `contact_requests` table on startup
-# (CREATE TABLE IF NOT EXISTS), so no separate migration job is needed.
-apiVersion: apps/v1
-kind: StatefulSet
+# (CREATE TABLE IF NOT EXISTS) — greenfield, no migration job.
+#
+# Backups: Velero (kopia fs-backup of the PVs) for now. PITR via the
+# barman-cloud plugin is deferred (see the design spec amendment).
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
 metadata:
   name: contact-postgres
   labels:
     app: contact-postgres
 spec:
-  serviceName: contact-postgres
-  replicas: 1
-  selector:
-    matchLabels:
-      app: contact-postgres
-  template:
-    metadata:
-      labels:
-        app: contact-postgres
-    spec:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 999
-        runAsGroup: 999
-        fsGroup: 999
-        seccompProfile:
-          type: RuntimeDefault
-      containers:
-        - name: postgres
-          # Digest-pinned for immutability; tag kept for readability (Renovate-bumpable).
-          image: docker.io/postgres:18.4-alpine3.24@sha256:9a8afca54e7861fd90fab5fdf4c42477a6b1cb7d293595148e674e0a3181de15
-          ports:
-            - containerPort: 5432
-              name: postgres
-              protocol: TCP
-          env:
-            - name: POSTGRES_USER
-              value: contact
-            - name: POSTGRES_DB
-              value: contact
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: contact-db
-                  key: POSTGRES_PASSWORD
-            # Keep PGDATA in a subdirectory so the volume root (lost+found etc.)
-            # does not collide with initdb.
-            - name: PGDATA
-              value: /var/lib/postgresql/data/pgdata
-          volumeMounts:
-            - name: data
-              mountPath: /var/lib/postgresql/data
-            - name: run
-              mountPath: /var/run/postgresql
-            - name: tmp
-              mountPath: /tmp
-          readinessProbe:
-            exec:
-              command: ["pg_isready", "-U", "contact", "-d", "contact"]
-            initialDelaySeconds: 5
-            periodSeconds: 10
-            timeoutSeconds: 3
-            failureThreshold: 6
-          livenessProbe:
-            exec:
-              command: ["pg_isready", "-U", "contact", "-d", "contact"]
-            initialDelaySeconds: 20
-            periodSeconds: 15
-            timeoutSeconds: 3
-            failureThreshold: 3
-          resources:
-            requests:
-              cpu: "50m"
-              memory: "128Mi"
-            limits:
-              cpu: "500m"
-              memory: "512Mi"
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
-            readOnlyRootFilesystem: true
-        - name: postgres-exporter
-          # Digest-pinned for immutability; tag kept for readability (Renovate-bumpable).
-          # v0.17.0+ required: PG17 moved checkpoints_timed/checkpoints_req
-          # from pg_stat_bgwriter to pg_stat_checkpointer; older exporter
-          # versions query the removed columns and fail the stat_bgwriter collector.
-          image: docker.io/prometheuscommunity/postgres-exporter:v0.20.1@sha256:ac5ec343104fae0e2d84a27bb8d69b38430a11910c5382cad85d478d2bab713e
-          ports:
-            - containerPort: 9187
-              name: metrics
-              protocol: TCP
-          env:
-            # Built from separate vars (not the shared DATABASE_URL) so we can
-            # force sslmode=disable: the pq driver defaults to requiring SSL,
-            # but this Postgres has no SSL configured.
-            - name: DATA_SOURCE_USER
-              value: contact
-            - name: DATA_SOURCE_PASS
-              valueFrom:
-                secretKeyRef:
-                  name: contact-db
-                  key: POSTGRES_PASSWORD
-            - name: DATA_SOURCE_URI
-              value: "contact-postgres:5432/contact?sslmode=disable"
-          readinessProbe:
-            httpGet:
-              path: /metrics
-              port: metrics
-            periodSeconds: 10
-            timeoutSeconds: 2
-            failureThreshold: 3
-          resources:
-            requests:
-              cpu: "10m"
-              memory: "32Mi"
-            limits:
-              cpu: "100m"
-              memory: "64Mi"
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
-            readOnlyRootFilesystem: true
-            runAsNonRoot: true
-            runAsUser: 65534
-      volumes:
-        - name: run
-          emptyDir: {}
-        - name: tmp
-          emptyDir: {}
-  volumeClaimTemplates:
-    - metadata:
-        name: data
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        storageClassName: longhorn
-        resources:
-          requests:
-            storage: 2Gi
+  instances: 2
+  imageName: ghcr.io/cloudnative-pg/postgresql:18
+
+  # Reuse the ESO-managed contact-db secret (from OpenBao) as the app-user
+  # credentials, so the password still lives in OpenBao (per-env property patch
+  # unchanged). CNPG reads the basic-auth username/password keys added to that
+  # secret. initdb creates database `contact` owned by user `contact`.
+  bootstrap:
+    initdb:
+      database: contact
+      owner: contact
+      secret:
+        name: contact-db
+
+  storage:
+    storageClass: longhorn-cnpg
+    size: 2Gi
+
+  # Spread primary + replica across nodes.
+  affinity:
+    enablePodAntiAffinity: true
+    topologyKey: kubernetes.io/hostname
+
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+
+  # CNPG can auto-create a PodMonitor, but Prometheus only selects monitors
+  # labelled release=kube-prometheus-stack — the operator's PodMonitor can't
+  # carry that label, so disable it and ship our own below.
+  monitoring:
+    enablePodMonitor: false
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: contact-postgres
-  labels:
-    app: contact-postgres
-spec:
-  clusterIP: None
-  selector:
-    app: contact-postgres
-  ports:
-    - name: postgres
-      port: 5432
-      targetPort: postgres
-      protocol: TCP
-    - name: metrics
-      port: 9187
-      targetPort: metrics
-      protocol: TCP
----
+# Scrapes the CNPG instances' built-in metrics exporter (:9187). Labelled for
+# the kube-prometheus-stack Prometheus selector, mirroring the other backend
+# ServiceMonitors.
 apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
+kind: PodMonitor
 metadata:
   name: contact-postgres
   labels:
@@ -173,8 +68,8 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: contact-postgres
-  endpoints:
+      cnpg.io/cluster: contact-postgres
+  podMetricsEndpoints:
     - port: metrics
       interval: 30s
       path: /metrics

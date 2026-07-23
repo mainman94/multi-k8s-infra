@@ -84,12 +84,12 @@ spec:
         - ports:
             - port: "53"
               protocol: ANY
-    # Meshed edge: contact-api -> contact-postgres.
+    # contact-api -> contact-postgres (CNPG primary). No Cilium mutual auth:
+    # CNPG runs its own PostgreSQL TLS, layering SPIRE mTLS on top risks
+    # double-mTLS breakage. Selects CNPG instance pods by cluster label.
     - toEndpoints:
         - matchLabels:
-            app: contact-postgres
-      authentication:
-        mode: required
+            cnpg.io/cluster: contact-postgres
       toPorts:
         - ports:
             - port: "5432"
@@ -115,6 +115,10 @@ spec:
             - port: "6379"
               protocol: TCP
 ---
+# CNPG instance pods (contact-postgres cluster). No Cilium mutual auth on any
+# edge — CNPG manages its own PostgreSQL/replication TLS; the cluster label
+# selects both instances. Ports: 5432 postgres+replication, 8000 instance
+# manager (probes + operator), 9187 metrics exporter.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -122,20 +126,45 @@ metadata:
 spec:
   endpointSelector:
     matchLabels:
-      app: contact-postgres
+      cnpg.io/cluster: contact-postgres
   ingress:
-    # Meshed edge: require mutual auth from contact-api.
+    # contact-api client connections.
     - fromEndpoints:
         - matchLabels:
             app: contact-api
-      authentication:
-        mode: required
       toPorts:
         - ports:
             - port: "5432"
               protocol: TCP
+    # Streaming replication + instance-manager traffic between peers.
+    - fromEndpoints:
+        - matchLabels:
+            cnpg.io/cluster: contact-postgres
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+            - port: "8000"
+              protocol: TCP
+    # CNPG operator (cnpg-system) manages the instances (postgres + instance
+    # manager status port).
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: cnpg-system
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+            - port: "8000"
+              protocol: TCP
+    # kubelet health probes hit the instance manager (:8000) from the node.
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
     # Prometheus metrics scrape from monitoring namespace.
-    # No mutual auth: keep scraping decoupled from the app mesh.
     - fromEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: monitoring
@@ -143,10 +172,6 @@ spec:
         - ports:
             - port: "9187"
               protocol: TCP
-          rules:
-            http:
-              - method: GET
-                path: /metrics
   egress:
     - toEndpoints:
         - matchLabels:
@@ -156,6 +181,19 @@ spec:
         - ports:
             - port: "53"
               protocol: ANY
+    # Streaming replication + instance-manager traffic to the peer instance.
+    - toEndpoints:
+        - matchLabels:
+            cnpg.io/cluster: contact-postgres
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+            - port: "8000"
+              protocol: TCP
+    # Instance manager talks to the Kubernetes API server.
+    - toEntities:
+        - kube-apiserver
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy

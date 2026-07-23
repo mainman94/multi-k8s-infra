@@ -2,7 +2,24 @@
 
 **Date:** 2026-07-23
 **Repo:** `multi-k8s-infra` (GitOps, cluster `eggenberg-talos-cluster-1`)
-**Status:** Approved (brainstorm) → ready for implementation plan
+**Status:** Approved (brainstorm) → in implementation
+
+## Amendment (2026-07-23, during implementation)
+
+Backup scope narrowed after confirming CNPG is now at **operator 1.30** (chart
+`cloudnative-pg` 0.29.0) and in-tree `barmanObjectStore` is deprecated since 1.26:
+
+- **No PITR / Barman this pass.** Adopt CNPG for **HA + operator lifecycle only**.
+  Velero **continues** kopia fs-backup of the CNPG PVs (do NOT exclude them).
+  PITR via the barman-cloud plugin is deferred to a later pass.
+- Superseded below: decision 2, decision 5, Component 3 (Barman), the
+  `cnpg-backup-externalsecret`, the Velero-exclusion edit, and the world:443
+  Barman egress in Component 5 — all **dropped** for this pass.
+- **CNPG↔client edges use plain L3/L4 (no Cilium mutual auth).** CNPG runs its
+  own PostgreSQL TLS + replication mTLS; layering Cilium SPIRE mutual auth on the
+  contact-api→postgres and instance↔instance edges risks double-mTLS breakage.
+  The rest of the backend mesh (api↔nats↔valkey) keeps mutual auth.
+- Operator pinned to chart 0.29.0 / app 1.30.0.
 
 ## Problem
 
