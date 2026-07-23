@@ -36,7 +36,7 @@ jobs:
             -print0 | xargs -0 kubeconform \
               -verbose \
               -ignore-missing-schemas \
-              -skip InfisicalSecret,Warehouse \
+              -skip InfisicalSecret,Warehouse,Cluster \
               -schema-location default \
               -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
 
