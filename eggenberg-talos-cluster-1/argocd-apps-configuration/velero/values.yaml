@@ -7,6 +7,9 @@ configuration:
       config:
         # Backblaze S3-compatible endpoint
         s3Url: https://s3.eu-central-003.backblazeb2.com
+        # Backblaze B2 rejects AWS SDK checksum/tagging headers (x-amz-tagging,
+        # x-amz-sdk-checksum-algorithm) with 400 InvalidArgument. Empty disables them.
+        checksumAlgorithm: ""
         # Use path-style URLs for S3-compatible backends
         s3ForcePathStyle: "true"
         # Backblaze uses standard TLS
