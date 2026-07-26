@@ -11,7 +11,7 @@ spec:
   sources:
     - repoURL: https://kubernetes.github.io/autoscaler
       chart: vertical-pod-autoscaler
-      targetRevision: 0.10.0
+      targetRevision: 0.11.0
       helm:
         valueFiles:
           - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/vertical-pod-autoscaler/values.yaml
