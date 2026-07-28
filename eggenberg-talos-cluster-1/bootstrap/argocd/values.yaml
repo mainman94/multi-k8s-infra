@@ -8,12 +8,6 @@ applicationSet:
       additionalLabels:
         release: kube-prometheus-stack
 server:
-  service:
-    # h2c so Cilium Gateway/Envoy proxies gRPC(-web) to argocd-server instead of
-    # returning 404/grpc-status:12. Required for `argocd login --grpc-web`.
-    # Chart only exposes appProtocol on the https port; both ports target the same
-    # plaintext 8080 (server.insecure=true), so the HTTPRoute must point at port 443.
-    servicePortHttpsAppProtocol: kubernetes.io/h2c
   metrics:
     enabled: true
     service:

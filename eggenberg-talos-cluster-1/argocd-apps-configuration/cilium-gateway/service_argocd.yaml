@@ -26,8 +26,6 @@ spec:
     - argo.hauptmann.dev
   rules:
     - backendRefs:
-        # port 443 carries the h2c appProtocol (argocd values: servicePortHttpsAppProtocol)
-        # so Envoy proxies gRPC(-web); both ports hit the same plaintext 8080 (insecure).
         - name: argocd-server
           namespace: argocd
-          port: 443
+          port: 80
