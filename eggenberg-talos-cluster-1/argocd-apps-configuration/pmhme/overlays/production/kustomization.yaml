@@ -2,33 +2,33 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: portfolio
 labels:
-  - pairs:
-      app.kubernetes.io/environment: production
-    includeTemplates: true
+- pairs:
+    app.kubernetes.io/environment: production
+  includeTemplates: true
 resources:
-  - namespace.yaml
-  - ../../base
+- namespace.yaml
+- ../../base
 components:
-  - ../../components/keda-ns-scoped
+- ../../components/keda-ns-scoped
 images:
-  - name: git.hauptmann.dev/philipphauptmann/contact-api
-    newTag: 0.5.1
-  - name: git.hauptmann.dev/philipphauptmann/notifier-email
-    newTag: 0.2.2
-  - name: git.hauptmann.dev/philipphauptmann/notifier-telegram
-    newTag: 0.2.2
-  - name: git.hauptmann.dev/philipphauptmann/pmhme
-    newTag: 0.8.3
+- name: git.hauptmann.dev/philipphauptmann/contact-api
+  newTag: 0.5.3
+- name: git.hauptmann.dev/philipphauptmann/notifier-email
+  newTag: 0.2.4
+- name: git.hauptmann.dev/philipphauptmann/notifier-telegram
+  newTag: 0.2.4
+- name: git.hauptmann.dev/philipphauptmann/pmhme
+  newTag: 0.9.0
 patches:
-  - patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 3
-    target:
-      kind: Rollout
-      name: portfolio-app
-  - path: httproute-patch.yaml
-  - path: configmap-patch.yaml
-    target:
-      kind: ConfigMap
-      name: portfolio-app-config
+- patch: |-
+    - op: replace
+      path: /spec/replicas
+      value: 3
+  target:
+    kind: Rollout
+    name: portfolio-app
+- path: httproute-patch.yaml
+- path: configmap-patch.yaml
+  target:
+    kind: ConfigMap
+    name: portfolio-app-config
