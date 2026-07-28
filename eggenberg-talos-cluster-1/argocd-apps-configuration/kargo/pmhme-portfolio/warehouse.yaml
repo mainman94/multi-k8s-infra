@@ -14,20 +14,24 @@ spec:
     - image:
         repoURL: git.hauptmann.dev/philipphauptmann/pmhme
         imageSelectionStrategy: SemVer
-        allowTags: '^[0-9]+\.[0-9]+\.[0-9]+(?:-[a-zA-Z0-9.-]+)?(?:\+[a-zA-Z0-9.-]+)?$'
+        allowTagsRegexes:
+          - '^[0-9]+\.[0-9]+\.[0-9]+(?:-[a-zA-Z0-9.-]+)?(?:\+[a-zA-Z0-9.-]+)?$'
         discoveryLimit: 5
     - image:
         repoURL: git.hauptmann.dev/philipphauptmann/contact-api
         imageSelectionStrategy: SemVer
-        allowTags: '^[0-9]+\.[0-9]+\.[0-9]+(?:-[a-zA-Z0-9.-]+)?(?:\+[a-zA-Z0-9.-]+)?$'
+        allowTagsRegexes:
+          - '^[0-9]+\.[0-9]+\.[0-9]+(?:-[a-zA-Z0-9.-]+)?(?:\+[a-zA-Z0-9.-]+)?$'
         discoveryLimit: 5
     - image:
         repoURL: git.hauptmann.dev/philipphauptmann/notifier-telegram
         imageSelectionStrategy: SemVer
-        allowTags: '^[0-9]+\.[0-9]+\.[0-9]+(?:-[a-zA-Z0-9.-]+)?(?:\+[a-zA-Z0-9.-]+)?$'
+        allowTagsRegexes:
+          - '^[0-9]+\.[0-9]+\.[0-9]+(?:-[a-zA-Z0-9.-]+)?(?:\+[a-zA-Z0-9.-]+)?$'
         discoveryLimit: 5
     - image:
         repoURL: git.hauptmann.dev/philipphauptmann/notifier-email
         imageSelectionStrategy: SemVer
-        allowTags: '^[0-9]+\.[0-9]+\.[0-9]+(?:-[a-zA-Z0-9.-]+)?(?:\+[a-zA-Z0-9.-]+)?$'
+        allowTagsRegexes:
+          - '^[0-9]+\.[0-9]+\.[0-9]+(?:-[a-zA-Z0-9.-]+)?(?:\+[a-zA-Z0-9.-]+)?$'
         discoveryLimit: 5
