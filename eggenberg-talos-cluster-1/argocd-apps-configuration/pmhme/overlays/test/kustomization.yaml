@@ -2,34 +2,34 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: portfolio-test
 labels:
-  - pairs:
-      app.kubernetes.io/environment: test
-    includeTemplates: true
+- pairs:
+    app.kubernetes.io/environment: test
+  includeTemplates: true
 resources:
-  - namespace.yaml
-  - ../../base
+- namespace.yaml
+- ../../base
 components:
-  - ../../components/notification-sink
-  - ../../components/keda-ns-scoped
+- ../../components/notification-sink
+- ../../components/keda-ns-scoped
 images:
-  - name: git.hauptmann.dev/philipphauptmann/contact-api
-    newTag: 0.5.1
-  - name: git.hauptmann.dev/philipphauptmann/notifier-email
-    newTag: 0.2.2
-  - name: git.hauptmann.dev/philipphauptmann/notifier-telegram
-    newTag: 0.2.2
-  - name: git.hauptmann.dev/philipphauptmann/pmhme
-    newTag: 0.8.3
+- name: git.hauptmann.dev/philipphauptmann/contact-api
+  newTag: 0.5.3
+- name: git.hauptmann.dev/philipphauptmann/notifier-email
+  newTag: 0.2.4
+- name: git.hauptmann.dev/philipphauptmann/notifier-telegram
+  newTag: 0.2.4
+- name: git.hauptmann.dev/philipphauptmann/pmhme
+  newTag: 0.9.0
 patches:
-  - patch: |-
-      - op: replace
-        path: /spec/data/0/remoteRef/property
-        value: POSTGRES_PASSWORD_TEST
-    target:
-      kind: ExternalSecret
-      name: contact-db
-  - path: httproute-patch.yaml
-  - path: configmap-patch.yaml
-    target:
-      kind: ConfigMap
-      name: portfolio-app-config
+- patch: |-
+    - op: replace
+      path: /spec/data/0/remoteRef/property
+      value: POSTGRES_PASSWORD_TEST
+  target:
+    kind: ExternalSecret
+    name: contact-db
+- path: httproute-patch.yaml
+- path: configmap-patch.yaml
+  target:
+    kind: ConfigMap
+    name: portfolio-app-config
