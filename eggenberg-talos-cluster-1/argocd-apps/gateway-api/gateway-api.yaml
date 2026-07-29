@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gateway-api
+  namespace: argocd
+  labels:
+    category: infrastructure
+  annotations:
+    # Standard-channel CRDs must exist before Cilium's gatewayAPI operator and the
+    # cilium-gateway Gateway (sync-wave 10) reconcile. Negative wave = applied first.
+    argocd.argoproj.io/sync-wave: "-5"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/kubernetes-sigs/gateway-api
+    path: "config/crd/standard"
+    targetRevision: v1.6.1
+    directory:
+      recurse: true
+  destination:
+    server: https://kubernetes.default.svc
+    # CRDs are cluster-scoped; namespace is a no-op placeholder.
+    namespace: kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      # gateway-api CRDs blow past the client-side apply annotation size limit.
+      - ServerSideApply=true
