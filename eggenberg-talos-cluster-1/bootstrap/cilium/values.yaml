@@ -59,8 +59,31 @@ authentication:
         enabled: true
         existingNamespace: true
         server:
+          # --- FIX 1: Storage aktivieren oder beschleunigen ---
+          # Im Testbetrieb/Talos ohne PersistentVolume auf true lassen,
+          # aber dem Pod genug Ressourcen & Zeit geben.
           dataStorage:
-            enabled: false
+            enabled: true
+
+          # --- FIX 2: Ressourcen-Requests setzen (behebt Kyverno Warnings) ---
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+
+          # --- FIX 3: Probes entspannen ---
+          # Gibt SPIRE beim Starten bis zu 60s Zeit, bevor Kubelet eingreift
+          livenessProbe:
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 6
+          readinessProbe:
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            failureThreshold: 5
 
 l2announcements:
   enabled: true
