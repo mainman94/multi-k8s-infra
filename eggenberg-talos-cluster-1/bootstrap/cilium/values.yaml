@@ -53,26 +53,14 @@ ingressController:
 authentication:
   enabled: true
   mutual:
-    # SPIRE-Verbindungstimeout von default 30s auf 60s erhöhen
     spire:
       enabled: true
-      connectionTimeout: "60s"
       install:
         enabled: true
         existingNamespace: true
         server:
           dataStorage:
             enabled: false
-          # --- FIX: Ressourcen explizit vorgeben ---
-          # Behebt Kyverno 'require-cpu-memory-requests' und verhindert,
-          # dass der Container mangels CPU-Throttle zu lange zum Booten braucht.
-          resources:
-            requests:
-              cpu: 250m
-              memory: 256Mi
-            limits:
-              cpu: 500m
-              memory: 512Mi
 
 l2announcements:
   enabled: true
