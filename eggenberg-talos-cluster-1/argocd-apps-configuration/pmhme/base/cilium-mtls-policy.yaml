@@ -1,6 +1,8 @@
-# Enforces Cilium mutual authentication (SPIRE mTLS) for pod-to-pod traffic.
-# Empty fromEndpoints/toEndpoints selectors match all pods in the policy's
-# own namespace, so each overlay gets a same-namespace mesh.
+# Same-namespace allow mesh for portfolio-app. Previously enforced Cilium mutual
+# authentication (SPIRE mTLS); that is removed (deprecated in 1.20, SPIRE was
+# crashlooping) — pod traffic is now encrypted by WireGuard transparent
+# encryption. Empty fromEndpoints/toEndpoints selectors match all pods in the
+# policy's own namespace, keeping the same-namespace allow each overlay relies on.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -12,8 +14,6 @@ spec:
   ingress:
     - fromEndpoints:
         - {}
-      authentication:
-        mode: "required"
       toPorts:
         - ports:
             - port: "3000"
@@ -21,5 +21,3 @@ spec:
   egress:
     - toEndpoints:
         - {}
-      authentication:
-        mode: "required"

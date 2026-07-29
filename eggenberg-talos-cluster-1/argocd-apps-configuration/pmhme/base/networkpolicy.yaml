@@ -73,8 +73,6 @@ spec:
     - toEndpoints:
         - matchLabels:
             app: contact-api
-      authentication:
-        mode: required
       toPorts:
         - ports:
             - port: "8080"

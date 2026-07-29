@@ -50,17 +50,16 @@ ingressController:
   default: false
   loadbalancerMode: shared
 
+# Mutual authentication (SPIRE mTLS) removed — deprecated in Cilium 1.20 and
+# the SPIRE server was crashlooping. Pod-to-pod confidentiality is now provided
+# by WireGuard transparent encryption (node-to-node), which keeps L4 policies
+# and DNS working (unlike ztunnel).
 authentication:
+  enabled: false
+
+encryption:
   enabled: true
-  mutual:
-    spire:
-      enabled: true
-      install:
-        enabled: true
-        existingNamespace: true
-        server:
-          dataStorage:
-            enabled: false
+  type: wireguard
 
 l2announcements:
   enabled: true

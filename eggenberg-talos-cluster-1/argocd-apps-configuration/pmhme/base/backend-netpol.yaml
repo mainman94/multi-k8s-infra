@@ -6,12 +6,11 @@
 # CiliumNetworkPolicy it becomes default-deny for all non-matching traffic, so
 # keep each workload's allowed ingress/egress complete when editing.
 #
-# Service mesh: in-cluster app->app edges carry `authentication.mode: required`
-# (Cilium SPIRE mutual auth, enabled cluster-wide in bootstrap/cilium). Auth is
-# scoped to the specific pod-to-pod edges ONLY. DNS (kube-dns), world egress
-# (SMTP/Telegram), kubelet host probes, and Prometheus scrapes are deliberately
-# left unauthenticated — those peers have no SPIFFE identity and requiring mutual
-# auth toward them would drop the traffic.
+# Confidentiality: pod-to-pod traffic is encrypted node-to-node by WireGuard
+# transparent encryption (bootstrap/cilium). Cilium SPIRE mutual auth
+# (authentication.mode: required) was removed — deprecated in 1.20 and the SPIRE
+# server was crashlooping. These policies remain the L4 segmentation layer;
+# inline "meshed edge"/"no mutual auth" notes below refer to the old SPIRE model.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -65,8 +64,6 @@ spec:
     - fromEndpoints:
         - matchLabels:
             app: portfolio-app
-      authentication:
-        mode: required
       toPorts:
         - ports:
             - port: "8080"
@@ -98,8 +95,6 @@ spec:
     - toEndpoints:
         - matchLabels:
             app: contact-nats
-      authentication:
-        mode: required
       toPorts:
         - ports:
             - port: "4222"
@@ -108,8 +103,6 @@ spec:
     - toEndpoints:
         - matchLabels:
             app: contact-valkey
-      authentication:
-        mode: required
       toPorts:
         - ports:
             - port: "6379"
@@ -213,8 +206,6 @@ spec:
             app: notifier-telegram
         - matchLabels:
             app: notifier-email
-      authentication:
-        mode: required
       toPorts:
         - ports:
             - port: "4222"
@@ -299,8 +290,6 @@ spec:
     - toEndpoints:
         - matchLabels:
             app: contact-nats
-      authentication:
-        mode: required
       toPorts:
         - ports:
             - port: "4222"
@@ -353,8 +342,6 @@ spec:
     - toEndpoints:
         - matchLabels:
             app: contact-nats
-      authentication:
-        mode: required
       toPorts:
         - ports:
             - port: "4222"
@@ -385,8 +372,6 @@ spec:
     - fromEndpoints:
         - matchLabels:
             app: contact-api
-      authentication:
-        mode: required
       toPorts:
         - ports:
             - port: "6379"
