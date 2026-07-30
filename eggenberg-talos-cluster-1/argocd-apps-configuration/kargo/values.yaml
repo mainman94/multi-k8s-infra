@@ -4,7 +4,22 @@ api:
   secret:
     name: kargo-admin-secret
   adminAccount:
+    # Kept as a break-glass fallback alongside SSO. Disable once OIDC is verified.
     enabled: true
+  # SSO via Pocket ID (OIDC + PKCE — public client, no client secret needed, so
+  # nothing to store in OpenBao). issuerURL/clientID are public values.
+  # Pocket ID group "homelab" (groups claim, requested via additionalScopes).
+  oidc:
+    enabled: true
+    issuerURL: https://id.hauptmann.dev
+    clientID: bf4d7cd6-747d-45b8-b70c-55bfba255d09
+    usernameClaim: email
+    additionalScopes:
+      - groups
+    admins:
+      claims:
+        groups:
+          - homelab
   argocd:
     urls:
       "": "https://argo.hauptmann.dev"
@@ -15,6 +30,12 @@ api:
       enabled: false
   tls:
     enabled: false
+    # cilium-gateway terminates TLS and forwards plain HTTP to kargo-api:80
+    # (see cilium-gateway/service_kargo.yaml). This forces Kargo to build all its
+    # URLs — OIDC redirect_uri and token issuer — as https, so they match the
+    # https callback registered in Pocket ID. Without it login fails on a
+    # redirect_uri/scheme mismatch.
+    terminatedUpstream: true
 controller:
   replicas: 1
   argocd:
