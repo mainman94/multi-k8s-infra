@@ -48,3 +48,13 @@ cleanupController:
     limits:
       cpu: 100m
       memory: 128Mi
+
+# PolicyException support. Off by default in the chart (--enablePolicyException=
+# false). Enabled so a single privileged workload in an otherwise-Enforced
+# namespace can be carved out with a namespaced PolicyException object (git-
+# tracked, auditable) instead of loosening the whole policy. Exceptions are only
+# honored in the kyverno namespace so a random namespace cannot self-exempt.
+features:
+  policyExceptions:
+    enabled: true
+    namespace: kyverno

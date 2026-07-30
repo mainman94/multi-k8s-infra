@@ -23,6 +23,11 @@ fi
 hr "kustomize build (overlays + bases)"
 while IFS= read -r k; do
   d=$(dirname "$k")
+  # kind: Component is not buildable standalone (it resolves against the overlay
+  # that includes it); only build overlays + bases.
+  if grep -qE '^kind:[[:space:]]*Component[[:space:]]*$' "$k"; then
+    continue
+  fi
   if ! kubectl kustomize "$d" >/dev/null 2>&1; then
     echo "BUILD FAILED: $d"
     fail=1

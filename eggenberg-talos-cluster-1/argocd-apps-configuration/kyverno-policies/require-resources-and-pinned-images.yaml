@@ -12,9 +12,17 @@ metadata:
     policies.kyverno.io/category: Best Practices
     policies.kyverno.io/severity: medium
     policies.kyverno.io/description: >-
-      Every container must declare CPU and memory requests so the scheduler can place it and autoscalers (KEDA/VPA) have a baseline. Audit only.
+      Every container must declare CPU and memory requests so the scheduler can place it and autoscalers (KEDA/VPA) have a baseline. Audit globally, Enforced in clean namespaces.
 spec:
   validationFailureAction: Audit
+  # Enforce only where reports are already clean (see baseline-pod-security.yaml);
+  # infra namespaces stay Audit until their requests are set.
+  validationFailureActionOverrides:
+    - action: Enforce
+      namespaces:
+        - portfolio # pmhme production overlay
+        - portfolio-dev
+        - portfolio-test
   admission: true
   background: true
   emitWarning: false
@@ -46,9 +54,11 @@ metadata:
     policies.kyverno.io/category: Best Practices
     policies.kyverno.io/severity: medium
     policies.kyverno.io/description: >-
-      Images must use an explicit tag or digest, never :latest or an untagged reference, so deployments are reproducible. Audit only.
+      Images must use an explicit tag or digest, never :latest or an untagged reference, so deployments are reproducible. Enforced cluster-wide.
 spec:
-  validationFailureAction: Audit
+  # Enforced globally: 0 violations across the cluster (all images already pinned),
+  # so admission-blocking a :latest or untagged image is safe and prevents drift.
+  validationFailureAction: Enforce
   admission: true
   background: true
   emitWarning: false
