@@ -10,7 +10,7 @@ spec:
   sources:
     - repoURL: https://argoproj.github.io/argo-helm
       chart: argo-cd
-      targetRevision: 10.2.1
+      targetRevision: 10.2.2
       helm:
         valueFiles:
           - $values/eggenberg-talos-cluster-1/bootstrap/argocd/values.yaml
