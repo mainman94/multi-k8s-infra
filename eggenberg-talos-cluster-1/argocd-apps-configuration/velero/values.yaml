@@ -7,8 +7,11 @@ configuration:
       config:
         # Backblaze S3-compatible endpoint
         s3Url: https://s3.eu-central-003.backblazeb2.com
-        # Backblaze B2 rejects AWS SDK checksum/tagging headers (x-amz-tagging,
-        # x-amz-sdk-checksum-algorithm) with 400 InvalidArgument. Empty disables them.
+        # Backblaze B2 rejects the AWS SDK checksum header
+        # (x-amz-sdk-checksum-algorithm) with 400 InvalidArgument. Empty disables it.
+        # NOTE: this does NOT stop the x-amz-tagging header — up to v1.14.2 the aws
+        # plugin sends it unconditionally (even empty), which B2 also 400s. Fixed only
+        # on the plugin's main branch, so the initContainer below is pinned to main.
         checksumAlgorithm: ""
         # Use path-style URLs for S3-compatible backends
         s3ForcePathStyle: "true"
@@ -32,7 +35,10 @@ configuration:
 # AWS S3 plugin required for S3-compatible providers (Backblaze, MinIO, etc.)
 initContainers:
   - name: velero-plugin-for-aws
-    image: velero/velero-plugin-for-aws:v1.14.2
+    # ponytail: pinned to unreleased main build — only version that gates the
+    # x-amz-tagging header (Backblaze B2 rejects it). Repin to the next tagged
+    # release > v1.14.2 once one ships with the buildPutObjectInput fix.
+    image: velero/velero-plugin-for-aws:main@sha256:9507ec33f99c8862cbae0e4dd0e7bc102a4c1bc9097e1d8477d6b3d8e7c270a6
     imagePullPolicy: IfNotPresent
     volumeMounts:
       - mountPath: /target
