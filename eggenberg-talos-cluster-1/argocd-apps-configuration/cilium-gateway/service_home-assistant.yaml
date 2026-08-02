@@ -7,8 +7,8 @@ metadata:
     app.kubernetes.io/name: home-assistant
 spec:
   ports:
-    - port: 30123
-      targetPort: 30123
+    - port: 30672
+      targetPort: 30672
       protocol: TCP
       name: http
 ---
@@ -25,7 +25,7 @@ addressType: IPv4
 ports:
   - name: http
     protocol: TCP
-    port: 30123
+    port: 30672
 endpoints:
   - addresses:
       - 192.168.0.129
@@ -45,4 +45,4 @@ spec:
   rules:
     - backendRefs:
         - name: home-assistant-external
-          port: 30123
+          port: 30672
