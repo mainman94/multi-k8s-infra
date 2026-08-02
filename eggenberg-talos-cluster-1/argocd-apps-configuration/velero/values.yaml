@@ -65,6 +65,8 @@ schedules:
         - kube-apiserver
         - monitoring
         - trivy-system
+        - portfolio-dev
+        - portfolio-test
       includedClusterScopedResources:
         - "*"
       excludedClusterScopedResources:
