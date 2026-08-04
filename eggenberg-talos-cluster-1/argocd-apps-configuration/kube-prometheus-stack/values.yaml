@@ -59,6 +59,9 @@ grafana:
   enabled: true
   ingress:
     enabled: false
+  # RWO longhorn volume: old pod must release the PV before the new one can attach
+  deploymentStrategy:
+    type: Recreate
   persistence:
     enabled: true
     size: 10Gi
