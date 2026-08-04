@@ -1,5 +1,9 @@
 defaultSettings:
   defaultReplicaCount: "2"
+  # Evict the last replica off a draining node instead of blocking the drain
+  # forever — lets `talosctl upgrade` finish without manually deleting pods.
+  nodeDrainPolicy: block-for-eviction-if-contains-last-replica
+  detachManuallyAttachedVolumesWhenCordoned: true
 persistence:
   defaultClass: true
   defaultClassReplicaCount: 2
