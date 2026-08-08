@@ -19,7 +19,7 @@ images:
   - name: git.hauptmann.dev/philipphauptmann/notifier-telegram
     newTag: 0.2.5
   - name: git.hauptmann.dev/philipphauptmann/notifier-email
-    newTag: 0.2.5
+    newTag: 0.2.6
 patches:
   - patch: |-
       - op: replace
