@@ -123,11 +123,11 @@ grafana:
       email_attribute_path: email
       login_attribute_path: preferred_username
       name_attribute_path: name
-      # Members of the grafana-admins group in Pocket ID get Admin, everyone
-      # else read-only. Without the fallback a missing group claim would lock
-      # every SSO user out.
+      # Members of the homelab group in Pocket ID get Admin, everyone else
+      # read-only. Without the fallback a missing group claim would lock every
+      # SSO user out.
       role_attribute_path: >-
-        contains(groups[*], 'grafana-admins') && 'Admin' || 'Viewer'
+        contains(groups[*], 'homelab') && 'Admin' || 'Viewer'
     auth:
       # Send users back to Pocket ID's logout, not Grafana's login form.
       signout_redirect_url: https://id.hauptmann.dev/api/oidc/end-session
