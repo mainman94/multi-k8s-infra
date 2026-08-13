@@ -285,6 +285,11 @@ extraManifests:
                 name: alertmanager-discord
                 key: webhook
               sendResolved: true
+# Cilium runs with kubeProxyReplacement, so there is no kube-proxy to scrape.
+# Left enabled, the chart ships both a ServiceMonitor for a target that never
+# exists and the KubeProxyDown rule that then fires forever.
+kubeProxy:
+  enabled: false
 # Node Exporter configuration
 nodeExporter:
   enabled: true
