@@ -92,6 +92,10 @@ metrics:
   serviceMonitor:
     enabled: true
     namespace: velero
+    # Prometheus only selects monitors carrying the release label of the
+    # kube-prometheus-stack install; without it this ServiceMonitor is ignored.
+    additionalLabels:
+      release: kube-prometheus-stack
 
 # Kopia configuration for PV backups
 deployNodeAgent: true

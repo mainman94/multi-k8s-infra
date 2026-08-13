@@ -92,6 +92,133 @@ grafana:
     enabled: true
     size: 10Gi
     storageClassName: longhorn
+# Alert rules for components the chart's built-in defaultRules do not cover.
+# Rendered as PrometheusRules carrying the release label Prometheus selects on.
+additionalPrometheusRulesMap:
+  homelab:
+    groups:
+      # Backups fail silently: nobody notices until a restore is needed.
+      - name: velero
+        rules:
+          - alert: VeleroBackupFailed
+            expr: increase(velero_backup_failure_total[1h]) > 0
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: Velero backup failed ({{ $labels.schedule }})
+              description: >-
+                {{ $value }} failed backup(s) in the last hour.
+          - alert: VeleroBackupPartiallyFailed
+            expr: increase(velero_backup_partial_failure_total[1h]) > 0
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: Velero backup partially failed ({{ $labels.schedule }})
+              description: Some items were not backed up.
+          # Schedule is daily at 02:00; 26h allows one missed run plus slack
+          # before shouting.
+          - alert: VeleroBackupStale
+            expr: >-
+              time() - velero_backup_last_successful_timestamp{schedule!=""} > 26 * 3600
+            for: 30m
+            labels:
+              severity: critical
+            annotations:
+              summary: No successful Velero backup in 26h ({{ $labels.schedule }})
+              description: >-
+                Last success was {{ $value | humanizeDuration }} ago.
+      - name: longhorn
+        rules:
+          # robustness: 0 unknown, 1 healthy, 2 degraded, 3 faulted.
+          - alert: LonghornVolumeDegraded
+            expr: longhorn_volume_robustness == 2
+            for: 15m
+            labels:
+              severity: warning
+            annotations:
+              summary: Longhorn volume {{ $labels.volume }} degraded
+              description: Running below the configured replica count.
+          - alert: LonghornVolumeFaulted
+            expr: longhorn_volume_robustness == 3
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: Longhorn volume {{ $labels.volume }} faulted
+              description: No healthy replica left — data at risk.
+          - alert: LonghornDiskFillingUp
+            expr: >-
+              longhorn_disk_usage_bytes / longhorn_disk_capacity_bytes > 0.85
+            for: 30m
+            labels:
+              severity: warning
+            annotations:
+              summary: Longhorn disk {{ $labels.disk }} above 85%
+              description: >-
+                Node {{ $labels.node }} at {{ $value | humanizePercentage }}.
+      - name: cert-manager
+        rules:
+          # Let's Encrypt renews at 30d left; 14d means renewal has been
+          # failing for two weeks.
+          - alert: CertManagerCertExpiringSoon
+            expr: >-
+              certmanager_certificate_expiration_timestamp_seconds - time() < 14 * 24 * 3600
+            for: 1h
+            labels:
+              severity: warning
+            annotations:
+              summary: Certificate {{ $labels.name }} expires in under 14d
+              description: >-
+                Renewal is likely broken. Expires in {{ $value | humanizeDuration }}.
+          - alert: CertManagerCertNotReady
+            expr: certmanager_certificate_ready_status{condition="True"} == 0
+            for: 1h
+            labels:
+              severity: warning
+            annotations:
+              summary: Certificate {{ $labels.name }} not ready
+              description: Issuance or renewal is stuck.
+      - name: argocd
+        rules:
+          # Drift that outlives a sync window means self-heal cannot converge.
+          - alert: ArgoCDAppOutOfSync
+            expr: argocd_app_info{sync_status="OutOfSync"} == 1
+            for: 30m
+            labels:
+              severity: warning
+            annotations:
+              summary: ArgoCD app {{ $labels.name }} out of sync for 30m
+              description: Self-heal is not converging.
+          - alert: ArgoCDAppDegraded
+            expr: argocd_app_info{health_status="Degraded"} == 1
+            for: 15m
+            labels:
+              severity: critical
+            annotations:
+              summary: ArgoCD app {{ $labels.name }} degraded
+              description: Workload is unhealthy.
+      - name: cloudnative-pg
+        rules:
+          - alert: CNPGInstanceDown
+            expr: cnpg_collector_up == 0
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: CNPG instance {{ $labels.pod }} down
+              description: Metrics collector cannot reach the instance.
+          # No WAL archiving configured (Velero-only backups), so streaming
+          # replication is the whole redundancy story — watch it.
+          - alert: CNPGReplicationLagHigh
+            expr: cnpg_pg_replication_lag > 300
+            for: 15m
+            labels:
+              severity: warning
+            annotations:
+              summary: CNPG replica lagging {{ $value }}s
+              description: Failover would lose this much data.
 # Node Exporter configuration
 nodeExporter:
   enabled: true

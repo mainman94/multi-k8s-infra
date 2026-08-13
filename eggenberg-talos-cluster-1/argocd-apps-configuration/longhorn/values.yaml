@@ -9,6 +9,11 @@ persistence:
   defaultClassReplicaCount: 2
 ingress:
   enabled: false
+metrics:
+  serviceMonitor:
+    enabled: true
+    additionalLabels:
+      release: kube-prometheus-stack
 csi:
   attacherReplicaCount: "2"
   provisionerReplicaCount: "2"

@@ -7,6 +7,11 @@ webhook:
   replicaCount: 1
 cainjector:
   replicaCount: 1
-# Prometheus metrics
+# Prometheus metrics. `enabled` alone only adds scrape annotations, which this
+# cluster's Prometheus ignores — it selects ServiceMonitors by release label.
 prometheus:
   enabled: true
+  servicemonitor:
+    enabled: true
+    labels:
+      release: kube-prometheus-stack
