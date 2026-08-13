@@ -271,13 +271,15 @@ extraManifests:
     spec:
       route:
         receiver: discord
+        # Both are plumbing, not incidents, and belong in a null receiver:
         # Watchdog fires permanently by design as a dead-man's switch for the
-        # alerting path itself; excluding it here drops it to the root
-        # "null" receiver.
+        # alerting path itself, and InfoInhibitor exists only to drive the
+        # chart's inhibit_rules for severity=info. Excluding them here drops
+        # them to the root "null" receiver.
         matchers:
           - name: alertname
-            matchType: "!="
-            value: Watchdog
+            matchType: "!~"
+            value: Watchdog|InfoInhibitor
       receivers:
         - name: discord
           discordConfigs:
