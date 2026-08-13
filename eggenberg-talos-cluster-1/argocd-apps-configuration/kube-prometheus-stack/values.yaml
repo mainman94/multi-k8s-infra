@@ -3,7 +3,33 @@ alertmanager:
   enabled: true
   service:
     type: ClusterIP
+  # Routes every firing alert to a Discord channel. The webhook URL comes from
+  # OpenBao via the alertmanager-discord ExternalSecret and is read from disk,
+  # so it never lands in this file or in the rendered ConfigMap.
+  config:
+    route:
+      receiver: discord
+      group_by: [alertname, namespace]
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 12h
+      routes:
+        # Watchdog fires permanently by design as a dead-man's switch for the
+        # alerting path itself; it would drown the channel.
+        - receiver: "null"
+          matchers:
+            - alertname = "Watchdog"
+    receivers:
+      - name: "null"
+      - name: discord
+        discord_configs:
+          # yamllint disable-line rule:line-length
+          - webhook_url_file: /etc/alertmanager/secrets/alertmanager-discord/webhook
+            send_resolved: true
   alertmanagerSpec:
+    # Mounted at /etc/alertmanager/secrets/<name>/ inside the pod.
+    secrets:
+      - alertmanager-discord
     storage:
       volumeClaimTemplate:
         spec:
