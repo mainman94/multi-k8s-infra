@@ -3,33 +3,27 @@ alertmanager:
   enabled: true
   service:
     type: ClusterIP
-  # Routes every firing alert to a Discord channel. The webhook URL comes from
-  # OpenBao via the alertmanager-discord ExternalSecret and is read from disk,
-  # so it never lands in this file or in the rendered ConfigMap.
+  # Only the skeleton lives here: the actual Discord receiver is an
+  # AlertmanagerConfig CR (see extraManifests). The inline config cannot
+  # reference a secret, and prometheus-operator rejects `webhook_url_file` —
+  # its discordConfig type has no such field, so the whole reconcile fails and
+  # the StatefulSet silently keeps the previous config. Everything that does
+  # not match the CR's route lands in "null", Watchdog included.
   config:
     route:
-      receiver: discord
+      receiver: "null"
       group_by: [alertname, namespace]
       group_wait: 30s
       group_interval: 5m
       repeat_interval: 12h
-      routes:
-        # Watchdog fires permanently by design as a dead-man's switch for the
-        # alerting path itself; it would drown the channel.
-        - receiver: "null"
-          matchers:
-            - alertname = "Watchdog"
     receivers:
       - name: "null"
-      - name: discord
-        discord_configs:
-          # yamllint disable-line rule:line-length
-          - webhook_url_file: /etc/alertmanager/secrets/alertmanager-discord/webhook
-            send_resolved: true
   alertmanagerSpec:
-    # Mounted at /etc/alertmanager/secrets/<name>/ inside the pod.
-    secrets:
-      - alertmanager-discord
+    # By default the operator appends a `namespace = monitoring` matcher to
+    # every AlertmanagerConfig route, which would drop alerts from all other
+    # namespaces. None disables that.
+    alertmanagerConfigMatcherStrategy:
+      type: None
     storage:
       volumeClaimTemplate:
         spec:
@@ -92,6 +86,51 @@ grafana:
     enabled: true
     size: 10Gi
     storageClassName: longhorn
+  # OIDC client credentials from OpenBao (grafana-pocketid ExternalSecret).
+  # Grafana maps GF_* env vars onto grafana.ini keys, so the secret never has
+  # to appear in the rendered ConfigMap below.
+  envValueFrom:
+    GF_AUTH_GENERIC_OAUTH_CLIENT_ID:
+      secretKeyRef:
+        name: grafana-pocketid
+        key: client_id
+    GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET:
+      secretKeyRef:
+        name: grafana-pocketid
+        key: client_secret
+  # SSO via Pocket ID, replacing the click-ops config under
+  # /admin/authentication/generic_oauth. The UI writes to Grafana's DB and
+  # silently wins over this file, so delete the UI-created provider once this
+  # is live — otherwise the two disagree and the file looks broken.
+  grafana.ini:
+    server:
+      # Required for the OAuth redirect to point at the public hostname
+      # instead of the in-cluster service name.
+      root_url: https://grafana.hauptmann.dev
+    auth.generic_oauth:
+      enabled: true
+      name: Pocket ID
+      icon: signin
+      # Local admin login stays available as the break-glass path if Pocket ID
+      # is down; auto_login would take that away.
+      auto_login: false
+      allow_sign_up: true
+      use_pkce: true
+      scopes: openid email profile groups
+      auth_url: https://id.hauptmann.dev/authorize
+      token_url: https://id.hauptmann.dev/api/oidc/token
+      api_url: https://id.hauptmann.dev/api/oidc/userinfo
+      email_attribute_path: email
+      login_attribute_path: preferred_username
+      name_attribute_path: name
+      # Members of the grafana-admins group in Pocket ID get Admin, everyone
+      # else read-only. Without the fallback a missing group claim would lock
+      # every SSO user out.
+      role_attribute_path: >-
+        contains(groups[*], 'grafana-admins') && 'Admin' || 'Viewer'
+    auth:
+      # Send users back to Pocket ID's logout, not Grafana's login form.
+      signout_redirect_url: https://id.hauptmann.dev/api/oidc/end-session
 # Alert rules for components the chart's built-in defaultRules do not cover.
 # Rendered as PrometheusRules carrying the release label Prometheus selects on.
 additionalPrometheusRulesMap:
@@ -219,6 +258,33 @@ additionalPrometheusRulesMap:
             annotations:
               summary: CNPG replica lagging {{ $value }}s
               description: Failover would lose this much data.
+# The Discord receiver. Lives in a CR rather than in alertmanager.config
+# because only this form can point at a Secret: the operator resolves apiURL
+# out of alertmanager-discord (ESO → OpenBao) and writes it into the generated
+# config, so the webhook never appears in Git.
+extraManifests:
+  - apiVersion: monitoring.coreos.com/v1alpha1
+    kind: AlertmanagerConfig
+    metadata:
+      name: discord
+      namespace: monitoring
+    spec:
+      route:
+        receiver: discord
+        # Watchdog fires permanently by design as a dead-man's switch for the
+        # alerting path itself; excluding it here drops it to the root
+        # "null" receiver.
+        matchers:
+          - name: alertname
+            matchType: "!="
+            value: Watchdog
+      receivers:
+        - name: discord
+          discordConfigs:
+            - apiURL:
+                name: alertmanager-discord
+                key: webhook
+              sendResolved: true
 # Node Exporter configuration
 nodeExporter:
   enabled: true
