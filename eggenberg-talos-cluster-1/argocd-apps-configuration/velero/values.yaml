@@ -26,11 +26,19 @@ configuration:
       config:
         region: us-east-1
 
-  # Velero server configuration
-  velero:
-    logLevel: info
-    defaultVolumeSnapshotLocations: aws
-    uploaderType: kopia
+  # Velero server configuration. These belong directly under `configuration:` —
+  # the chart has no `configuration.velero` block, so nesting them there made
+  # Helm drop them silently.
+  logLevel: info
+  defaultVolumeSnapshotLocations: aws
+  uploaderType: kopia
+
+  # Back up every pod volume with Kopia instead of requiring a
+  # backup.velero.io/backup-volumes annotation per workload. Without this only
+  # the few annotated volumes were captured: 4 of 17 PVCs, leaving Prometheus,
+  # Grafana, Loki, Tempo, Trivy and six Postgres volumes unbacked while the
+  # backup still reported Completed.
+  defaultVolumesToFsBackup: true
 
 # AWS S3 plugin required for S3-compatible providers (Backblaze, MinIO, etc.)
 initContainers:
@@ -97,11 +105,11 @@ metrics:
     additionalLabels:
       release: kube-prometheus-stack
 
-# Kopia configuration for PV backups
+# Kopia configuration for PV backups. The node agent does the actual file
+# system backup; what gets backed up is decided by
+# configuration.defaultVolumesToFsBackup above.
 deployNodeAgent: true
 nodeAgent:
-  podVolumeBacking:
-    enabled: true
   resources:
     requests:
       cpu: 100m
