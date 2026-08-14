@@ -29,8 +29,12 @@ configuration:
   # Velero server configuration. These belong directly under `configuration:` —
   # the chart has no `configuration.velero` block, so nesting them there made
   # Helm drop them silently.
+  #
+  # defaultVolumeSnapshotLocations was dropped along the way: the flag takes
+  # provider:location pairs, so the bare "aws" it used to carry was invalid and
+  # only ever "worked" because it was silently discarded. Longhorn has no AWS
+  # snapshotter anyway — fs-backup does the work.
   logLevel: info
-  defaultVolumeSnapshotLocations: aws
   uploaderType: kopia
 
   # Same default for ad-hoc backups as the daily schedule already sets on its
