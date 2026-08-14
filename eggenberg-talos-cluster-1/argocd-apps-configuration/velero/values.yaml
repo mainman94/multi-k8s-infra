@@ -33,12 +33,17 @@ configuration:
   defaultVolumeSnapshotLocations: aws
   uploaderType: kopia
 
-  # Back up every pod volume with Kopia instead of requiring a
-  # backup.velero.io/backup-volumes annotation per workload. Without this only
-  # the few annotated volumes were captured: 4 of 17 PVCs, leaving Prometheus,
-  # Grafana, Loki, Tempo, Trivy and six Postgres volumes unbacked while the
-  # backup still reported Completed.
+  # Same default for ad-hoc backups as the daily schedule already sets on its
+  # own template, so a manual `velero backup create` does not silently skip
+  # volumes.
   defaultVolumesToFsBackup: true
+
+  # 12 repositories at the 1h default meant 288 maintenance jobs a day against
+  # Backblaze, each one a chance to hit a transient "unexpected EOF" and fail
+  # the job (Kopia already retries 10x internally before giving up). With one
+  # backup a day and a 48h TTL there is nothing to compact hourly, so this cuts
+  # the exposure ~12x.
+  defaultRepoMaintainFrequency: 12h
 
 # AWS S3 plugin required for S3-compatible providers (Backblaze, MinIO, etc.)
 initContainers:
