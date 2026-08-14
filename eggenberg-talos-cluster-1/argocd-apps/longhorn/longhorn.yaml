@@ -17,6 +17,12 @@ spec:
     - repoURL: https://github.com/mainman94/multi-k8s-infra
       targetRevision: HEAD
       ref: values
+    - repoURL: https://github.com/mainman94/multi-k8s-infra/
+      path: "eggenberg-talos-cluster-1/argocd-apps-configuration/longhorn"
+      targetRevision: HEAD
+      directory:
+        # Only the extra manifests; the sibling values.yaml is a Helm input.
+        include: "networkpolicy-*.yaml"
   destination:
     server: https://kubernetes.default.svc
     namespace: longhorn-system
