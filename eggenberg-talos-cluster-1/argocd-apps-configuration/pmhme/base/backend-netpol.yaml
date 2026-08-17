@@ -278,6 +278,10 @@ spec:
               - method: GET
                 path: /metrics
   egress:
+    # matchPattern "*" does not widen what may be resolved; it puts DNS through
+    # Cilium's proxy so the toFQDNs rule below can learn the name -> IP mapping.
+    # Without this rule the toFQDNs egress below matches nothing and all
+    # Telegram traffic is denied.
     - toEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: kube-system
@@ -286,6 +290,9 @@ spec:
         - ports:
             - port: "53"
               protocol: ANY
+          rules:
+            dns:
+              - matchPattern: "*"
     # Meshed edge: notifier-telegram -> contact-nats.
     - toEndpoints:
         - matchLabels:
@@ -294,9 +301,11 @@ spec:
         - ports:
             - port: "4222"
               protocol: TCP
-    # Telegram Bot API (api.telegram.org) over HTTPS. No mutual auth (world).
-    - toEntities:
-        - world
+    # Telegram Bot API over HTTPS, scoped to the API hostname rather than the
+    # whole internet. Matches TELEGRAM_API_BASE on the notifier-telegram
+    # Rollout; if that env var ever points elsewhere, this rule must follow it.
+    - toFQDNs:
+        - matchName: api.telegram.org
       toPorts:
         - ports:
             - port: "443"
