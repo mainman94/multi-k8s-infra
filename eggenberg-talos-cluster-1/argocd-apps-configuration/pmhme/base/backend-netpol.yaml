@@ -339,6 +339,10 @@ spec:
               - method: GET
                 path: /metrics
   egress:
+    # matchPattern "*" does not widen what may be resolved; it puts DNS through
+    # Cilium's proxy so the toFQDNs rule below can learn the name -> IP mapping.
+    # Without this rule the toFQDNs egress below matches nothing and all SMTP
+    # traffic is denied.
     - toEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: kube-system
@@ -347,6 +351,9 @@ spec:
         - ports:
             - port: "53"
               protocol: ANY
+          rules:
+            dns:
+              - matchPattern: "*"
     # Meshed edge: notifier-email -> contact-nats.
     - toEndpoints:
         - matchLabels:
@@ -355,9 +362,13 @@ spec:
         - ports:
             - port: "4222"
               protocol: TCP
-    # Outbound SMTP relay (submission/implicit-TLS/legacy). No mutual auth (world).
-    - toEntities:
-        - world
+    # Outbound SMTP relay, scoped to the relay hostname rather than the whole
+    # internet. Must match SMTP_HOST in the contact-smtp Secret; if that value
+    # changes, this rule has to follow it. Ports kept as submission (587),
+    # implicit TLS (465) and legacy (25) since SMTP_PORT also lives in the
+    # Secret -- 25 can be dropped once the configured port is confirmed.
+    - toFQDNs:
+        - matchName: smtp.gmail.com
       toPorts:
         - ports:
             - port: "587"
