@@ -19,7 +19,7 @@ images:
 - name: git.hauptmann.dev/philipphauptmann/notifier-telegram
   newTag: 0.2.7
 - name: git.hauptmann.dev/philipphauptmann/pmhme
-  newTag: 0.15.0
+  newTag: 0.16.0
 patches:
 - patch: |-
     - op: replace
