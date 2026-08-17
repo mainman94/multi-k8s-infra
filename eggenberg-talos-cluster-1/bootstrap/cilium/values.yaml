@@ -69,6 +69,13 @@ encryption:
 l2announcements:
   enabled: true
 
+# BBR congestion control for pods, plus EDT-based egress pacing. Requires the
+# eBPF host routing enabled via bpf.masquerade above. Pods only pick up BBR on
+# (re)creation, so existing workloads keep cubic until they restart.
+bandwidthManager:
+  enabled: true
+  bbr: true
+
 hubble:
   enabled: true
 
