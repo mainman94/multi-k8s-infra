@@ -10,6 +10,11 @@ k8sServicePort: 7445
 
 l7Proxy: true
 
+# eBPF masquerading replaces the iptables masquerade path, which in turn lets
+# Cilium use eBPF host routing instead of the legacy netfilter host path.
+bpf:
+  masquerade: true
+
 cgroup:
   autoMount:
     enabled: false
