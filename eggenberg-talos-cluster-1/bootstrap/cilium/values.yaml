@@ -1,8 +1,6 @@
 kubeProxyReplacement: true
 
 ipam:
-  operator:
-    clusterPoolIPv4PodCIDRList: "10.42.0.0/16"
   mode: kubernetes
 
 k8sServiceHost: localhost
