@@ -13,6 +13,9 @@ spec:
     - stageSelector:
         name: test
       autoPromotionEnabled: true
+    # prod is promoted by hand. Freight reaches this stage only after test's
+    # promotion (smoke + version-check) succeeded and the freight was verified
+    # there, so the manual click is the last gate rather than the only one.
     - stageSelector:
         name: prod
-      autoPromotionEnabled: true
+      autoPromotionEnabled: false
