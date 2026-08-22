@@ -9,3 +9,6 @@ mind.mv2.lock
 .vscode
 *.log
 *.tmp
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/

@@ -82,3 +82,11 @@ spec:
             method: GET
             url: https://test.hauptmann.dev/version
             successExpression: response.status == 200 && response.body.version == '${{ outputs.overlay.deployedTag }}'
+  verification:
+    analysisTemplates:
+      - name: pmhme-portfolio-http-check
+    args:
+      - name: service-name
+        value: portfolio-service
+      - name: namespace
+        value: portfolio-test
