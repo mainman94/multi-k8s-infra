@@ -40,7 +40,7 @@ spec:
                         - name: rollout-name
                         - name: rollout-namespace
                     container:
-                      image: curlimages/curl:latest
+                      image: curlimages/curl:8.11.1
                       command: [sh, -c]
                       args:
                         - |
