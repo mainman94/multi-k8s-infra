@@ -5,7 +5,11 @@ persistence:
   storageClass: "longhorn"
   #accessMode: ReadWriteOnce
 nscd:
-  enabled: true
+  # Sidecar runs as root to enable DNS caching; the chart's default securityContext
+  # is otherwise restricted-compliant, so this root sidecar was the sole blocker
+  # for enforcing restricted PSA here. Disabling only drops DNS caching — Uptime
+  # Kuma's harmless "Failed to start nscd" log line still appears either way.
+  enabled: false
 resources:
   limits:
     cpu: 1000m
