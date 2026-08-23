@@ -29,6 +29,15 @@ spec:
         - portfolio # pmhme production overlay
         - portfolio-dev
         - portfolio-test
+        # Verified clean against this policy (kubectl get polr) and already
+        # gated at restricted PodSecurity admission — enforcing here only
+        # adds the readOnlyRootFilesystem check PSA doesn't cover.
+        - cert-manager
+        - external-secrets
+        - keda
+        - external-dns
+        - cnpg-system
+        - kyverno
   # admission/emitWarning are Kyverno-defaulted; set explicitly so the stored
   # policy matches git and ArgoCD stays Synced (no drift from the webhook).
   admission: true

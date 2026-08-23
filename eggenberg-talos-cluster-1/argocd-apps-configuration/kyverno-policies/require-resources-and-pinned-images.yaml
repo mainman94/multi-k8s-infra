@@ -23,6 +23,13 @@ spec:
         - portfolio # pmhme production overlay
         - portfolio-dev
         - portfolio-test
+        # Verified clean (kubectl get polr) after the requests/limits pass.
+        - cert-manager
+        - external-secrets
+        - keda
+        - external-dns
+        - cnpg-system
+        - kyverno
   admission: true
   background: true
   emitWarning: false
