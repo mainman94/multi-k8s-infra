@@ -37,4 +37,11 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-    # yamllint ensable rule:line-length
+    managedNamespaceMetadata:
+      labels:
+        # restricted breaks the admission-controller pods (needs caps,
+        # non-restricted seccomp); baseline is the safe ceiling here.
+        pod-security.kubernetes.io/enforce: baseline
+        pod-security.kubernetes.io/audit: baseline
+        pod-security.kubernetes.io/warn: baseline
+        # yamllint ensable rule:line-length

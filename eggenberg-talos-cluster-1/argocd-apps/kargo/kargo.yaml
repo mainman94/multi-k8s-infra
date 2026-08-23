@@ -26,3 +26,10 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        # restricted breaks kargo-api pods (needs caps, non-restricted
+        # seccomp); baseline is the safe ceiling here.
+        pod-security.kubernetes.io/enforce: baseline
+        pod-security.kubernetes.io/audit: baseline
+        pod-security.kubernetes.io/warn: baseline

@@ -27,3 +27,10 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+    managedNamespaceMetadata:
+      labels:
+        # restricted breaks argo-events/argo-workflows pods (need caps,
+        # non-restricted seccomp); baseline is the safe ceiling here.
+        pod-security.kubernetes.io/enforce: baseline
+        pod-security.kubernetes.io/audit: baseline
+        pod-security.kubernetes.io/warn: baseline
