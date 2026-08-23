@@ -9,6 +9,7 @@ metadata:
 spec:
   # NATS streaming needs a quorum of 2 out of 3.
   minAvailable: 2
+  unhealthyPodEvictionPolicy: AlwaysAllow
   selector:
     matchLabels:
       controller: eventbus-controller
