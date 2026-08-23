@@ -90,6 +90,15 @@ schedules:
         - nodes
         - events
         - events.events.k8s.io
+      # Skip Velero's own kopia repo-maintenance Jobs. They are ephemeral: by
+      # the time the backup reaches them their emptyDir volumes (plugins,
+      # scratch) are already gone, so the PVB fails with "expected one matching
+      # path, got 0" and the whole backup lands in PartiallyFailed. Every one of
+      # them carries velero.io/repo-name, and nothing worth restoring does.
+      labelSelector:
+        matchExpressions:
+          - key: velero.io/repo-name
+            operator: DoesNotExist
       snapshotVolumes: true
       # Longhorn PVs have no native AWS snapshotter; use kopia fs-backup instead
       defaultVolumesToFsBackup: true

@@ -1,0 +1,14 @@
+# CoreDNS is deployed by Talos itself, not by any ArgoCD app, so it ships
+# without a PDB. Its anti-affinity is only `preferred`, which means both
+# replicas can legally land on the same node — and a drain of that node would
+# then take cluster DNS down entirely. minAvailable 1 keeps one resolver up.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: coredns-pdb
+  namespace: kube-system
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      k8s-app: kube-dns

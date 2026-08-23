@@ -1,0 +1,15 @@
+# The EventBus CRD has no PDB field of its own, so the NATS StatefulSet it
+# generates (3 replicas) would otherwise let a node drain evict all of them at
+# once — taking the Sensor/EventSource event path down with it.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: eventbus-default-stan-pdb
+  namespace: argocd
+spec:
+  # NATS streaming needs a quorum of 2 out of 3.
+  minAvailable: 2
+  selector:
+    matchLabels:
+      controller: eventbus-controller
+      eventbus-name: default

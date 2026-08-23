@@ -1,0 +1,29 @@
+# Cluster-wide baseline objects that belong to no single app — typically
+# additions to components Talos itself deploys (CoreDNS, kube-proxy
+# replacements, etc.), which have no chart of their own to hang them off.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cluster-baseline
+  namespace: argocd
+  labels:
+    category: infrastructure
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/mainman94/multi-k8s-infra
+    targetRevision: HEAD
+    path: eggenberg-talos-cluster-1/argocd-apps-configuration/cluster-baseline
+    directory:
+      recurse: true
+  destination:
+    server: https://kubernetes.default.svc
+    # Each manifest carries its own namespace; this is only the fallback for
+    # any that don't.
+    namespace: kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
