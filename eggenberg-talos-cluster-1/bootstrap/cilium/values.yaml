@@ -1,5 +1,16 @@
 kubeProxyReplacement: true
 
+# CNI dataplane: request based on 7d peak (341m/576Mi), no CPU limit — a
+# throttled cilium-agent means throttled packet processing cluster-wide,
+# worse than letting it burst. Memory limit only guards against a leak
+# taking the node down.
+resources:
+  requests:
+    cpu: 100m
+    memory: 384Mi
+  limits:
+    memory: 1Gi
+
 ipam:
   mode: kubernetes
 
@@ -42,6 +53,13 @@ loadBalancer:
 
 operator:
   replicas: 1
+  resources:
+    requests:
+      cpu: 10m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
 
 gatewayAPI:
   enabled: true
@@ -79,9 +97,32 @@ hubble:
 
   relay:
     enabled: true
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
 
   ui:
     enabled: true
+    backend:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 64Mi
+        limits:
+          cpu: 100m
+          memory: 128Mi
+    frontend:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          cpu: 100m
+          memory: 64Mi
 
   metrics:
     enabled:
@@ -107,3 +148,11 @@ envoy:
     path: /dev/stdout
     defaultLevel: info
     accessLogBufferSize: 65536
+  # Serves the public Gateway (registry.hauptmann.dev etc.) — same no-CPU-limit
+  # reasoning as cilium-agent above, this is the request hot path.
+  resources:
+    requests:
+      cpu: 20m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
