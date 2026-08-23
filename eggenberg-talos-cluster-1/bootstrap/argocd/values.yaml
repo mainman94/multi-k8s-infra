@@ -7,6 +7,27 @@ applicationSet:
       enabled: true
       additionalLabels:
         release: kube-prometheus-stack
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+notifications:
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      additionalLabels:
+        release: kube-prometheus-stack
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
 server:
   metrics:
     enabled: true
@@ -17,6 +38,13 @@ server:
       interval: 30s
       additionalLabels:
         release: kube-prometheus-stack
+  resources:
+    requests:
+      cpu: 20m
+      memory: 64Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
   ingress:
     enabled: false
     ingressClassName: cilium
@@ -141,6 +169,13 @@ redis:
       enabled: true
       additionalLabels:
         release: kube-prometheus-stack
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
 controller:
   metrics:
     enabled: true
@@ -150,6 +185,14 @@ controller:
       enabled: true
       additionalLabels:
         release: kube-prometheus-stack
+  # 7d peak: 883m/2748Mi (sync-heavy across ~29 apps). Sized above that peak.
+  resources:
+    requests:
+      cpu: 200m
+      memory: 1536Mi
+    limits:
+      cpu: 1000m
+      memory: 3072Mi
 repoServer:
   metrics:
     enabled: true
@@ -159,6 +202,13 @@ repoServer:
       enabled: true
       additionalLabels:
         release: kube-prometheus-stack
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
 dex:
   enabled: true
   env:
@@ -175,3 +225,10 @@ dex:
       enabled: true
       additionalLabels:
         release: kube-prometheus-stack
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi

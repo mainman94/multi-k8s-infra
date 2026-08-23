@@ -36,12 +36,57 @@ api:
     # https callback registered in Pocket ID. Without it login fails on a
     # redirect_uri/scheme mismatch.
     terminatedUpstream: true
+  resources:
+    requests:
+      cpu: 10m
+      memory: 96Mi
+    limits:
+      cpu: 200m
+      memory: 384Mi
 controller:
   replicas: 1
   argocd:
     namespace: argocd
     watchArgocdNamespaceOnly: false
+  # 7d peak cpu 35m is the highest in this namespace (Argo CD reconcile watch).
+  resources:
+    requests:
+      cpu: 50m
+      memory: 96Mi
+    limits:
+      cpu: 300m
+      memory: 384Mi
 webhooksServer:
   replicas: 1
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+externalWebhooksServer:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
 managementController:
   replicas: 1
+  resources:
+    requests:
+      cpu: 10m
+      memory: 48Mi
+    limits:
+      cpu: 100m
+      memory: 192Mi
+garbageCollector:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi

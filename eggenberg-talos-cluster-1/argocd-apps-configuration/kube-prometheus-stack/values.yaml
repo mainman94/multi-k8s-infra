@@ -32,6 +32,13 @@ alertmanager:
             requests:
               storage: 10Gi
           storageClassName: longhorn
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi
 # Prometheus server configuration
 prometheus:
   enabled: true
@@ -73,6 +80,14 @@ prometheus:
             target_label: pod
           - source_labels: [__meta_kubernetes_pod_node_name]
             target_label: instance
+    # 7d peak 481m/2747Mi (10d retention, 30s scrape across ~29 apps).
+    resources:
+      requests:
+        cpu: 100m
+        memory: 1536Mi
+      limits:
+        cpu: 800m
+        memory: 3072Mi
 # yamllint enable rule:line-length
 # Grafana configuration
 grafana:
@@ -86,6 +101,22 @@ grafana:
     enabled: true
     size: 10Gi
     storageClassName: longhorn
+  resources:
+    requests:
+      cpu: 20m
+      memory: 256Mi
+    limits:
+      cpu: 300m
+      memory: 640Mi
+  # Shared by both the dashboard and datasource sidecars.
+  sidecar:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi
   # OIDC client credentials from OpenBao (grafana-pocketid ExternalSecret).
   # Grafana maps GF_* env vars onto grafana.ini keys, so the secret never has
   # to appear in the rendered ConfigMap below.
@@ -292,9 +323,42 @@ extraManifests:
 # exists and the KubeProxyDown rule that then fires forever.
 kubeProxy:
   enabled: false
+prometheusOperator:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  # Shared by the config-reloader sidecar on both Prometheus and Alertmanager.
+  prometheusConfigReloader:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
 # Node Exporter configuration
 nodeExporter:
   enabled: true
+prometheus-node-exporter:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
 # Kube State Metrics configuration
 kubeStateMetrics:
   enabled: true
+kube-state-metrics:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi

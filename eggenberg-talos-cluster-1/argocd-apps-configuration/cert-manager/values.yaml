@@ -2,11 +2,34 @@
 crds:
   enabled: true
 replicaCount: 1
+resources:
+  requests:
+    cpu: 10m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
 # Required for webhook to work properly
 webhook:
   replicaCount: 1
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
 cainjector:
   replicaCount: 1
+  # cainjector peaks well above the others (7d max ~228Mi) — watches every
+  # CRD/webhook config in the cluster for CA injection.
+  resources:
+    requests:
+      cpu: 10m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 384Mi
 # Prometheus metrics. `enabled` alone only adds scrape annotations, which this
 # cluster's Prometheus ignores — it selects ServiceMonitors by release label.
 prometheus:

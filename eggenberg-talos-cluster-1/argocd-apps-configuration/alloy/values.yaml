@@ -70,5 +70,12 @@ alloy:
         targets    = discovery.relabel.pods_enriched.output
         forward_to = [loki.process.sanitize.receiver]
       }
+  resources:
+    requests:
+      cpu: 20m
+      memory: 256Mi
+    limits:
+      cpu: 300m
+      memory: 512Mi
 controller:
   type: daemonset

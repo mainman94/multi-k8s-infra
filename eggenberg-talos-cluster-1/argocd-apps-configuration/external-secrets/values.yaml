@@ -6,4 +6,26 @@
 #     "external-secrets" -> matches the OpenBao kubernetes-auth role "eso"
 #     (bound SA external-secrets / ns external-secrets), configured in the
 #     homelab repo's terraform/openbao.
-{}
+resources:
+  requests:
+    cpu: 10m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+webhook:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 256Mi
+certController:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 256Mi

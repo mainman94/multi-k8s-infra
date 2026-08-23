@@ -1,5 +1,12 @@
 # Argo Workflows Server Configuration
 server:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
   ingress:
     enabled: false
     ingressClassName: cilium
@@ -34,6 +41,13 @@ controller:
     enabled: true
     additionalLabels:
       release: kube-prometheus-stack
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
 # Extra K8s manifests for SSO RBAC
 extraObjects:
   # Default ServiceAccount (catch-all fallback)

@@ -18,6 +18,13 @@ tempo:
           endpoint: "0.0.0.0:4317"
         http:
           endpoint: "0.0.0.0:4318"
+  resources:
+    requests:
+      cpu: 10m
+      memory: 96Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
 # Persist WAL + trace blocks so restarts don't lose data.
 persistence:
   enabled: true

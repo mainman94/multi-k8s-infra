@@ -8,6 +8,14 @@ spec:
   eventBusName: default
   template:
     serviceAccountName: argo-events-sa
+    container:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          cpu: 200m
+          memory: 128Mi
   dependencies:
     - name: rollout-completed
       eventSourceName: rollout-completed

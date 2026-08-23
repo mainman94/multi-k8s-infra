@@ -1,3 +1,26 @@
+admissionController:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+recommender:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 96Mi
+    limits:
+      cpu: 100m
+      memory: 256Mi
 updater:
   extraArgs:
     - --min-replicas=1
+  resources:
+    requests:
+      cpu: 10m
+      memory: 96Mi
+    limits:
+      cpu: 100m
+      memory: 256Mi
