@@ -1,0 +1,55 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: spegel-netpol
+  namespace: spegel
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: spegel
+  ingress:
+    # containerd on each node pulls mirrored images via hostPort 30020->5000.
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "5000"
+              protocol: TCP
+    # p2p gossip mesh between spegel peers (libp2p over TCP + QUIC).
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: spegel
+      toPorts:
+        - ports:
+            - port: "5001"
+              protocol: TCP
+            - port: "5001"
+              protocol: UDP
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: monitoring
+      toPorts:
+        - ports:
+            - port: "9090"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: spegel
+      toPorts:
+        - ports:
+            - port: "5001"
+              protocol: TCP
+            - port: "5001"
+              protocol: UDP
+    # Watches Nodes/EndpointSlices via the K8s API to discover peers.
+    - toEntities:
+        - kube-apiserver

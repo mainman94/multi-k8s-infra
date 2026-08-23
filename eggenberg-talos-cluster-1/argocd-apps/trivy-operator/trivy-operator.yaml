@@ -24,6 +24,12 @@ spec:
     - repoURL: https://github.com/mainman94/multi-k8s-infra
       targetRevision: HEAD
       ref: values
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
+      targetRevision: HEAD
+      path: "eggenberg-talos-cluster-1/argocd-apps-configuration/trivy-operator"
+      directory:
+        # values.yaml is a Helm input, not a manifest.
+        include: "*-netpol.yaml"
   destination:
     server: https://kubernetes.default.svc
     namespace: trivy-system

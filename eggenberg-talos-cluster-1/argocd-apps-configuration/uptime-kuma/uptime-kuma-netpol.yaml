@@ -1,0 +1,34 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: uptime-kuma-netpol
+  namespace: uptime-kuma
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: uptime-kuma
+  ingress:
+    # Cilium Gateway (status.hauptmann.dev) proxies through the node's Envoy,
+    # which shows up as the "host" identity; kubelet probes also hit here.
+    - fromEntities:
+        - ingress
+        - host
+      toPorts:
+        - ports:
+            - port: "3001"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+    # Uptime Kuma's job is checking arbitrary external hosts/ports — an
+    # allowlist here would have to be updated for every new monitor. "world"
+    # already excludes cluster-internal endpoints, so this can't be used to
+    # pivot into other namespaces.
+    - toEntities:
+        - world

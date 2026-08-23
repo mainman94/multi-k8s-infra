@@ -1,0 +1,41 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: trivy-netpol
+  namespace: trivy-system
+spec:
+  # Covers trivy-operator, the built-in trivy-server, and the ephemeral scan
+  # Jobs the operator spawns (dynamic pod-template-hash labels, so a single
+  # namespace-wide selector is far less fragile than chasing each one).
+  endpointSelector: {}
+  ingress:
+    - fromEntities:
+        - host
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: trivy-system
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: monitoring
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: trivy-system
+    # trivy-operator watches workloads and creates scan Jobs via the K8s API.
+    - toEntities:
+        - kube-apiserver
+    # Vulnerability DB is pulled from ghcr.io at scan time.
+    - toEntities:
+        - world
