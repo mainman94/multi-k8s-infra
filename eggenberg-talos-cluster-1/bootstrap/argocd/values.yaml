@@ -87,6 +87,17 @@ configs:
         - CiliumIdentity
         - CiliumEndpoint
         - CiliumEndpointSlice
+      - apiGroups:
+        - velero.io
+        kinds:
+        - Backup
+        - Restore
+        - PodVolumeBackup
+        - PodVolumeRestore
+        - BackupRepository
+        - DeleteBackupRequest
+        - DownloadRequest
+        - ServerStatusRequest
     # Dex/Pocket ID OIDC
     url: https://argo.hauptmann.dev
     dex.config: |
