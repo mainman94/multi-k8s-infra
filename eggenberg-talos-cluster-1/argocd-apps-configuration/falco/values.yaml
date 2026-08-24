@@ -15,7 +15,15 @@ resources:
     cpu: 500m
     memory: 512Mi
 
-# Alerts go to stdout for now (kubectl logs / Loki). Flip to true + configure
-# outputs (Slack, etc.) once we want forwarded alerts.
+# Forward Falco alerts to the cluster's Alertmanager. Its root route already
+# sends everything (except Watchdog/InfoInhibitor) to Discord, so this rides
+# the existing pipeline with no extra PrometheusRule/AlertmanagerConfig needed.
 falcosidekick:
-  enabled: false
+  enabled: true
+  config:
+    alertmanager:
+      hostport: "http://kube-prometheus-stack-alertmanager.monitoring.svc.cluster.local:9093"
+      # v1 API was removed in Alertmanager 0.27+ (kube-prometheus-stack 88.x ships it).
+      endpoint: "/api/v2/alerts"
+      # Falco alert priorities below this are dropped before reaching Discord.
+      minimumpriority: "warning"
