@@ -1,0 +1,43 @@
+# yamllint disable rule:line-length
+# Falco runtime security. Watches syscalls (modern eBPF probe, no kernel module
+# needed on Talos's immutable OS) and alerts on anomalous container behavior.
+# Same multi-source pattern as the trivy-operator app. sync-wave 1.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: falco
+  namespace: argocd
+  labels:
+    category: security
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: default
+  sources:
+    - repoURL: https://falcosecurity.github.io/charts
+      chart: falco
+      targetRevision: 9.1.0
+      helm:
+        valueFiles:
+          - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/falco/values.yaml
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
+      targetRevision: HEAD
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: falco
+  syncPolicy:
+    managedNamespaceMetadata:
+      labels:
+        # eBPF probe needs elevated privileges (perf events, hostPID-less but
+        # privileged syscall tracing).
+        pod-security.kubernetes.io/enforce: privileged
+        pod-security.kubernetes.io/audit: privileged
+        pod-security.kubernetes.io/warn: privileged
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    # yamllint enable rule:line-length

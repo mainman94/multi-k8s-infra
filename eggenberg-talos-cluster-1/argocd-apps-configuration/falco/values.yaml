@@ -1,0 +1,21 @@
+# yamllint disable rule:line-length
+# Falco config. Runtime syscall monitoring via modern eBPF probe (Talos has no
+# loadable kernel modules, so kmod driver is not an option).
+
+driver:
+  kind: modern_ebpf
+
+# Sane per-node defaults; bump if the default ruleset proves too noisy for
+# these nodes' syscall volume.
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# Alerts go to stdout for now (kubectl logs / Loki). Flip to true + configure
+# outputs (Slack, etc.) once we want forwarded alerts.
+falcosidekick:
+  enabled: false
