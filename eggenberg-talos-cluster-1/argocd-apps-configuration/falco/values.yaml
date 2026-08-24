@@ -20,6 +20,13 @@ resources:
 # the existing pipeline with no extra PrometheusRule/AlertmanagerConfig needed.
 falcosidekick:
   enabled: true
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
   config:
     alertmanager:
       hostport: "http://kube-prometheus-stack-alertmanager.monitoring.svc.cluster.local:9093"
