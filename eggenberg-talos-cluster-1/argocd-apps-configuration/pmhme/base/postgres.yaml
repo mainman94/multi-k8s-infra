@@ -19,7 +19,9 @@ metadata:
     app: contact-postgres
 spec:
   instances: 2
-  imageName: ghcr.io/cloudnative-pg/postgresql:18
+  # minimal flavor: no ssl-cert/locales/extra debs — smaller attack surface,
+  # also drops the ssl-cert-snakeoil.key that trivy flagged as a "private key".
+  imageName: ghcr.io/cloudnative-pg/postgresql:18-minimal-trixie
 
   # Reuse the ESO-managed contact-db secret (from OpenBao) as the app-user
   # credentials, so the password still lives in OpenBao (per-env property patch
