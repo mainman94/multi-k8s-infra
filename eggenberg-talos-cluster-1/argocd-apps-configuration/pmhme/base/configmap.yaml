@@ -9,6 +9,8 @@ data:
   LOG_LEVEL: "info"
   TELEMETRY_ENABLED: "true"
   OTEL_SERVICE_NAME: "hauptmann-portfolio"
+  # Tempo OTLP/HTTP receiver. Egress opened in networkpolicy.yaml (port 4318).
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://tempo.monitoring.svc.cluster.local:4318"
   # Platform page: server-side Prometheus read for /platform cluster metrics.
   PROMETHEUS_URL: "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090"
   OPS_NAMESPACE: "portfolio"

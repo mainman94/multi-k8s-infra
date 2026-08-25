@@ -90,3 +90,14 @@ spec:
               protocol: TCP
             - port: "443"
               protocol: TCP
+    # OTLP/HTTP trace export to Tempo. Missing before: portfolio-app had no
+    # egress rule to Tempo's receiver, so Cilium silently dropped every trace
+    # (default-deny once an endpoint is selected by any CiliumNetworkPolicy).
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: monitoring
+            app.kubernetes.io/name: tempo
+      toPorts:
+        - ports:
+            - port: "4318"
+              protocol: TCP
