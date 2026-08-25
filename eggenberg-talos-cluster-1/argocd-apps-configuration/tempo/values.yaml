@@ -35,6 +35,11 @@ tempo:
     processor:
       service_graphs: {}
       span_metrics: {}
+      # Required for Grafana Traces Drilldown's TraceQL metrics queries
+      # (rate()/histogram_over_time() by arbitrary attributes), not just the
+      # fixed service-graphs/span-metrics dimensions.
+      local_blocks:
+        flush_to_storage: true
     storage:
       path: /var/tempo/metrics-wal
   overrides:
@@ -43,6 +48,7 @@ tempo:
         processors:
           - service-graphs
           - span-metrics
+          - local-blocks
 # Persist WAL + trace blocks so restarts don't lose data.
 persistence:
   enabled: true
