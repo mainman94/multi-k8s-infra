@@ -13,7 +13,7 @@ components:
 - ../../components/keda-ns-scoped
 images:
 - name: git.hauptmann.dev/philipphauptmann/contact-api
-  newTag: 0.7.0
+  newTag: 0.8.0
 - name: git.hauptmann.dev/philipphauptmann/notifier-email
   newTag: 0.2.7
 - name: git.hauptmann.dev/philipphauptmann/notifier-telegram
