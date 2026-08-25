@@ -5,6 +5,7 @@ metadata:
 data:
   STAGE: "test"
   LOG_LEVEL: "info"
+  OTEL_SERVICE_NAME: "hauptmann-portfolio-test"
   # /platform page reads this env's own namespace (button scales it too).
   OPS_NAMESPACE: "portfolio-test"
   SITE_URL: "https://test.hauptmann.dev"
