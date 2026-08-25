@@ -17,7 +17,7 @@ images:
   - name: git.hauptmann.dev/philipphauptmann/contact-api
     newTag: 0.8.1
   - name: git.hauptmann.dev/philipphauptmann/notifier-telegram
-    newTag: 0.2.7
+    newTag: 0.3.0
   - name: git.hauptmann.dev/philipphauptmann/notifier-email
     newTag: 0.3.0
 patches:
