@@ -57,6 +57,9 @@ prometheus:
     scrapeInterval: 30s
     evaluationInterval: 30s
     retention: 10d
+    # Tempo's metrics-generator (service-graphs/span-metrics) pushes RED
+    # metrics here via remote_write; off by default upstream.
+    enableRemoteWriteReceiver: true
     storageSpec:
       volumeClaimTemplate:
         spec:

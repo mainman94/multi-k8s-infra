@@ -25,6 +25,24 @@ tempo:
     limits:
       cpu: 200m
       memory: 256Mi
+  # Derive RED metrics (service graphs, span rate/latency/error) from traces.
+  # Without this the generator ring is empty and Grafana's Tempo "compare"/
+  # TraceQL-metrics views fail with "error finding generators: empty ring".
+  # Requires kube-prometheus-stack's remote-write receiver (see its values.yaml).
+  metricsGenerator:
+    enabled: true
+    remoteWriteUrl: "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
+    processor:
+      service_graphs: {}
+      span_metrics: {}
+    storage:
+      path: /var/tempo/metrics-wal
+  overrides:
+    defaults:
+      metrics_generator:
+        processors:
+          - service-graphs
+          - span-metrics
 # Persist WAL + trace blocks so restarts don't lose data.
 persistence:
   enabled: true
