@@ -17,7 +17,7 @@ metadata:
     policies.kyverno.io/category: Pod Security Standards
     policies.kyverno.io/severity: medium
     policies.kyverno.io/description: >-
-      Baseline hardening for workloads: no privilege escalation, run as non-root, read-only root filesystem, all Linux capabilities dropped. Audit globally, Enforced in clean namespaces.
+      Baseline hardening for workloads: no privilege escalation, run as non-root, read-only root filesystem, all Linux capabilities dropped, RuntimeDefault seccomp profile. Audit globally, Enforced in clean namespaces.
 spec:
   validationFailureAction: Audit
   # Enforce only where reports are already clean; everything else stays Audit and
@@ -118,3 +118,24 @@ spec:
                   capabilities:
                     drop:
                       - ALL
+
+    - name: require-seccomp-runtime-default
+      skipBackgroundRequests: true
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        allowExistingViolations: true
+        message: "seccompProfile.type must be RuntimeDefault (pod or every container)."
+        anyPattern:
+          - spec:
+              securityContext:
+                seccompProfile:
+                  type: RuntimeDefault
+          - spec:
+              containers:
+                - securityContext:
+                    seccompProfile:
+                      type: RuntimeDefault
