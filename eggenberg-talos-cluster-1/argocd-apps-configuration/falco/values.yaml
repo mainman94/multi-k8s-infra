@@ -16,6 +16,16 @@ falcoctl:
     follow:
       args: ["--log-format=json", "--no-verify"]
 
+# Cilium's init container writes cilium-cni into hostPath /opt/cni/bin then
+# execve's it immediately on every node (re)start — trips the stock "Drop and
+# execute new binary in container" rule (EXE_WRITABLE|EXE_UPPER_LAYER).
+# Legitimate CNI plugin install, not persistence. Exempt that exact binary.
+customRules:
+  cilium-cni-exception.yaml: |-
+    - rule: Drop and execute new binary in container
+      append: true
+      condition: and not (proc.name=cilium-cni and proc.exepath=/opt/cni/bin/cilium-cni)
+
 # Sane per-node defaults; bump if the default ruleset proves too noisy for
 # these nodes' syscall volume.
 resources:
