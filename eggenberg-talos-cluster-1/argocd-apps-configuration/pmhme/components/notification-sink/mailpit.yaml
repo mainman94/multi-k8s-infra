@@ -17,12 +17,15 @@ spec:
     spec:
       securityContext:
         runAsNonRoot: true
-        runAsUser: 1000
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
         seccompProfile:
           type: RuntimeDefault
       containers:
         - name: mailpit
           image: docker.io/axllent/mailpit:v1.31
+          imagePullPolicy: Always
           env:
             - name: MP_SMTP_BIND_ADDR
               value: "0.0.0.0:1025"
@@ -41,6 +44,13 @@ spec:
               port: smtp
             initialDelaySeconds: 3
             periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: smtp
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            timeoutSeconds: 2
+            failureThreshold: 3
           resources:
             requests:
               cpu: "10m"

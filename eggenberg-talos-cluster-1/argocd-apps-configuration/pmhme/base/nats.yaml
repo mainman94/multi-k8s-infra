@@ -18,13 +18,16 @@ spec:
     spec:
       securityContext:
         runAsNonRoot: true
-        runAsUser: 1000
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
         seccompProfile:
           type: RuntimeDefault
       containers:
         - name: nats
           # Digest-pinned for immutability; tag kept for readability (Renovate-bumpable).
           image: docker.io/nats:2-alpine@sha256:d4ac35882ac65aff236cd65b9d3fa4d24332c681e1a85f94eedccd3cdd65b1da
+          imagePullPolicy: Always
           # Enable the HTTP monitoring endpoint for health probes.
           args:
             - "--http_port=8222"
@@ -71,6 +74,7 @@ spec:
         - name: nats-exporter
           # Digest-pinned for immutability; tag kept for readability (Renovate-bumpable).
           image: docker.io/natsio/prometheus-nats-exporter:0.20.2@sha256:c623b608e148e31e1c1c878673a197f1828e58ce90de4f01d22f1baa84c8fee9
+          imagePullPolicy: Always
           args:
             - "-varz"
             - "-connz"
@@ -86,6 +90,14 @@ spec:
               path: /metrics
               port: metrics
             periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: metrics
+            initialDelaySeconds: 10
+            periodSeconds: 15
             timeoutSeconds: 2
             failureThreshold: 3
           resources:
