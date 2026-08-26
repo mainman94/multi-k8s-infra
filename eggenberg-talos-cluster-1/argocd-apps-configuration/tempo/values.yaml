@@ -1,4 +1,7 @@
 tempo:
+  # The chart defaults to a 1024 MiB ballast, which cannot fit into the
+  # container's 256 MiB memory limit and causes an OOM crash loop.
+  memBallastSizeMbs: 0
   # Keep traces for two days; homelab-sized retention.
   retention: 48h
   storage:
