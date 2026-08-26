@@ -47,6 +47,8 @@ spec:
               value: "8081"
             - name: METRICS_PORT
               value: "9090"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://tempo.monitoring.svc.cluster.local:4318
             - name: TELEGRAM_API_BASE
               value: https://api.telegram.org
             - name: TELEGRAM_BOT_TOKEN

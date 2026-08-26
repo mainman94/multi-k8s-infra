@@ -107,6 +107,16 @@ spec:
         - ports:
             - port: "6379"
               protocol: TCP
+    # OTLP/HTTP trace export to Tempo. Without this rule Cilium silently drops
+    # every trace once this endpoint is selected by a CiliumNetworkPolicy.
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: monitoring
+            app.kubernetes.io/name: tempo
+      toPorts:
+        - ports:
+            - port: "4318"
+              protocol: TCP
 ---
 # CNPG instance pods (contact-postgres cluster). No Cilium mutual auth on any
 # edge — CNPG manages its own PostgreSQL/replication TLS; the cluster label
@@ -310,6 +320,16 @@ spec:
         - ports:
             - port: "443"
               protocol: TCP
+    # OTLP/HTTP trace export to Tempo. Without this rule Cilium silently drops
+    # every trace once this endpoint is selected by a CiliumNetworkPolicy.
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: monitoring
+            app.kubernetes.io/name: tempo
+      toPorts:
+        - ports:
+            - port: "4318"
+              protocol: TCP
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -378,6 +398,16 @@ spec:
             - port: "25"
               protocol: TCP
               # yamllint enable rule:line-length
+    # OTLP/HTTP trace export to Tempo. Without this rule Cilium silently drops
+    # every trace once this endpoint is selected by a CiliumNetworkPolicy.
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: monitoring
+            app.kubernetes.io/name: tempo
+      toPorts:
+        - ports:
+            - port: "4318"
+              protocol: TCP
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
