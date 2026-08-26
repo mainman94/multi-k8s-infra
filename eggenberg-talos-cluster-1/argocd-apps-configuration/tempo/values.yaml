@@ -24,10 +24,10 @@ tempo:
   resources:
     requests:
       cpu: 10m
-      memory: 96Mi
+      memory: 256Mi
     limits:
       cpu: 200m
-      memory: 256Mi
+      memory: 512Mi
   # Derive RED metrics (service graphs, span rate/latency/error) from traces.
   # Without this the generator ring is empty and Grafana's Tempo "compare"/
   # TraceQL-metrics views fail with "error finding generators: empty ring".
