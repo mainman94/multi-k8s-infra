@@ -28,6 +28,13 @@ patches:
     target:
       kind: ExternalSecret
       name: contact-db
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/env/6/value
+        value: hauptmann-contact-api-dev
+    target:
+      kind: Rollout
+      name: contact-api
   - path: httproute-patch.yaml
   - path: configmap-patch.yaml
     target:
