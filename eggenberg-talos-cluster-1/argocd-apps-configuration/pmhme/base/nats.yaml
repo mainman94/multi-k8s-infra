@@ -94,7 +94,7 @@ spec:
             failureThreshold: 3
           livenessProbe:
             httpGet:
-              path: /healthz
+              path: /metrics
               port: metrics
             initialDelaySeconds: 10
             periodSeconds: 15
