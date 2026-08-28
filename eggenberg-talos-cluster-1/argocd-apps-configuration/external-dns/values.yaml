@@ -30,12 +30,21 @@ extraArgs:
   - --cloudflare-proxied
 
 # Cloudflare API token, provisioned from OpenBao by External Secrets Operator.
+# EXTERNAL_DNS_DEFAULT_TARGETS is the --default-targets flag: every record points
+# at the site's public IP instead of the Cilium Gateway's internal VIP that lands
+# in the Gateway status. Kept in OpenBao (prod/network) so the address is not in
+# this public repo.
 env:
   - name: CF_API_TOKEN
     valueFrom:
       secretKeyRef:
         name: cloudflare-api-token
         key: CF_API_TOKEN
+  - name: EXTERNAL_DNS_DEFAULT_TARGETS
+    valueFrom:
+      secretKeyRef:
+        name: external-dns-default-targets
+        key: PUBLIC_IP
 
 # Metrics into the existing kube-prometheus-stack.
 serviceMonitor:
