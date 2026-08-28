@@ -1,15 +1,16 @@
-# Talos runs etcd outside the kubelet, so there is no pod for the chart's
-# default `component: etcd` selector to find and the Service stays without
-# endpoints — that is why the etcd dashboard is empty. Listing the control
-# plane IPs makes the chart write the Endpoints itself. Port 2381 and scheme
-# http are the chart defaults and match the metrics-only listener enabled in
-# the homelab repo's terraform/talos/patch.yaml.
+# Talos runs etcd outside the kubelet, so the chart's `component: etcd` selector
+# finds no pod and the Service stays without endpoints — hence the empty etcd
+# dashboard. Setting kubeEtcd.endpoints would make the chart write an Endpoints
+# object, but ArgoCD excludes v1/Endpoints cluster-wide (see
+# bootstrap/argocd/values.yaml), so it is never applied. The metrics listener is
+# therefore scraped statically in prometheusSpec.additionalScrapeConfigs below;
+# only the dashboard and the alert rules are kept from the chart.
 kubeEtcd:
   enabled: true
-  endpoints:
-    - 192.168.0.53
-    - 192.168.0.65
-    - 192.168.0.101
+  service:
+    enabled: false
+  serviceMonitor:
+    enabled: false
 
 # Alertmanager configuration
 alertmanager:
@@ -82,6 +83,15 @@ prometheus:
               storage: 20Gi
           storageClassName: longhorn
     additionalScrapeConfigs:
+      # etcd on the Talos metrics listener (2381, read-only, no client certs).
+      # The job name has to match `.*etcd.*` — that is what the chart's etcd
+      # rules and its Grafana dashboard select on.
+      - job_name: "kube-etcd"
+        static_configs:
+          - targets:
+              - 192.168.0.53:2381
+              - 192.168.0.65:2381
+              - 192.168.0.101:2381
       - job_name: "ztunnel"
         kubernetes_sd_configs:
           - role: pod
