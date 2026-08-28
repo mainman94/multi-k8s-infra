@@ -123,6 +123,39 @@ metrics:
     additionalLabels:
       release: kube-prometheus-stack
 
+  # Without these rules a failed nightly backup is only visible by looking at
+  # `kubectl get backups`. Same release label as the ServiceMonitor so the
+  # kube-prometheus-stack Prometheus picks the rules up.
+  prometheusRule:
+    enabled: true
+    additionalLabels:
+      release: kube-prometheus-stack
+    spec:
+      - alert: VeleroBackupFailed
+        expr: increase(velero_backup_failure_total[1h]) > 0
+        labels:
+          severity: critical
+        annotations:
+          summary: "Velero backup failed (schedule {{ $labels.schedule }})"
+          description: "A Velero backup run failed in the last hour. Check `kubectl get backups -n velero`."
+      - alert: VeleroBackupPartiallyFailed
+        expr: increase(velero_backup_partial_failure_total[1h]) > 0
+        labels:
+          severity: warning
+        annotations:
+          summary: "Velero backup partially failed (schedule {{ $labels.schedule }})"
+          description: "At least one volume was not backed up. Check the PodVolumeBackups of the run for the failing volume."
+      # The daily schedule runs at 02:00; 26h of silence means a run was missed
+      # entirely, which no failure counter would catch.
+      - alert: VeleroBackupTooOld
+        expr: time() - velero_backup_last_successful_timestamp{schedule="velero-daily"} > 26 * 3600
+        for: 1h
+        labels:
+          severity: critical
+        annotations:
+          summary: "No successful Velero backup for more than 26h"
+          description: "The last successful run of {{ $labels.schedule }} is older than 26 hours."
+
 # Kopia configuration for PV backups. The node agent does the actual file
 # system backup; what gets backed up is decided by
 # configuration.defaultVolumesToFsBackup above.
