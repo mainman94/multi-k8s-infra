@@ -3,3 +3,10 @@ repos:
     rev: v0.16.0
     hooks:
       - id: yamlfmt
+        # Kargo rewrites these on every promotion (kustomize-set-image) and
+        # writes kyaml's indentless list style. Reformatting them here only
+        # produces a diff that the next promotion flips straight back, so the
+        # working tree is never clean. The exclusion lives here rather than in
+        # .yamlfmt because yamlfmt ignores its own `exclude` list when the
+        # files are handed to it as arguments, which is what pre-commit does.
+        exclude: ^eggenberg-talos-cluster-1/argocd-apps-configuration/pmhme/overlays/[^/]+/kustomization\.yaml$
