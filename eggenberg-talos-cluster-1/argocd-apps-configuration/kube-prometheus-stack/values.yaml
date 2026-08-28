@@ -1,3 +1,16 @@
+# Talos runs etcd outside the kubelet, so there is no pod for the chart's
+# default `component: etcd` selector to find and the Service stays without
+# endpoints — that is why the etcd dashboard is empty. Listing the control
+# plane IPs makes the chart write the Endpoints itself. Port 2381 and scheme
+# http are the chart defaults and match the metrics-only listener enabled in
+# the homelab repo's terraform/talos/patch.yaml.
+kubeEtcd:
+  enabled: true
+  endpoints:
+    - 192.168.0.53
+    - 192.168.0.65
+    - 192.168.0.101
+
 # Alertmanager configuration
 alertmanager:
   enabled: true
