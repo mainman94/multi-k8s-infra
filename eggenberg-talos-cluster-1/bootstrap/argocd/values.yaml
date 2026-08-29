@@ -209,12 +209,6 @@ repoServer:
     limits:
       cpu: 1000m
       memory: 512Mi
-  # Chart default timeoutSeconds:1 on /healthz?full=true trips under a
-  # manifest-render load spike (many Kustomize/Helm apps), killing the pod
-  # mid-render instead of just waiting it out (13 restarts/19h observed).
-  livenessProbe:
-    timeoutSeconds: 10
-    failureThreshold: 6
 dex:
   enabled: true
   env:
