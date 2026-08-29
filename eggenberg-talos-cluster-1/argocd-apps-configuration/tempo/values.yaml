@@ -26,8 +26,31 @@ tempo:
       cpu: 10m
       memory: 256Mi
     limits:
-      cpu: 200m
+      cpu: 500m
       memory: 512Mi
+  # 200m limit let brief load spikes (WAL replay, blocklist poll, generator
+  # gRPC backlog) starve the /ready handler past the 5s probe timeout;
+  # liveness then killed the pod mid-write, corrupting the local blocklist
+  # index and slowing the next startup — a 69-restart crash loop over 19h.
+  # Looser timeout/threshold gives it room to answer under a brief spike.
+  livenessProbe:
+    httpGet:
+      path: /ready
+      port: 3200
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 10
+    failureThreshold: 6
+    successThreshold: 1
+  readinessProbe:
+    httpGet:
+      path: /ready
+      port: 3200
+    initialDelaySeconds: 20
+    periodSeconds: 10
+    timeoutSeconds: 10
+    failureThreshold: 3
+    successThreshold: 1
   # Derive RED metrics (service graphs, span rate/latency/error) from traces.
   # Without this the generator ring is empty and Grafana's Tempo "compare"/
   # TraceQL-metrics views fail with "error finding generators: empty ring".
