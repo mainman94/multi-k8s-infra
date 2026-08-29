@@ -24,10 +24,13 @@ tempo:
   resources:
     requests:
       cpu: 10m
-      memory: 256Mi
+      memory: 384Mi
     limits:
       cpu: 500m
-      memory: 512Mi
+      # 512Mi OOM-killed on boot: the crash loop below never gave the
+      # compactor a stable run, so ~1400 uncompacted blocks piled up and
+      # blow the memory budget just loading the blocklist at startup.
+      memory: 1536Mi
   # 200m limit let brief load spikes (WAL replay, blocklist poll, generator
   # gRPC backlog) starve the /ready handler past the 5s probe timeout;
   # liveness then killed the pod mid-write, corrupting the local blocklist
