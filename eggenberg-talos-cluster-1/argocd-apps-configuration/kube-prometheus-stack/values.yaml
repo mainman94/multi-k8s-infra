@@ -69,7 +69,10 @@ prometheus:
   prometheusSpec:
     scrapeInterval: 30s
     evaluationInterval: 30s
-    retention: 10d
+    retention: 7d
+    # Safety cap below the PVC size so retention evicts data before disk
+    # fills, even if scrape cardinality grows faster than retention alone accounts for.
+    retentionSize: 27GB
     # Tempo's metrics-generator (service-graphs/span-metrics) pushes RED
     # metrics here via remote_write; off by default upstream.
     enableRemoteWriteReceiver: true
@@ -79,7 +82,7 @@ prometheus:
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
-              storage: 20Gi
+              storage: 30Gi
           storageClassName: longhorn
     additionalScrapeConfigs:
       - job_name: "ztunnel"
@@ -97,12 +100,14 @@ prometheus:
           - source_labels: [__meta_kubernetes_pod_node_name]
             target_label: instance
     # 7d peak 481m/2747Mi (10d retention, 30s scrape across ~29 apps).
+    # Bumped 2026-08-29: etcd metrics scraping added ~1830 series/15s across
+    # 3 nodes, pushing CPU limit throttling (36% observed at 800m).
     resources:
       requests:
         cpu: 100m
         memory: 1536Mi
       limits:
-        cpu: 800m
+        cpu: 1200m
         memory: 3072Mi
 # yamllint enable rule:line-length
 # Grafana configuration
@@ -131,7 +136,7 @@ grafana:
         cpu: 10m
         memory: 64Mi
       limits:
-        cpu: 200m
+        cpu: 400m
         memory: 128Mi
   # OIDC client credentials from OpenBao (grafana-pocketid ExternalSecret).
   # Grafana maps GF_* env vars onto grafana.ini keys, so the secret never has
@@ -365,7 +370,7 @@ prometheus-node-exporter:
       cpu: 10m
       memory: 32Mi
     limits:
-      cpu: 100m
+      cpu: 200m
       memory: 128Mi
 # Kube State Metrics configuration
 kubeStateMetrics:

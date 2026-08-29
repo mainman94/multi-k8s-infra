@@ -45,6 +45,12 @@ api:
       memory: 384Mi
 controller:
   replicas: 1
+  # tmp-data is an emptyDir (scratch space, gone on pod restart anyway) —
+  # Velero was backing it up regardless, and a corrupted index blob in the
+  # resulting kopia repo has been failing every daily backup + maintenance
+  # job since 2026-08-29. Nothing here is worth restoring.
+  podAnnotations:
+    backup.velero.io/backup-volumes-excludes: tmp-data
   argocd:
     namespace: argocd
     watchArgocdNamespaceOnly: false
