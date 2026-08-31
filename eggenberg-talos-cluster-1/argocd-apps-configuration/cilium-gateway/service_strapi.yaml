@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: strapi-external
+  namespace: cilium
+  labels:
+    app.kubernetes.io/name: strapi
+spec:
+  ports:
+    - port: 30668
+      targetPort: 30668
+      protocol: TCP
+      name: http
+---
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: strapi-external-1
+  namespace: cilium
+  labels:
+    app.kubernetes.io/name: strapi
+    kubernetes.io/service-name: strapi-external
+    endpointslice.kubernetes.io/managed-by: argocd
+addressType: IPv4
+ports:
+  - name: http
+    protocol: TCP
+    port: 30668
+endpoints:
+  - addresses:
+      - 192.168.0.129
+    conditions: {}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: strapi
+  namespace: cilium
+spec:
+  parentRefs:
+    - name: public
+      sectionName: https
+  hostnames:
+    - strapi.hauptmann.dev
+  rules:
+    - backendRefs:
+        - name: strapi-external
+          port: 30668
