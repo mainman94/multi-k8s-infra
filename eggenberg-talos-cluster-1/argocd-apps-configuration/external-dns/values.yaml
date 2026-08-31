@@ -28,6 +28,10 @@ txtOwnerId: external-dns-eggenberg
 # with a Cloudflare origin cert, which requires proxied records.
 extraArgs:
   - --cloudflare-proxied
+  # Gateway API supplies the Cilium VIP (192.168.0.9) as each HTTPRoute's
+  # target. Prefer EXTERNAL_DNS_DEFAULT_TARGETS, which is the public IP from
+  # OpenBao, so Cloudflare can proxy the records.
+  - --force-default-targets
 
 # Cloudflare API token, provisioned from OpenBao by External Secrets Operator.
 # EXTERNAL_DNS_DEFAULT_TARGETS is the --default-targets flag: every record points
