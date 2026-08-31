@@ -10,7 +10,7 @@ spec:
   sources:
     - repoURL: ghcr.io/akuity/kargo-charts
       chart: kargo
-      targetRevision: 1.11.2
+      targetRevision: 1.11.3
       helm:
         valueFiles:
           - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/kargo/values.yaml
