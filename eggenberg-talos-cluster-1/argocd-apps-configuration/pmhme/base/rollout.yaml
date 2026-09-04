@@ -35,6 +35,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: portfolio-app-config
+            - secretRef:
+                name: blog-repo-token
           ports:
             - containerPort: 3000
               name: http
@@ -97,6 +99,15 @@ spec:
               type: RuntimeDefault
             seLinuxOptions:
               level: "s0:c123,c456"
+          volumeMounts:
+            # readOnlyRootFilesystem — blogRepoSync.ts clones/pulls the blog
+            # content repo into ./.blog-content (resolves to /app/.blog-content)
+            # at runtime, so that one path needs to be writable.
+            - name: blog-content
+              mountPath: /app/.blog-content
+      volumes:
+        - name: blog-content
+          emptyDir: {}
       securityContext:
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch

@@ -19,3 +19,15 @@ data:
   # Analytics: shipped only when both are set. dev/test blank them to opt out.
   UMAMI_SCRIPT_URL: "https://umami.hauptmann.dev/script.js"
   UMAMI_WEBSITE_ID: "06b02831-8ba7-4603-a821-9fa473ac1c08"
+  # Blog content — cloned/pulled at runtime from a separate git repo (see
+  # portfolio's src/utils/blogRepoSync.ts), same across all stages. Token
+  # comes from blog-repo-token-externalsecret.yaml, not this ConfigMap.
+  BLOG_REPO_URL: "https://git.hauptmann.dev/philipphauptmann/portfolio-blogs.git"
+  BLOG_REPO_BRANCH: "main"
+  # "test" while trying things out — drop this key once real posts move to
+  # the content repo's root.
+  BLOG_REPO_CONTENT_PATH: "test"
+  BLOG_REPO_REFRESH_MS: "300000"
+  # CSP img-src allowlist for cover images + inline post images, which point
+  # at this same host's raw-file URLs.
+  BLOG_IMAGE_ORIGIN: "https://git.hauptmann.dev"
