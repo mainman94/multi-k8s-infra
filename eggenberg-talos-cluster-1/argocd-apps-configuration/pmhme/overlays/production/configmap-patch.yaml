@@ -5,3 +5,4 @@ metadata:
 data:
   STAGE: "production"
   LOG_LEVEL: "warn"
+  BLOG_REPO_CONTENT_PATH: ""
