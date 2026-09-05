@@ -9,9 +9,9 @@ Run repo validation and report failures concisely.
 
 ## Steps
 
-1. Run `bash .claude/skills/preflight/preflight.sh`.
+1. Run `make preflight`.
 2. Summarize: what passed, what failed, and the exact file:line of each failure.
-3. If `yamlfmt` reports formatting diffs, offer to apply them (`pre-commit run yamlfmt --all-files`).
+3. If `yamlfmt` reports formatting diffs, offer to apply them (`make fmt`).
 4. Do not commit if anything fails unless the user explicitly accepts.
 
 ## What it checks
