@@ -70,6 +70,32 @@ diff: ## Show what a running ArgoCD would see as drift (needs cluster access)
 	@command -v argocd >/dev/null || { echo "argocd CLI not on PATH" >&2; exit 1; }
 	argocd app diff app-of-app
 
+.PHONY: images
+images: ## List every image the repo's own apps run (from rendered overlays)
+	@scripts/list-images.sh
+
+.PHONY: scan
+scan: ## trivy config scan of the cluster manifests (advisory)
+	@command -v trivy >/dev/null || { echo "trivy not on PATH — see .devcontainer" >&2; exit 1; }
+	trivy config $(CLUSTER_DIR)
+
+.PHONY: scan-strict
+scan-strict: ## Same scan, but fail on any finding
+	@command -v trivy >/dev/null || { echo "trivy not on PATH — see .devcontainer" >&2; exit 1; }
+	trivy config --exit-code 1 $(CLUSTER_DIR)
+
+# Five of these live in the private Gitea registry behind Cloudflare, which
+# only resolves from inside the network — so this is a local target, not a CI
+# job. See the note in AGENTS.md.
+.PHONY: scan-images
+scan-images: ## CVE scan every image the repo's own apps run (advisory)
+	@command -v trivy >/dev/null || { echo "trivy not on PATH — see .devcontainer" >&2; exit 1; }
+	@scripts/list-images.sh | while read -r image; do \
+		echo "==> $$image"; \
+		trivy image --quiet --scanners vuln --ignore-unfixed \
+			--severity CRITICAL,HIGH "$$image" || true; \
+	done
+
 .PHONY: update-hooks
 update-hooks: ## Bump pinned hook revisions
 	pre-commit autoupdate

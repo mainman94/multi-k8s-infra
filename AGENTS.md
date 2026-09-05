@@ -58,6 +58,8 @@ reaches `main` reaches the cluster, and `make preflight` is the last gate.
 | `make kustomize`               | Build every overlay and base                        |
 | `make kubeconform`             | Schema validation (needs network for the CRD catalog) |
 | `make build OVERLAY=production`| Render one pmhme overlay to stdout                  |
+| `make scan`                    | trivy config scan of the cluster manifests          |
+| `make scan-images`             | CVE scan the images the repo's own apps run         |
 
 `.devcontainer/` provides kubectl, helm, kube-linter, kubeconform and the hook
 toolchain if you would rather not install them locally.
@@ -115,6 +117,29 @@ the dev container.
 `yamlfmt` deliberately excludes `pmhme/overlays/*/kustomization.yaml`: Kargo
 rewrites those on every promotion in kyaml's indentless list style, so
 formatting them just produces a diff the next promotion flips back.
+
+## Scanning
+
+Two workflows, deliberately split:
+
+- **`argocd-lint.yml`** — schema and security: kubeconform, kube-linter,
+  checkov (soft_fail).
+- **`ci.yml`** — the repo's own hooks, which is where the kustomize builds
+  live. Nothing in CI checked those before, so a base or overlay that did not
+  build reached `main` and ArgoCD found out first.
+
+Locally, `make scan` adds a trivy config pass over the manifests — a
+different rule set from checkov, and worth running before a change that
+touches securityContext or RBAC.
+
+**Image CVE scanning is a local target, not a CI job.** `make scan-images`
+sweeps the ten images the repo's own apps run, taken from the rendered
+overlays rather than grepped out of sources, since an overlay's image
+transformers decide the final tag. Five of them live in the private Gitea
+registry behind Cloudflare, which only resolves from inside the network — a
+GitHub-hosted runner cannot pull them, so a CI job would fail on half its
+input. Helm-chart apps are not covered either: their images come from each
+chart's defaults, which are not in this repo.
 
 ## Conventions
 

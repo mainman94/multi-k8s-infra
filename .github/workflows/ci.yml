@@ -1,0 +1,42 @@
+name: CI
+
+# argocd-lint.yml covers schema and security scanning. This one runs the
+# repo's own hooks, which is where the kustomize builds live — a base or
+# overlay that does not build is a manifest ArgoCD cannot sync, and nothing
+# in CI checked that before.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: pre-commit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      # kubectl carries kustomize, which is what the kustomize-build hook
+      # shells out to. The runner already ships it, but pin it so a runner
+      # image change cannot move the kustomize version underneath us.
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: v1.34.1
+
+      - name: Install kube-linter
+        env:
+          KUBE_LINTER_VERSION: v0.8.3
+        run: |
+          curl -sSL "https://github.com/stackrox/kube-linter/releases/download/${KUBE_LINTER_VERSION}/kube-linter-linux.tar.gz" \
+            | sudo tar xz -C /usr/local/bin kube-linter
+
+      - name: Run every hook
+        uses: pre-commit/action@v3.0.1
