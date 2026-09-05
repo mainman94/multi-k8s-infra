@@ -1,6 +1,41 @@
+# Local checks for the Talos GitOps repo.
+#
+# ArgoCD applies whatever lands on main, so these hooks are the last thing
+# between a broken manifest and the cluster. They mirror what
+# .github/workflows/argocd-lint.yml enforces, minus kubeconform (which needs
+# to fetch CRD schemas and is therefore left to CI).
+#
+# Install once:  make hooks
+# Run manually:  make lint      (hooks only)
+#                make preflight (hooks + kube-linter + kustomize builds)
+minimum_pre_commit_version: "3.5.0"
+
 repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: check-added-large-files
+        args: [--maxkb=512]
+      - id: check-json
+        # devcontainer.json is JSONC by spec — the format allows the
+        # comments explaining each feature, which a strict JSON parser
+        # will not accept.
+        exclude: ^\.devcontainer/
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+      - id: detect-private-key
+
   - repo: https://github.com/google/yamlfmt
-    rev: v0.16.0
+    rev: v0.21.0
     hooks:
       - id: yamlfmt
         # Kargo rewrites these on every promotion (kustomize-set-image) and
@@ -10,3 +45,42 @@ repos:
         # .yamlfmt because yamlfmt ignores its own `exclude` list when the
         # files are handed to it as arguments, which is what pre-commit does.
         exclude: ^eggenberg-talos-cluster-1/argocd-apps-configuration/pmhme/overlays/[^/]+/kustomization\.yaml$
+
+  # shellcheck-py, not the upstream shellcheck repo: it ships the binary in a
+  # wheel, so the hook needs no Docker daemon.
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1-1
+    hooks:
+      - id: shellcheck
+        args: [--severity=warning]
+
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.13.1-1
+    hooks:
+      - id: shfmt-src
+        args: [-i, "2", -ci]
+
+  # Secrets belong in OpenBao, reached through External Secrets. This is the
+  # backstop for a value pasted straight into a manifest.
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.0
+    hooks:
+      - id: gitleaks
+
+  - repo: local
+    hooks:
+      # A base or overlay that does not build is a manifest ArgoCD cannot
+      # sync. Cheap enough to run on every touch of the Kustomize tree.
+      - id: kustomize-build
+        name: kustomize build (overlays + bases)
+        entry: scripts/kustomize-build.sh
+        language: script
+        files: ^eggenberg-talos-cluster-1/argocd-apps-configuration/pmhme/
+        pass_filenames: false
+
+      - id: kube-linter
+        name: kube-linter (workload best practices)
+        entry: scripts/kube-lint.sh
+        language: script
+        files: ^eggenberg-talos-cluster-1/.*\.ya?ml$
+        pass_filenames: false

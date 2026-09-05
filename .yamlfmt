@@ -1,3 +1,9 @@
+# House YAML style, kept in step with docker-stack so the two repos format the
+# same way.
+#
+# retain_line_breaks: manifests use blank lines to separate logical blocks.
+# scan_folded_as_literal: a folded `command:`/script block keeps one line per
+# line instead of being re-folded into a single unreadable one.
 exclude:
   # These files contain only comments (disabled/WIP manifests) and would be
   # wiped by yamlfmt since it treats comment-only files as empty documents.
@@ -7,4 +13,5 @@ formatter:
   indent: 2
   line_ending: lf
   retain_line_breaks: true
+  scan_folded_as_literal: true
   trim_trailing_whitespace: true
