@@ -1,5 +1,9 @@
 defaultSettings:
   defaultReplicaCount: "2"
+  # Default (12%) reserves 474m/474m/954m per node for instance-managers on
+  # this cluster, ~10x actual usage (20-102m observed) and the main driver of
+  # the KubeCPUOvercommit alert. 5% still covers observed load with margin.
+  guaranteedInstanceManagerCPU: "5"
   # Evict the last replica off a draining node instead of blocking the drain
   # forever — lets `talosctl upgrade` finish without manually deleting pods.
   nodeDrainPolicy: block-for-eviction-if-contains-last-replica
