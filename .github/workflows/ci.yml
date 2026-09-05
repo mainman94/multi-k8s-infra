@@ -22,7 +22,7 @@ jobs:
 
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
+          python-version: "3.14"
 
       # kubectl carries kustomize, which is what the kustomize-build hook
       # shells out to. The runner already ships it, but pin it so a runner
