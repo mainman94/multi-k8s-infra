@@ -27,7 +27,7 @@ jobs:
       # kubectl carries kustomize, which is what the kustomize-build hook
       # shells out to. The runner already ships it, but pin it so a runner
       # image change cannot move the kustomize version underneath us.
-      - uses: azure/setup-kubectl@v4
+      - uses: azure/setup-kubectl@v5
         with:
           version: v1.34.1
 
