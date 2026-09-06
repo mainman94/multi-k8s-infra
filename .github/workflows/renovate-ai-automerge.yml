@@ -22,7 +22,7 @@ jobs:
     steps:
       - name: Evaluate PR risk (rules + AI)
         id: evaluate
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         env:
           AI_PROVIDER: ${{ vars.AI_PROVIDER || 'openai' }}
           AI_REQUIRE_RELEASE_NOTES: ${{ vars.AI_REQUIRE_RELEASE_NOTES || 'true' }}
@@ -382,16 +382,29 @@ jobs:
               .addRaw(`Reason: ${summary}`)
               .write();
 
+      # The evaluate step's outputs are model-written text derived from the
+      # dependency's own changelog, so they are untrusted input. They go
+      # through the environment rather than being interpolated into the
+      # script: `${{ }}` expands before the JS is parsed, so a backtick in a
+      # reason string would otherwise close the template literal and run as
+      # code with this workflow's write permissions.
       - name: Comment decision
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        env:
+          DECISION: ${{ steps.evaluate.outputs.decision }}
+          REASON: ${{ steps.evaluate.outputs.reason }}
+          RISK: ${{ steps.evaluate.outputs.risk }}
+          HARD_GATE: ${{ steps.evaluate.outputs.hard_gate }}
+          DOCS_REVIEWED: ${{ steps.evaluate.outputs.docs_reviewed }}
+          DOCS_URLS: ${{ steps.evaluate.outputs.docs_urls }}
         with:
           script: |
-            const decision = `${{ steps.evaluate.outputs.decision }}`;
-            const reason = `${{ steps.evaluate.outputs.reason }}`;
-            const risk = `${{ steps.evaluate.outputs.risk }}`;
-            const hardGate = `${{ steps.evaluate.outputs.hard_gate }}`;
-            const docsReviewed = `${{ steps.evaluate.outputs.docs_reviewed }}`;
-            const docsUrlsRaw = `${{ steps.evaluate.outputs.docs_urls }}`;
+            const decision = process.env.DECISION ?? "";
+            const reason = process.env.REASON ?? "";
+            const risk = process.env.RISK ?? "";
+            const hardGate = process.env.HARD_GATE ?? "";
+            const docsReviewed = process.env.DOCS_REVIEWED ?? "";
+            const docsUrlsRaw = process.env.DOCS_URLS ?? "";
             const docsUrls = docsUrlsRaw ? docsUrlsRaw.split("\n").filter(Boolean) : [];
             const icon = decision === "automerge" ? "✅" : "🛑";
             const title = decision === "automerge" ? "AI gate passed" : "AI gate requires manual review";
@@ -408,14 +421,16 @@ jobs:
 
       - name: Fail on manual decision
         if: steps.evaluate.outputs.decision == 'manual'
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        env:
+          REASON: ${{ steps.evaluate.outputs.reason }}
         with:
           script: |
-            core.setFailed(`Manual review required: ${{ steps.evaluate.outputs.reason }}`);
+            core.setFailed(`Manual review required: ${process.env.REASON ?? ""}`);
 
       - name: Enable auto-merge
         if: steps.evaluate.outputs.decision == 'automerge'
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |-
             const prNodeId = context.payload.pull_request.node_id;

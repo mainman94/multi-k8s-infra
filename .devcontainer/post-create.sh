@@ -1,29 +1,32 @@
 #!/usr/bin/env bash
-# Provision the dev container with the tools the repo's checks need.
-# kube-linter and kubeconform have no devcontainer feature, so they are
-# fetched here at pinned versions.
+# Provision the dev container. Every tool the repo's checks need — kubectl
+# (which carries kustomize), kube-linter, kubeconform, python, pre-commit,
+# actionlint, shellcheck, trivy — is pinned in mise.toml, so this installs
+# mise and lets it do the rest. CI installs from the same file, which is what
+# keeps a local `make preflight` honest.
 set -euo pipefail
 
-KUBE_LINTER_VERSION=v0.8.3
-KUBECONFORM_VERSION=v0.7.0
-
-echo "==> installing pre-commit"
-pipx install pre-commit 2>/dev/null || pip install --user --break-system-packages pre-commit
+echo "==> installing mise"
+curl -fsSL https://mise.run | sh
 export PATH="$HOME/.local/bin:$PATH"
 
-echo "==> installing kube-linter ${KUBE_LINTER_VERSION}"
-curl -sSL "https://github.com/stackrox/kube-linter/releases/download/${KUBE_LINTER_VERSION}/kube-linter-linux.tar.gz" \
-  | sudo tar xz -C /usr/local/bin kube-linter
+# Activate for interactive shells so the pinned binaries are on PATH.
+for shell in bash zsh; do
+  rc="$HOME/.${shell}rc"
+  [ -f "$rc" ] || continue
+  grep -q "mise activate" "$rc" || echo "eval \"\$(mise activate $shell)\"" >> "$rc"
+done
 
-echo "==> installing kubeconform ${KUBECONFORM_VERSION}"
-curl -sSL "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" \
-  | sudo tar xz -C /usr/local/bin kubeconform
+echo "==> installing the pinned toolchain"
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+mise trust
+mise install
 
 echo "==> installing the git hook"
-pre-commit install
+mise exec -- pre-commit install
 
 echo "==> warming hook environments"
-pre-commit install-hooks
+mise exec -- pre-commit install-hooks
 
 cat <<'MSG'
 
@@ -31,6 +34,8 @@ multi-k8s-infra dev container ready.
 
   make help        list every target
   make preflight   the full gate: hooks + kube-linter + every kustomize build
+
+Tool versions come from mise.toml — the same file CI installs from.
 
 ArgoCD applies whatever reaches main, so run preflight before you push.
 MSG

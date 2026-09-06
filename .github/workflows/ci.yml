@@ -18,25 +18,20 @@ jobs:
     name: pre-commit
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          python-version: "3.14"
+          persist-credentials: false
 
-      # kubectl carries kustomize, which is what the kustomize-build hook
-      # shells out to. The runner already ships it, but pin it so a runner
-      # image change cannot move the kustomize version underneath us.
-      - uses: azure/setup-kubectl@v5
+      # kubectl (which carries kustomize), kube-linter, python, pre-commit,
+      # actionlint and shellcheck, all at the versions in mise.toml — the same
+      # file the dev container installs from. These used to be pinned in this
+      # workflow while the dev container installed `latest`.
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4
+
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
-          version: v1.34.1
-
-      - name: Install kube-linter
-        env:
-          KUBE_LINTER_VERSION: v0.8.3
-        run: |
-          curl -sSL "https://github.com/stackrox/kube-linter/releases/download/${KUBE_LINTER_VERSION}/kube-linter-linux.tar.gz" \
-            | sudo tar xz -C /usr/local/bin kube-linter
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
 
       - name: Run every hook
-        uses: pre-commit/action@v3.0.1
+        run: pre-commit run --all-files --show-diff-on-failure

@@ -15,6 +15,11 @@ help: ## Show this help
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) \
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
 
+.PHONY: tools
+tools: ## Install the pinned toolchain from mise.toml
+	@command -v mise >/dev/null || { echo "mise not on PATH — see https://mise.jdx.dev or .devcontainer" >&2; exit 1; }
+	mise install
+
 .PHONY: hooks
 hooks: ## Install the git pre-commit hook
 	pre-commit install
@@ -42,19 +47,7 @@ kube-lint: ## kube-linter over the cluster manifests
 
 .PHONY: kubeconform
 kubeconform: ## Schema-validate manifests against upstream + CRD catalog (needs network)
-	@command -v kubeconform >/dev/null || { echo "kubeconform not on PATH — see .devcontainer" >&2; exit 1; }
-	find . -type f \( -name '*.yaml' -o -name '*.yml' \) \
-		-not -path './.github/*' \
-		-not -name 'values.yaml' \
-		-not -name '.kube-linter.yaml' \
-		-not -name '.pre-commit-config.yaml' \
-		-not -name 'image-updater-dev.yaml' \
-		-not -name '*-patch.yaml' \
-		-print0 | xargs -0 kubeconform \
-			-verbose -ignore-missing-schemas \
-			-skip InfisicalSecret,Warehouse,Cluster \
-			-schema-location default \
-			-schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
+	scripts/kubeconform.sh
 
 .PHONY: build
 build: ## Render one overlay to stdout, e.g. make build OVERLAY=production
