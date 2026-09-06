@@ -1,0 +1,15 @@
+# zizmor configuration. Rule-level ignores live here rather than as inline
+# comments so the reason is written down once, next to the rule.
+
+rules:
+  dangerous-triggers:
+    ignore:
+      # renovate-ai-automerge.yml uses pull_request_target deliberately: it
+      # needs write permissions to approve and merge, which a pull_request
+      # run on a Renovate branch does not get. The risk that trigger normally
+      # carries — running untrusted PR code with a privileged token — does
+      # not apply here: the workflow never checks the PR out. It only calls
+      # the API through actions/github-script, and its first condition
+      # requires the head branch to live in this repository, so a fork PR
+      # cannot reach the merge path at all.
+      - renovate-ai-automerge.yml

@@ -1,0 +1,29 @@
+# The toolchain for this repo, in one place.
+#
+# The dev container, the git hooks and CI all install from here, so a bump
+# lands in all three at once. CI used to pin kubectl v1.34.1 and kube-linter
+# v0.8.3 in workflow env blocks while the dev container installed `latest` of
+# both — a kustomize or lint behaviour change would land in CI first and
+# nobody's local run.
+#
+# Renovate keeps these pins current (mise manager).
+
+[tools]
+# kubectl carries kustomize, which is what the repo builds with — there is
+# deliberately no standalone kustomize binary.
+kubectl = "1.34.1"
+kube-linter = "0.8.3"
+kubeconform = "0.7.0"
+
+# pre-commit builds the rest of the hook toolchain — yamlfmt, shfmt,
+# gitleaks — into its own cached envs.
+python = "3.14"
+pre-commit = "4.6.2"
+
+# actionlint shells out to shellcheck for `run:` blocks; shellcheck also
+# covers scripts/.
+actionlint = "1.7.9"
+shellcheck = "0.11.0"
+
+# `make scan` / `make scan-images`.
+trivy = "0.74.0"

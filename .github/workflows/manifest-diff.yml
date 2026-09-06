@@ -1,0 +1,108 @@
+name: Manifest diff
+
+# Whatever reaches main reaches the cluster. `make preflight` proves every
+# overlay still *builds*; nothing showed what a merge would actually change.
+# This renders every kustomization at the base and at the PR head and posts
+# the difference, so a review reads the resulting manifests rather than the
+# kustomize inputs.
+#
+# Deliberately `pull_request`, not `pull_request_target`: no secrets, and the
+# token is read-only on a fork PR. The comment step is skipped there rather
+# than reaching for elevated permissions to render untrusted input.
+
+on:
+  pull_request:
+    paths:
+      - "eggenberg-talos-cluster-1/**"
+
+permissions:
+  contents: read
+
+jobs:
+  diff:
+    name: Rendered manifest diff
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Check out the PR head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          path: head
+          persist-credentials: false
+
+      - name: Check out the base
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+          persist-credentials: false
+
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4
+        with:
+          working_directory: head
+
+      - name: Render both revisions
+        run: |
+          (cd head && scripts/render-all.sh "$GITHUB_WORKSPACE/rendered-head")
+          # The base is rendered with the head's script: a change to the
+          # script itself should not show up as a diff in every manifest.
+          (cd base && "$GITHUB_WORKSPACE/head/scripts/render-all.sh" "$GITHUB_WORKSPACE/rendered-base")
+
+      - name: Diff
+        id: diff
+        run: |
+          diff -ruN rendered-base rendered-head > manifest.diff || true
+          lines=$(wc -l < manifest.diff)
+          echo "lines=$lines" >> "$GITHUB_OUTPUT"
+          echo "### Rendered manifest diff" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$lines" -eq 0 ]; then
+            echo "No change to any rendered manifest." >> "$GITHUB_STEP_SUMMARY"
+          else
+            {
+              echo ""
+              echo '```diff'
+              head -c 60000 manifest.diff
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Comment the diff on the pull request
+        # Fork PRs get a read-only token; the job summary above still carries
+        # the diff for those.
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        env:
+          DIFF_LINES: ${{ steps.diff.outputs.lines }}
+        with:
+          script: |
+            const fs = require('fs');
+            const marker = '<!-- rendered-manifest-diff -->';
+            const lines = Number(process.env.DIFF_LINES);
+            const limit = 55000;
+
+            let body;
+            if (lines === 0) {
+              body = `${marker}\n**Rendered manifest diff:** no change to any rendered manifest.`;
+            } else {
+              let diff = fs.readFileSync('manifest.diff', 'utf8');
+              let truncated = '';
+              if (diff.length > limit) {
+                diff = diff.slice(0, limit);
+                truncated = '\n\n_Truncated — the full diff is in the job summary._';
+              }
+              body = `${marker}\n**Rendered manifest diff** (${lines} lines)\n\n<details><summary>Show diff</summary>\n\n\`\`\`diff\n${diff}\n\`\`\`\n\n</details>${truncated}`;
+            }
+
+            const {owner, repo} = context.repo;
+            const issue_number = context.payload.pull_request.number;
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number, per_page: 100,
+            });
+            const existing = comments.find((c) => c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({owner, repo, comment_id: existing.id, body});
+            } else {
+              await github.rest.issues.createComment({owner, repo, issue_number, body});
+            }

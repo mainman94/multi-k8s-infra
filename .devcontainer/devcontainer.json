@@ -2,18 +2,14 @@
   "name": "multi-k8s-infra",
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
   "features": {
-    // kubectl carries kustomize, which is what the repo builds with — there
-    // is deliberately no standalone kustomize binary.
+    // helm only: kubectl (which carries kustomize, what the repo builds
+    // with), kube-linter, kubeconform, python, pre-commit, actionlint,
+    // shellcheck and trivy are pinned in mise.toml and installed by
+    // post-create — the same file CI installs from.
     "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
-      "version": "latest",
+      "version": "none",
       "helm": "latest",
       "minikube": "none"
-    },
-    // pre-commit is a Python tool and builds the rest of the hook toolchain
-    // (yamlfmt, shellcheck, shfmt, gitleaks) into its own cached envs.
-    "ghcr.io/devcontainers/features/python:1": {
-      "version": "3.14",
-      "installTools": false
     },
     "ghcr.io/devcontainers/features/common-utils:2": {
       "installZsh": true,

@@ -62,6 +62,23 @@ repos:
 
   # Secrets belong in OpenBao, reached through External Secrets. This is the
   # backstop for a value pasted straight into a manifest.
+  # Workflow linting. actionlint checks schema, expressions and the shell in
+  # `run:` blocks (using the pinned shellcheck); zizmor audits for CI/CD
+  # security patterns. That second one earns its place here: this repo runs a
+  # pull_request_target workflow with write permissions, which is exactly the
+  # shape zizmor exists to keep honest.
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.9
+    hooks:
+      - id: actionlint-system
+
+  - repo: https://github.com/zizmorcore/zizmor-pre-commit
+    rev: v1.9.0
+    hooks:
+      - id: zizmor
+        # Ignores (with reasons) live in .github/zizmor.yml.
+        args: [--no-progress, --config, .github/zizmor.yml]
+
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.30.0
     hooks:

@@ -51,6 +51,7 @@ reaches `main` reaches the cluster, and `make preflight` is the last gate.
 | Command                        | What it does                                        |
 | ------------------------------ | --------------------------------------------------- |
 | `make help`                    | List every target                                   |
+| `make tools`                   | Install the pinned toolchain from `mise.toml`       |
 | `make hooks`                   | Install the git pre-commit hook (do this once)      |
 | `make preflight`               | The full gate: hooks + kube-linter + every kustomize build |
 | `make lint`                    | All pre-commit hooks over the whole tree            |
@@ -61,8 +62,15 @@ reaches `main` reaches the cluster, and `make preflight` is the last gate.
 | `make scan`                    | trivy config scan of the cluster manifests          |
 | `make scan-images`             | CVE scan the images the repo's own apps run         |
 
-`.devcontainer/` provides kubectl, helm, kube-linter, kubeconform and the hook
-toolchain if you would rather not install them locally.
+`.devcontainer/` provides helm; everything else comes from mise.
+
+**Tool versions live in `mise.toml` and nowhere else** — kubectl (which
+carries kustomize), kube-linter, kubeconform, python, pre-commit, actionlint,
+shellcheck and trivy. The dev container's post-create runs `mise install`, and
+CI installs from the same file with `jdx/mise-action`. CI used to pin kubectl
+v1.34.1 and kube-linter v0.8.3 in workflow env blocks while the dev container
+installed `latest` of both, so a kustomize or lint behaviour change would land
+in CI first and nobody's local run. Renovate bumps the pins.
 
 ## Layout (`eggenberg-talos-cluster-1/`)
 
@@ -100,6 +108,15 @@ spec:
 `.github/workflows/argocd-lint.yml`, minus kubeconform — that one fetches CRD
 schemas over the network, so it stays in CI and in `make kubeconform`.
 
+Two more hooks cover the workflows: **`actionlint`** (schema, expressions and
+the shell in `run:` blocks) and **`zizmor`** (CI/CD security patterns). zizmor
+earns its place here because of `renovate-ai-automerge.yml`: a
+`pull_request_target` workflow holding write permissions. Its ignore, with the
+reasoning, is in `.github/zizmor.yml` — that workflow never checks the PR out
+and gates on the head branch living in this repository, which is what makes
+the trigger safe. Every action reference is pinned to a **commit SHA** with
+the tag in a trailing comment; Renovate keeps the digests current.
+
 Two hooks are repo-specific:
 
 - **`kustomize-build`** — builds every overlay and base under `pmhme/`. A
@@ -123,10 +140,24 @@ formatting them just produces a diff the next promotion flips back.
 Two workflows, deliberately split:
 
 - **`argocd-lint.yml`** — schema and security: kubeconform, kube-linter,
-  checkov (soft_fail).
+  checkov (soft_fail). kubeconform runs `scripts/kubeconform.sh`, the same
+  thing `make kubeconform` runs, so the flags cannot drift between them.
 - **`ci.yml`** — the repo's own hooks, which is where the kustomize builds
   live. Nothing in CI checked those before, so a base or overlay that did not
   build reached `main` and ArgoCD found out first.
+- **`manifest-diff.yml`** — renders every kustomization at the base and at the
+  PR head and posts the difference as a PR comment. `preflight` proves the
+  overlays still build; this shows what merging would actually change in the
+  cluster, which is the thing a review should be reading.
+
+**kubeconform no longer passes on missing schemas.** It ran with
+`-ignore-missing-schemas` and an explicit `-skip InfisicalSecret,Warehouse,Cluster`,
+which meant any kind the catalog did not know about was silently accepted —
+the opposite of what a schema check is for. Every CRD this repo uses has a
+schema in the datreeio catalog (Warehouse and Cluster included; InfisicalSecret
+is gone since the move to external-secrets), so the run is now `-strict` with
+no blanket ignore. A genuinely schema-less CRD goes in `SKIP_KINDS` in
+`scripts/kubeconform.sh` with a comment saying why.
 
 Locally, `make scan` adds a trivy config pass over the manifests — a
 different rule set from checkov, and worth running before a change that

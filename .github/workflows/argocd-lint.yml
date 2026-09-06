@@ -17,37 +17,29 @@ jobs:
     name: Schema Validation (kubeconform)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
 
-      - name: Install kubeconform
-        run: |
-          curl -sSL "https://github.com/yannh/kubeconform/releases/download/v0.7.0/kubeconform-linux-amd64.tar.gz" | tar xz
-          sudo mv kubeconform /usr/local/bin/
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4
 
+      # The flags live in the script, so `make kubeconform` and this job
+      # cannot drift apart. It runs -strict and without
+      # -ignore-missing-schemas: an unknown kind is now a failure, not a
+      # silent pass.
       - name: Run kubeconform
-        run: |
-          find . -type f \( -name '*.yaml' -o -name '*.yml' \) \
-            -not -path './.github/*' \
-            -not -name 'values.yaml' \
-            -not -name '.kube-linter.yaml' \
-            -not -name '.pre-commit-config.yaml' \
-            -not -name 'image-updater-dev.yaml' \
-            -not -name '*-patch.yaml' \
-            -print0 | xargs -0 kubeconform \
-              -verbose \
-              -ignore-missing-schemas \
-              -skip InfisicalSecret,Warehouse,Cluster \
-              -schema-location default \
-              -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
+        run: scripts/kubeconform.sh
 
   kube-linter:
     name: Best Practices (kube-linter)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
 
       - name: Run kube-linter
-        uses: stackrox/kube-linter-action@v1
+        uses: stackrox/kube-linter-action@87802a2f4e01abebb3ee3c67a3002fea71f6eae5 # v1
         with:
           directory: .
           config: .kube-linter.yaml
@@ -56,10 +48,12 @@ jobs:
     name: Security Scan (checkov)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
 
       - name: Run checkov
-        uses: bridgecrewio/checkov-action@v12
+        uses: bridgecrewio/checkov-action@f967808197a8d784d3e72919f38c3ff0cda7884e # v12
         with:
           directory: .
           framework: kubernetes
