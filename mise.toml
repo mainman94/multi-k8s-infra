@@ -22,7 +22,7 @@ pre-commit = "4.6.2"
 
 # actionlint shells out to shellcheck for `run:` blocks; shellcheck also
 # covers scripts/.
-actionlint = "1.7.9"
+actionlint = "1.7.12"
 shellcheck = "0.11.0"
 
 # `make scan` / `make scan-images`.
