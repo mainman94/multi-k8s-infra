@@ -2,16 +2,15 @@ name: Validate Kubernetes Manifests
 # Every job here only reads the checkout; none post results or upload SARIF.
 permissions:
   contents: read
+# No path filter. These three are about to become required status checks on
+# main (the homelab repo's github stack sets them), and a required check that
+# does not run on a given pull request never reports — which blocks that pull
+# request for good. A PR touching only the Makefile, a script or a README
+# would be exactly that case. The three jobs take about twenty seconds.
 on:
   pull_request:
-    paths:
-      - "**/*.yaml"
-      - "**/*.yml"
   push:
     branches: [main]
-    paths:
-      - "**/*.yaml"
-      - "**/*.yml"
   workflow_dispatch:
 
 jobs:
