@@ -1,0 +1,30 @@
+# make scan (trivy config) is advisory — see AGENTS.md "Scanning". Entries
+# below are checked findings, not blanket noise suppression; inline
+# `# trivy:ignore:<ID>` comments don't take effect for these specific rules
+# in the installed trivy version, so they're ignored here instead.
+
+# PodDisruptionBudget for coredns must live in kube-system because that's
+# where coredns itself runs — there's no other namespace to put it in.
+KSV-0037
+
+# False positive: flags BLOG_REPO_REFRESH_MS (a plain integer, not a secret)
+# in pmhme/base/configmap.yaml. No real credential ever goes in this
+# ConfigMap — secrets are ExternalSecrets-backed.
+KSV-01010
+
+# Base manifests for contact-* (nats/valkey/mailpit/telegram-sink) deliberately
+# omit metadata.namespace so kustomize's overlay `namespace:` transformer can
+# set the real one (portfolio/-dev/-test) — see overlays/*/kustomization.yaml.
+KSV-0110
+
+# All contact-* (nats/valkey/mailpit/telegram-sink) images are docker.io,
+# pinned by digest for immutability — see the "Digest-pinned" comments next
+# to each image. There's no private registry for these upstream images.
+KSV-0125
+
+# vpa-admission-controller-patch (vertical-pod-autoscaler/rbac_fix.yaml)
+# needs get/list/watch/create/update/patch/delete on its own
+# mutatingwebhookconfigurations to self-manage its webhook CA bundle
+# (see the vpa-tls-certs ignoreDifferences in autoscaler.yaml) — this
+# mirrors upstream kubernetes/autoscaler's own admission-controller RBAC.
+KSV-0114
