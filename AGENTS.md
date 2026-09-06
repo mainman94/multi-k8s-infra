@@ -178,6 +178,39 @@ GitHub-hosted runner cannot pull them, so a CI job would fail on half its
 input. Helm-chart apps are not covered either: their images come from each
 chart's defaults, which are not in this repo.
 
+## Agent tooling
+
+`.claude/` is checked in, so every agent working here starts from the same
+setup:
+
+- **`agents/manifest-reviewer.md`** — reviews changed manifests for security,
+  resource hygiene and the conventions below. Worth asking for by name before
+  pushing anything that changes a workload.
+- **`skills/preflight/SKILL.md`** — runs `make preflight` and reports what
+  failed.
+- **`skills/new-argo-app/`** — scaffolds a new ArgoCD application from
+  `templates/`, which keeps the 3-source Application pattern intact.
+- **`hooks/guard-secrets.sh`** (PreToolUse) blocks a write that would commit a
+  plaintext secret; **`hooks/format-yaml.sh`** (PostToolUse) formats what was
+  just written, so `yamlfmt` in CI does not fail on whitespace.
+
+The hooks fire automatically from `settings.json`; the agent and skills are
+invoked deliberately.
+
+## Merge requirements
+
+Three checks are required on a pull request: `pre-commit`,
+`Schema Validation (kubeconform)` and `Best Practices (kube-linter)`. The names
+are the **job names** — the ruleset in the `homelab` repo matches on those, so
+renaming a job in `ci.yml` or `argocd-lint.yml` without updating the ruleset
+leaves every PR permanently `blocked` waiting for a check that no longer
+reports under that name.
+
+`manifest-diff.yml` and the checkov job are deliberately not required.
+`manifest-diff.yml` is path-filtered, and a required check from a path-filtered
+workflow never reports on a PR outside those paths — which blocks the PR
+forever rather than passing it.
+
 ## Conventions
 
 - Everything is YAML. Formatted by `yamlfmt` (`.yamlfmt`), linted by `kube-linter` (`.kube-linter.yaml`).
