@@ -68,7 +68,7 @@ repos:
   # pull_request_target workflow with write permissions, which is exactly the
   # shape zizmor exists to keep honest.
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.9
+    rev: v1.7.12
     hooks:
       - id: actionlint-system
 
