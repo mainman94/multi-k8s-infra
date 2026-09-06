@@ -159,6 +159,12 @@ is gone since the move to external-secrets), so the run is now `-strict` with
 no blanket ignore. A genuinely schema-less CRD goes in `SKIP_KINDS` in
 `scripts/kubeconform.sh` with a comment saying why.
 
+The one thing strict validation does need care with: a CRD can mark a field
+`required` *and* give it a default, as Kargo's Warehouse does with `interval`.
+The API server fills the default in, so the cluster accepts the manifest and a
+static validator cannot. Write the documented default explicitly (that is what
+`interval: 5m0s` in `warehouse.yaml` is) rather than skipping the kind.
+
 Locally, `make scan` adds a trivy config pass over the manifests — a
 different rule set from checkov, and worth running before a change that
 touches securityContext or RBAC.

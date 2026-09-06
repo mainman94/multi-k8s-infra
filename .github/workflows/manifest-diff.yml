@@ -76,7 +76,7 @@ jobs:
         env:
           DIFF_LINES: ${{ steps.diff.outputs.lines }}
         with:
-          script: |
+          script: |-
             const fs = require('fs');
             const marker = '<!-- rendered-manifest-diff -->';
             const lines = Number(process.env.DIFF_LINES);

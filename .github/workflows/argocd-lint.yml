@@ -1,5 +1,7 @@
 name: Validate Kubernetes Manifests
-permissions: read-all
+# Every job here only reads the checkout; none post results or upload SARIF.
+permissions:
+  contents: read
 on:
   pull_request:
     paths:
