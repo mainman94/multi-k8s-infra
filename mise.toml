@@ -13,7 +13,7 @@
 # deliberately no standalone kustomize binary.
 kubectl = "1.34.1"
 kube-linter = "0.8.3"
-kubeconform = "0.7.0"
+kubeconform = "0.8.0"
 
 # pre-commit builds the rest of the hook toolchain — yamlfmt, shfmt,
 # gitleaks — into its own cached envs.
