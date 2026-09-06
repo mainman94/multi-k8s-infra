@@ -10,7 +10,7 @@ spec:
   project: default
   sources:
     - repoURL: https://zotregistry.dev/helm-charts
-      targetRevision: 0.1.122
+      targetRevision: 0.1.124
       chart: zot
       helm:
         valueFiles:
