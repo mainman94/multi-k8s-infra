@@ -17,25 +17,25 @@ spec:
         includePaths:
           - eggenberg-talos-cluster-1/argocd-apps-configuration/pmhme/overlays/dev/kustomization.yaml
     - image:
-        repoURL: git.hauptmann.dev/philipphauptmann/pmhme
+        repoURL: ghcr.io/mainman94/pmhme
         imageSelectionStrategy: SemVer
         allowTagsRegexes:
           - '^[0-9]+\.[0-9]+\.[0-9]+(?:-[a-zA-Z0-9.-]+)?(?:\+[a-zA-Z0-9.-]+)?$'
         discoveryLimit: 5
     - image:
-        repoURL: git.hauptmann.dev/philipphauptmann/contact-api
+        repoURL: ghcr.io/mainman94/contact-api
         imageSelectionStrategy: SemVer
         allowTagsRegexes:
           - '^[0-9]+\.[0-9]+\.[0-9]+(?:-[a-zA-Z0-9.-]+)?(?:\+[a-zA-Z0-9.-]+)?$'
         discoveryLimit: 5
     - image:
-        repoURL: git.hauptmann.dev/philipphauptmann/notifier-telegram
+        repoURL: ghcr.io/mainman94/notifier-telegram
         imageSelectionStrategy: SemVer
         allowTagsRegexes:
           - '^[0-9]+\.[0-9]+\.[0-9]+(?:-[a-zA-Z0-9.-]+)?(?:\+[a-zA-Z0-9.-]+)?$'
         discoveryLimit: 5
     - image:
-        repoURL: git.hauptmann.dev/philipphauptmann/notifier-email
+        repoURL: ghcr.io/mainman94/notifier-email
         imageSelectionStrategy: SemVer
         allowTagsRegexes:
           - '^[0-9]+\.[0-9]+\.[0-9]+(?:-[a-zA-Z0-9.-]+)?(?:\+[a-zA-Z0-9.-]+)?$'
