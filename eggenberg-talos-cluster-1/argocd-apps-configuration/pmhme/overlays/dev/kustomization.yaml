@@ -12,13 +12,13 @@ components:
   - ../../components/notification-sink
   - ../../components/keda-ns-scoped
 images:
-  - name: git.hauptmann.dev/philipphauptmann/pmhme
+  - name: ghcr.io/mainman94/pmhme
     newTag: 0.25.1
-  - name: git.hauptmann.dev/philipphauptmann/contact-api
+  - name: ghcr.io/mainman94/contact-api
     newTag: 0.9.1
-  - name: git.hauptmann.dev/philipphauptmann/notifier-telegram
+  - name: ghcr.io/mainman94/notifier-telegram
     newTag: 0.3.1
-  - name: git.hauptmann.dev/philipphauptmann/notifier-email
+  - name: ghcr.io/mainman94/notifier-email
     newTag: 0.3.1
 patches:
   - patch: |-
