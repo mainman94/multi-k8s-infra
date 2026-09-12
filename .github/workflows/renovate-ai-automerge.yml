@@ -28,6 +28,11 @@ jobs:
           AI_REQUIRE_RELEASE_NOTES: ${{ vars.AI_REQUIRE_RELEASE_NOTES || 'true' }}
           AI_MAX_DOC_URLS: ${{ vars.AI_MAX_DOC_URLS || '5' }}
           AI_MAX_DOC_CHARS: ${{ vars.AI_MAX_DOC_CHARS || '12000' }}
+          # Hosts whose pages may be fetched as release notes. Subdomains are
+          # included. Widen via the AI_DOC_HOSTS repo variable rather than here.
+          AI_DOC_HOSTS: >-
+            ${{ vars.AI_DOC_HOSTS ||
+            'github.com,githubusercontent.com,gitlab.com,artifacthub.io,kubernetes.io,cncf.io' }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-4.1-mini' }}
@@ -102,10 +107,39 @@ jobs:
             );
             const onlyVersionBumps = diffLines.length > 0 && nonVersionLines.length === 0 && !hasRiskySignals;
 
+            // These URLs come out of the PR body, so they are attacker-chosen text
+            // as far as this job is concerned, and the job fetches them from a
+            // runner holding this workflow's secrets. Restrict them to hosts that
+            // actually publish release notes so the body cannot aim the fetch at
+            // an arbitrary endpoint.
+            const allowedDocHosts = (process.env.AI_DOC_HOSTS || "")
+              .split(",")
+              .map((h) => h.trim().toLowerCase())
+              .filter(Boolean);
+            function isAllowedDocUrl(candidate) {
+              try {
+                const parsed = new URL(candidate);
+                if (parsed.protocol !== "https:") return false;
+                const host = parsed.hostname.toLowerCase();
+                return allowedDocHosts.some((allowed) => host === allowed || host.endsWith(`.${allowed}`));
+              } catch {
+                return false;
+              }
+            }
+
             // Pull release notes / docs links from PR body (Renovate usually includes these).
             const body = pr.body || "";
             const urlMatches = body.match(/https?:\/\/[^\s)\]>"]+/g) || [];
-            const docUrls = [...new Set(urlMatches)].slice(0, maxDocUrls);
+            const candidateUrls = [...new Set(
+              // Trailing sentence punctuation is not part of the URL and makes the
+              // fetch 404 on links Renovate writes mid-sentence.
+              urlMatches.map((u) => u.replace(/[.,;:]+$/, ""))
+            )];
+            const docUrls = candidateUrls.filter(isAllowedDocUrl).slice(0, maxDocUrls);
+            const rejectedUrls = candidateUrls.filter((u) => !isAllowedDocUrl(u));
+            if (rejectedUrls.length) {
+              core.info(`Ignored ${rejectedUrls.length} PR-body link(s) outside AI_DOC_HOSTS: ${rejectedUrls.join(", ")}`);
+            }
 
             async function fetchDocSnippet(url) {
               try {
@@ -115,7 +149,15 @@ jobs:
                 clearTimeout(timeout);
                 if (!res.ok) return null;
                 const resolvedUrl = res.url || url;
+                // redirect: "follow" can land off-host, so the final URL has to
+                // clear the same allowlist as the one we started with.
+                if (!isAllowedDocUrl(resolvedUrl)) {
+                  core.info(`Ignored doc redirect to disallowed host: ${resolvedUrl}`);
+                  return null;
+                }
                 const ctype = (res.headers.get("content-type") || "").toLowerCase();
+                const declaredLength = Number(res.headers.get("content-length") || "0");
+                if (declaredLength > 5_000_000) return null;
                 let text = await res.text();
                 if (ctype.includes("text/html")) {
                   text = text
@@ -440,10 +482,27 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |-
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const pullNumber = context.payload.pull_request.number;
             const prNodeId = context.payload.pull_request.node_id;
             const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-            let lastError = null;
-            for (let attempt = 1; attempt <= 6; attempt++) {
+            const maxAttempts = 6;
+            let lastMessage = "";
+
+            // Squash-merge now instead of queueing. Branch protection is enforced
+            // server-side and GITHUB_TOKEN is not a bypass actor, so this cannot
+            // merge ahead of the required checks -- it is refused until they pass.
+            async function mergeNow() {
+              await github.rest.pulls.merge({
+                owner,
+                repo,
+                pull_number: pullNumber,
+                merge_method: "squash"
+              });
+            }
+
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
               try {
                 await github.graphql(
                   `mutation($pullRequestId: ID!) {
@@ -456,22 +515,36 @@ jobs:
                   }`,
                   { pullRequestId: prNodeId }
                 );
-                core.info(`Auto-merge enabled (attempt ${attempt}).`);
+                core.info(`Auto-merge enabled (attempt ${attempt}/${maxAttempts}).`);
                 return;
               } catch (err) {
-                lastError = err;
-                const message = String(err?.message || err);
-                const isUnstable = message.toLowerCase().includes("unstable status");
-                if (isUnstable && attempt < 6) {
-                  core.info(`PR still unstable (attempt ${attempt}/6), retrying...`);
-                  await sleep(5000);
-                  continue;
+                lastMessage = String(err?.message || err);
+
+                // "clean"/"unstable status" both mean the PR is mergeable right
+                // now, so there is nothing to queue and the mutation is refused.
+                // The previous version warned and exited green here, which left
+                // every gate-approved PR sitting unmerged.
+                if (/clean status|unstable status/i.test(lastMessage)) {
+                  try {
+                    await mergeNow();
+                    core.info(`Auto-merge not applicable (${lastMessage}); merged directly.`);
+                    return;
+                  } catch (mergeErr) {
+                    lastMessage = `direct merge failed: ${String(mergeErr?.message || mergeErr)}`;
+                  }
+                } else if (!/base branch was modified|try again|timeout|502|503/i.test(lastMessage)) {
+                  throw err;
                 }
-                if (isUnstable) {
-                  core.warning(`Skipped auto-merge for now: ${message}`);
-                  return;
+
+                if (attempt < maxAttempts) {
+                  core.info(`Merge not arranged yet (attempt ${attempt}/${maxAttempts}): ${lastMessage}`);
+                  await sleep(5000 * attempt);
                 }
-                throw err;
               }
             }
-            core.warning(`Skipped auto-merge after retries: ${String(lastError?.message || lastError)}`);
+
+            // The gate approved this PR but we could not arrange the merge. Fail
+            // so the red check surfaces it, rather than stranding it silently.
+            core.setFailed(
+              `Gate decided automerge but the merge could not be arranged after ${maxAttempts} attempts: ${lastMessage}`
+            );
