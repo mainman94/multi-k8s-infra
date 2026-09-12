@@ -4,7 +4,6 @@
     "config:recommended",
     "helpers:pinGitHubActionDigests"
   ],
-  "automerge": true,
   "rebaseWhen": "behind-base-branch",
   "argocd": {
     "managerFilePatterns": [
