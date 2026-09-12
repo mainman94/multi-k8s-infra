@@ -51,8 +51,12 @@ jobs:
 
             const changedPaths = files.map((f) => f.filename);
             const badExt = changedPaths.filter((p) => !p.endsWith(".yaml") && !p.endsWith(".yml"));
+            // .pre-commit-config.yaml passes the YAML-only check above but pins
+            // hooks that execute arbitrary code in CI, so a bump there is the
+            // same class of change as a workflow edit, not a manifest bump.
             const forbiddenPaths = changedPaths.filter((p) =>
               p.startsWith(".github/") ||
+              p === ".pre-commit-config.yaml" ||
               p.endsWith(".md") ||
               p.endsWith(".sh") ||
               p.endsWith(".json") ||
@@ -252,9 +256,7 @@ jobs:
                   { role: "user", content: userContext }
                 ]
               };
-              if (currentProvider === "openai") {
-                requestPayload.response_format = { type: "json_object" };
-              }
+              requestPayload.response_format = { type: "json_object" };
               const requestBody = JSON.stringify(requestPayload);
 
               for (let attempt = 1; attempt <= 3; attempt++) {
@@ -362,17 +364,22 @@ jobs:
             const risk = parsed.risk || "medium";
             const summary = parsed.summary || "No summary";
             const flags = Array.isArray(parsed.flags) ? parsed.flags : [];
+            // A heuristic risk guessed from the diff is not an AI review. Merging
+            // on it would auto-merge exactly the PRs where the model failed to
+            // answer, so an unparseable response always goes to manual.
+            const aiAnswered = !flags.includes("non_json_ai_output");
+            const decision = risk === "low" && aiAnswered ? "automerge" : "manual";
             core.setOutput("reason", `AI risk=${risk}; ${summary}${flags.length ? `; flags=${flags.join(", ")}` : ""}`);
             core.setOutput("risk", risk);
             core.setOutput("hard_gate", "passed");
             core.setOutput("docs_reviewed", String(docSnippets.length));
             core.setOutput("docs_urls", [...new Set(docSnippets.map((d) => d.url))].join("\n"));
-            core.setOutput("decision", risk === "low" ? "automerge" : "manual");
+            core.setOutput("decision", decision);
 
             await core.summary
               .addHeading("Renovate AI Decision")
               .addTable([
-                [{ data: "Decision", header: true }, risk === "low" ? "automerge" : "manual"],
+                [{ data: "Decision", header: true }, decision],
                 [{ data: "Risk", header: true }, risk],
                 [{ data: "Hard gate", header: true }, "passed"],
                 [{ data: "Provider/Model", header: true }, `${usedProvider}/${usedModel}`],
