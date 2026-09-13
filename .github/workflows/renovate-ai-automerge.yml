@@ -27,6 +27,8 @@ jobs:
           AI_PROVIDER: ${{ vars.AI_PROVIDER || 'openai' }}
           AI_REQUIRE_RELEASE_NOTES: ${{ vars.AI_REQUIRE_RELEASE_NOTES || 'true' }}
           AI_MAX_DOC_URLS: ${{ vars.AI_MAX_DOC_URLS || '5' }}
+          # Must cover the model's reasoning tokens as well as the JSON answer.
+          AI_MAX_TOKENS: ${{ vars.AI_MAX_TOKENS || '2000' }}
           AI_MAX_DOC_CHARS: ${{ vars.AI_MAX_DOC_CHARS || '12000' }}
           # Hosts whose pages may be fetched as release notes. Subdomains are
           # included. Widen via the AI_DOC_HOSTS repo variable rather than here.
@@ -44,6 +46,7 @@ jobs:
             const repo = context.repo.repo;
             const prNumber = pr.number;
             const requireReleaseNotes = (process.env.AI_REQUIRE_RELEASE_NOTES || "true").toLowerCase() === "true";
+            const maxTokens = Number(process.env.AI_MAX_TOKENS || "2000");
             const maxDocUrls = Number(process.env.AI_MAX_DOC_URLS || "5");
             const maxDocChars = Number(process.env.AI_MAX_DOC_CHARS || "12000");
 
@@ -289,16 +292,26 @@ jobs:
                 headers["X-OpenRouter-Title"] = `${owner}/${repo} renovate-ai-automerge`;
               }
 
+              // Reasoning models spend output tokens on their chain of thought
+              // before emitting an answer, and OpenRouter bills/counts those as
+              // output tokens. The old 300-token ceiling truncated them mid
+              // reasoning, so the JSON was never reached and every PR fell
+              // through to the heuristic. Budget for reasoning plus the answer.
               const requestPayload = {
                 model,
                 temperature: 0,
-                max_tokens: 300,
+                max_tokens: maxTokens,
                 messages: [
                   { role: "system", content: prompt },
                   { role: "user", content: userContext }
                 ]
               };
               requestPayload.response_format = { type: "json_object" };
+              if (currentProvider === "openrouter") {
+                // Keep the chain of thought out of message.content; we only
+                // parse the answer, and some providers leak reasoning into it.
+                requestPayload.reasoning = { exclude: true };
+              }
               const requestBody = JSON.stringify(requestPayload);
 
               for (let attempt = 1; attempt <= 3; attempt++) {
@@ -361,6 +374,19 @@ jobs:
 
             const data = await response.json();
             const outputText = data?.choices?.[0]?.message?.content || "";
+
+            // A truncated response is indistinguishable from prose once parsing
+            // fails, which reads as "the model ignored the JSON instruction"
+            // and sends you looking in the wrong place. Name it directly.
+            if (data?.choices?.[0]?.finish_reason === "length") {
+              core.setOutput("decision", "manual");
+              core.setOutput("reason", `AI response truncated at max_tokens=${maxTokens} (finish_reason=length); raise the AI_MAX_TOKENS variable`);
+              core.setOutput("risk", "n/a");
+              core.setOutput("hard_gate", "passed");
+              core.setOutput("docs_reviewed", String(docSnippets.length));
+              core.setOutput("docs_urls", [...new Set(docSnippets.map((d) => d.url))].join("\n"));
+              return;
+            }
             const parseCandidates = [];
             const trimmedOutput = outputText.trim();
             if (trimmedOutput) parseCandidates.push(trimmedOutput);
