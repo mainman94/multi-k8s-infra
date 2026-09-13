@@ -19,6 +19,13 @@ webhook:
     limits:
       cpu: 100m
       memory: 128Mi
+# PostSync hook Job the chart runs to verify the webhook is serving; Kyverno's
+# pmhme-require-resource-requests policy blocks it without requests set.
+startupapicheck:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
 cainjector:
   replicaCount: 1
   # cainjector peaks well above the others (7d max ~228Mi) — watches every
