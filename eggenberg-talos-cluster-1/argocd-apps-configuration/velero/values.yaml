@@ -71,7 +71,7 @@ credentials:
 schedules:
   daily:
     schedule: "0 2 * * *" # 2 AM daily
-    template:
+    template: &backup-template
       ttl: "48h" # 2 days retention
       includedNamespaces:
         - "*"
@@ -102,6 +102,14 @@ schedules:
       snapshotVolumes: true
       # Longhorn PVs have no native AWS snapshotter; use kopia fs-backup instead
       defaultVolumesToFsBackup: true
+  # The daily schedule keeps 2 days. That is too short a window for anything
+  # noticed late (silent corruption, an accidental delete found next week), so
+  # a weekly run of the exact same template is kept for 30 days.
+  weekly:
+    schedule: "0 3 * * 0" # 3 AM Sundays, after the daily has finished
+    template:
+      !!merge <<: *backup-template
+      ttl: "720h" # 30 days retention
 
 # Resource requests and limits
 resources:
@@ -147,6 +155,14 @@ metrics:
           description: "At least one volume was not backed up. Check the PodVolumeBackups of the run for the failing volume."
       # The daily schedule runs at 02:00; 26h of silence means a run was missed
       # entirely, which no failure counter would catch.
+      - alert: VeleroWeeklyBackupTooOld
+        expr: time() - velero_backup_last_successful_timestamp{schedule="velero-weekly"} > 8 * 86400
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "No successful weekly Velero backup for more than 8 days"
+          description: "The long-retention weekly backup has not succeeded within its 7-day interval plus a day of slack. Without it only the 48h daily chain remains."
       - alert: VeleroBackupTooOld
         expr: time() - velero_backup_last_successful_timestamp{schedule="velero-daily"} > 26 * 3600
         for: 1h
