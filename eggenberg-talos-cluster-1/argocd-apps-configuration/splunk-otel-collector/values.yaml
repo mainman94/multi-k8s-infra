@@ -1,0 +1,34 @@
+# Helm values for splunk-otel-collector, replacing kube-prometheus-stack as the
+# cluster's monitoring source (Splunk Observability Cloud free tier, 15 hosts).
+# Access token is provided via the pre-existing Secret created by
+# splunk-otel-collector-secret-externalsecret.yaml in this same directory
+# (secret.create: false so the chart never has a plaintext token in values).
+# Token itself lives in OpenBao at prod/splunk, key ACCESS_TOKEN.
+splunkObservability:
+  realm: eu0
+  metricsEnabled: true
+  tracesEnabled: true
+
+clusterName: eggenberg-talos-cluster-1
+
+secret:
+  create: false
+  name: splunk-otel-collector-secret
+
+agent:
+  resources:
+    limits:
+      cpu: 200m
+      memory: 500Mi
+    requests:
+      cpu: 100m
+      memory: 200Mi
+
+clusterReceiver:
+  resources:
+    limits:
+      cpu: 200m
+      memory: 500Mi
+    requests:
+      cpu: 100m
+      memory: 200Mi

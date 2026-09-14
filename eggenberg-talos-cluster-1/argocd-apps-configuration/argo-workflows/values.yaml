@@ -37,10 +37,10 @@ server:
 controller:
   metricsConfig:
     enabled: true
+  # kube-prometheus-stack is gone (replaced by splunk-otel-collector); the
+  # ServiceMonitor CRD no longer exists, so keep this disabled.
   serviceMonitor:
-    enabled: true
-    additionalLabels:
-      release: kube-prometheus-stack
+    enabled: false
   resources:
     requests:
       cpu: 10m

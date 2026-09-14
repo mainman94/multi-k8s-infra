@@ -54,30 +54,12 @@ tempo:
     timeoutSeconds: 10
     failureThreshold: 3
     successThreshold: 1
-  # Derive RED metrics (service graphs, span rate/latency/error) from traces.
-  # Without this the generator ring is empty and Grafana's Tempo "compare"/
-  # TraceQL-metrics views fail with "error finding generators: empty ring".
-  # Requires kube-prometheus-stack's remote-write receiver (see its values.yaml).
+  # Fed RED metrics (service graphs, span rate/latency/error) into
+  # kube-prometheus-stack's Prometheus via remote-write for Grafana's Tempo
+  # "compare"/TraceQL-metrics views. Both are gone (replaced by
+  # splunk-otel-collector), so disabled until there's a receiver again.
   metricsGenerator:
-    enabled: true
-    remoteWriteUrl: "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
-    processor:
-      service_graphs: {}
-      span_metrics: {}
-      # Required for Grafana Traces Drilldown's TraceQL metrics queries
-      # (rate()/histogram_over_time() by arbitrary attributes), not just the
-      # fixed service-graphs/span-metrics dimensions.
-      local_blocks:
-        flush_to_storage: true
-    storage:
-      path: /var/tempo/metrics-wal
-  overrides:
-    defaults:
-      metrics_generator:
-        processors:
-          - service-graphs
-          - span-metrics
-          - local-blocks
+    enabled: false
 # Persist WAL + trace blocks so restarts don't lose data.
 persistence:
   enabled: true

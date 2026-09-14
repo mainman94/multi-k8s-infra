@@ -141,19 +141,3 @@ spec:
       port: 7777
       targetPort: metrics
       protocol: TCP
----
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: contact-nats
-  labels:
-    app: contact-nats
-    release: kube-prometheus-stack
-spec:
-  selector:
-    matchLabels:
-      app: contact-nats
-  endpoints:
-    - port: metrics
-      interval: 30s
-      path: /metrics

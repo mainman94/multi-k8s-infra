@@ -111,15 +111,6 @@ spec:
         - setWeight: 50
         - pause:
             duration: 2m
-      analysis:
-        templates:
-          - templateName: contact-api-error-rate
-        startingStep: 1
-        args:
-          - name: namespace
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
 ---
 apiVersion: v1
 kind: Service
