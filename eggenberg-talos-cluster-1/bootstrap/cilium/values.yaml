@@ -134,14 +134,14 @@ hubble:
       - icmp
       - http
 
+# kube-prometheus-stack is gone (replaced by splunk-otel-collector); the
+# ServiceMonitor CRD no longer exists, so keep this disabled.
 prometheus:
   metricsService: true
   enabled: true
   port: 9962
   serviceMonitor:
-    enabled: true
-    labels:
-      release: kube-prometheus-stack
+    enabled: false
 
 envoy:
   log:
