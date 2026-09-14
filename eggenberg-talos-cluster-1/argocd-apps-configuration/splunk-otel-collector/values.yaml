@@ -37,6 +37,11 @@ agent:
     requests:
       cpu: 100m
       memory: 200Mi
+  # Fix health check endpoint for Talos Linux hostNetwork compatibility
+  config:
+    extensions:
+      health_check:
+        endpoint: 127.0.0.1:13133
 
 clusterReceiver:
   podSecurityContext:
