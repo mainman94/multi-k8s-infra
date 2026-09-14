@@ -38,6 +38,9 @@ agent:
     - name: host-usr-lib-osrelease
       hostPath:
         path: /etc/os-release
+        type: File
+  extraVolumeMounts:
+    - name: host-usr-lib-osrelease
       mountPath: /hostfs/usr/lib/os-release
       readOnly: true
 
