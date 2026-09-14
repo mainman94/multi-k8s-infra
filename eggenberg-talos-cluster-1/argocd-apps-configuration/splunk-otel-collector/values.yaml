@@ -14,22 +14,6 @@ secret:
   name: splunk-otel-collector-secret
 
 agent:
-  podSecurityContext:
-    runAsNonRoot: true
-    runAsUser: 999
-    fsGroup: 999
-    seccompProfile:
-      type: RuntimeDefault
-  securityContext:
-    allowPrivilegeEscalation: false
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
-    runAsUser: 999
-    capabilities:
-      drop:
-        - ALL
-    seccompProfile:
-      type: RuntimeDefault
   resources:
     limits:
       cpu: 200m
@@ -39,22 +23,6 @@ agent:
       memory: 200Mi
 
 clusterReceiver:
-  podSecurityContext:
-    runAsNonRoot: true
-    runAsUser: 999
-    fsGroup: 999
-    seccompProfile:
-      type: RuntimeDefault
-  securityContext:
-    allowPrivilegeEscalation: false
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
-    runAsUser: 999
-    capabilities:
-      drop:
-        - ALL
-    seccompProfile:
-      type: RuntimeDefault
   resources:
     limits:
       cpu: 200m
