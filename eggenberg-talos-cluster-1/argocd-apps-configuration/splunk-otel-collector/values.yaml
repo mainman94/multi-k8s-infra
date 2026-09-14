@@ -12,6 +12,7 @@ secret:
 agent:
   podSecurityContext:
     runAsNonRoot: true
+    runAsUser: 999
     fsGroup: 999
     seccompProfile:
       type: RuntimeDefault
@@ -19,6 +20,7 @@ agent:
     allowPrivilegeEscalation: false
     readOnlyRootFilesystem: true
     runAsNonRoot: true
+    runAsUser: 999
     capabilities:
       drop:
         - ALL
@@ -42,6 +44,7 @@ agent:
 clusterReceiver:
   podSecurityContext:
     runAsNonRoot: true
+    runAsUser: 999
     fsGroup: 999
     seccompProfile:
       type: RuntimeDefault
@@ -49,6 +52,7 @@ clusterReceiver:
     allowPrivilegeEscalation: false
     readOnlyRootFilesystem: true
     runAsNonRoot: true
+    runAsUser: 999
     capabilities:
       drop:
         - ALL
