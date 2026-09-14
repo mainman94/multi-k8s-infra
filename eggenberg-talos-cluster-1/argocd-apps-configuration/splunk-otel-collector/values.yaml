@@ -5,6 +5,10 @@ splunkObservability:
 
 clusterName: eggenberg-talos-cluster-1
 
+# Set distribution to gke to disable the problematic /usr/lib/os-release volume mount
+# This is a workaround for Talos Linux compatibility where /usr/lib is read-only
+distribution: gke
+
 secret:
   create: false
   name: splunk-otel-collector-secret
@@ -33,14 +37,6 @@ agent:
     requests:
       cpu: 100m
       memory: 200Mi
-  # Override the default host-usr-lib-osrelease volume to use a different path
-  # The chart hardcodes /usr/lib/os-release which doesn't exist on Talos
-  # Let's see if we can override this specific volume
-  extraVolumes:
-    - name: host-usr-lib-osrelease
-      configMap:
-        name: talos-os-release-config
-  extraVolumeMounts: []
 
 clusterReceiver:
   podSecurityContext:
