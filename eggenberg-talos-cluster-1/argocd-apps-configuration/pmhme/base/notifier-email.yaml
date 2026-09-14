@@ -112,17 +112,3 @@ spec:
         - setWeight: 50
         - pause:
             duration: 60
-      # Gate promotion on the send-failure ratio scraped from the notifier's
-      # own OTel metrics (:9090). Starts after the first pause so a bad new
-      # version is caught while only half the replicas run it.
-      analysis:
-        templates:
-          - templateName: notifier-failure-rate
-        startingStep: 1
-        args:
-          - name: namespace
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
-          - name: channel
-            value: email

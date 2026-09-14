@@ -107,16 +107,9 @@ metrics:
     # -- Metrics service port
     servicePort: 8443
   serviceMonitor:
-    # -- Enable a prometheus ServiceMonitor
-    enabled: true
-    # -- Prometheus ServiceMonitor interval
-    interval: 30s
-    # -- Prometheus [RelabelConfigs] to apply to samples before scraping
-    relabelings: []
-    # -- Prometheus [MetricRelabelConfigs] to apply to samples before ingestion
-    metricRelabelings: []
-    # -- Prometheus ServiceMonitor selector
-    selector: {}
+    # kube-prometheus-stack is gone (replaced by splunk-otel-collector); the
+    # ServiceMonitor CRD no longer exists, so keep this disabled.
+    enabled: false
     # promtheus: kube-prometheus
 
     # -- Prometheus ServiceMonitor namespace

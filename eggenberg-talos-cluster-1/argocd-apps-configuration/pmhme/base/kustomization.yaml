@@ -12,7 +12,6 @@ resources:
   - rollout.yaml
   - service.yaml
   - service-preview.yaml
-  - servicemonitor.yaml
   - httproute.yaml
   - analysis-template.yaml
   - pdb.yaml
@@ -28,7 +27,6 @@ resources:
   - contact-db-externalsecret.yaml
   - blog-repo-token-externalsecret.yaml
   - docker-pull-secret-externalsecret.yaml
-  - notifier-observability.yaml
   - backend-netpol.yaml
   - backend-pdb.yaml
   - portfolio-vpa.yaml

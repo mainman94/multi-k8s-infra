@@ -50,9 +50,10 @@ env:
         name: external-dns-default-targets
         key: PUBLIC_IP
 
-# Metrics into the existing kube-prometheus-stack.
+# kube-prometheus-stack is gone (replaced by splunk-otel-collector); the
+# ServiceMonitor CRD no longer exists, so keep this disabled.
 serviceMonitor:
-  enabled: true
+  enabled: false
 
 resources:
   requests:

@@ -32,23 +32,25 @@ resources:
     limits:
       cpu: 200m
       memory: 256Mi
-# Prometheus metrics
+# kube-prometheus-stack is gone (replaced by splunk-otel-collector); the
+# ServiceMonitor CRD no longer exists, so every serviceMonitor below stays
+# disabled.
 prometheus:
   metricServer:
     enabled: true
     port: 8080
     portName: metrics
     serviceMonitor:
-      enabled: true
+      enabled: false
   webhooks:
     enabled: true
     port: 8080
     portName: metrics
     serviceMonitor:
-      enabled: true
+      enabled: false
   operator:
     enabled: true
     port: 8080
     portName: metrics
     serviceMonitor:
-      enabled: true
+      enabled: false
