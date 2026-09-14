@@ -1,9 +1,3 @@
-# Helm values for splunk-otel-collector, replacing kube-prometheus-stack as the
-# cluster's monitoring source (Splunk Observability Cloud free tier, 15 hosts).
-# Access token is provided via the pre-existing Secret created by
-# splunk-otel-collector-secret-externalsecret.yaml in this same directory
-# (secret.create: false so the chart never has a plaintext token in values).
-# Token itself lives in OpenBao at prod/splunk, key ACCESS_TOKEN.
 splunkObservability:
   realm: eu0
   metricsEnabled: true
@@ -16,6 +10,20 @@ secret:
   name: splunk-otel-collector-secret
 
 agent:
+  podSecurityContext:
+    runAsNonRoot: true
+    fsGroup: 999
+    seccompProfile:
+      type: RuntimeDefault
+  securityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    capabilities:
+      drop:
+        - ALL
+    seccompProfile:
+      type: RuntimeDefault
   resources:
     limits:
       cpu: 200m
@@ -23,8 +31,29 @@ agent:
     requests:
       cpu: 100m
       memory: 200Mi
+  # Remap host os-release correctly for Talos's immutable filesystem
+  hostVolumes:
+    - name: host-usr-lib-osrelease
+      hostPath:
+        path: /etc/os-release
+      mountPath: /hostfs/usr/lib/os-release
+      readOnly: true
 
 clusterReceiver:
+  podSecurityContext:
+    runAsNonRoot: true
+    fsGroup: 999
+    seccompProfile:
+      type: RuntimeDefault
+  securityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    capabilities:
+      drop:
+        - ALL
+    seccompProfile:
+      type: RuntimeDefault
   resources:
     limits:
       cpu: 200m
