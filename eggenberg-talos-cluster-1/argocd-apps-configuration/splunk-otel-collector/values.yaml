@@ -33,9 +33,14 @@ agent:
     requests:
       cpu: 100m
       memory: 200Mi
-      # Note: Talos Linux has os-release at /etc/os-release, not /usr/lib/os-release
-      # The chart automatically mounts /usr/lib/os-release from host, which doesn't exist on Talos
-      # We may need to create a symlink on the host or use a different approach
+  # Override the default host-usr-lib-osrelease volume to use a different path
+  # The chart hardcodes /usr/lib/os-release which doesn't exist on Talos
+  # Let's see if we can override this specific volume
+  extraVolumes:
+    - name: host-usr-lib-osrelease
+      configMap:
+        name: talos-os-release-config
+  extraVolumeMounts: []
 
 clusterReceiver:
   podSecurityContext:

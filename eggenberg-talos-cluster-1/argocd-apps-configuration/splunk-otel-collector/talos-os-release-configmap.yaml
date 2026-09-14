@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: talos-os-release-config
+  namespace: splunk-otel-collector
+data:
+  os-release: |-
+    PRETTY_NAME="Talos Linux"
+    NAME="Talos Linux"
+    ID=talos
+    ID_LIKE=
+    VERSION_ID=v1.8.1
+    VERSION="v1.8.1 (Flux Capacitor)"
+    HOME_URL=https://www.talos.dev/
+    BUG_REPORT_URL=https://github.com/siderolabs/talos/issues
