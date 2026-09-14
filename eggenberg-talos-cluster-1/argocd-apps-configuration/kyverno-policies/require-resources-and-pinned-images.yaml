@@ -66,6 +66,14 @@ spec:
   # Enforced globally: 0 violations across the cluster (all images already pinned),
   # so admission-blocking a :latest or untagged image is safe and prevents drift.
   validationFailureAction: Enforce
+  # splunk-otel-collector's chart hardcodes an untagged UBI9 image
+  # (registry.access.redhat.com/ubi9/ubi, tag "" -> latest) for its one-shot
+  # secret-validation pre-install/pre-upgrade hook Pod. Not something values.yaml
+  # can override away from latest, so Audit here instead of blocking every install.
+  validationFailureActionOverrides:
+    - action: Audit
+      namespaces:
+        - splunk-otel-collector
   admission: true
   background: true
   emitWarning: false
