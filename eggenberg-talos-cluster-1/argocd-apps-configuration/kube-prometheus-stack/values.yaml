@@ -99,6 +99,23 @@ prometheus:
             target_label: pod
           - source_labels: [__meta_kubernetes_pod_node_name]
             target_label: instance
+      # The Docker host (Dockge stacks) is outside the cluster and has no
+      # Service to select on, so it is a plain static target rather than a
+      # ServiceMonitor. Both exporters live in
+      # docker-stack/infrastructure/monitoring-agents.
+      - job_name: "docker-host-node"
+        static_configs:
+          - targets: ["192.168.0.129:9100"]
+            labels:
+              instance: "docker-host"
+      - job_name: "docker-host-containers"
+        # cadvisor is the expensive one; 60s is plenty for spotting a
+        # restart loop or a container eating the box.
+        scrape_interval: 60s
+        static_configs:
+          - targets: ["192.168.0.129:9101"]
+            labels:
+              instance: "docker-host"
     # 7d peak 481m/2747Mi (10d retention, 30s scrape across ~29 apps).
     # Bumped 2026-08-29: etcd metrics scraping added ~1830 series/15s across
     # 3 nodes, pushing CPU limit throttling (36% observed at 800m).
@@ -208,11 +225,13 @@ additionalPrometheusRulesMap:
             annotations:
               summary: Velero backup partially failed ({{ $labels.schedule }})
               description: Some items were not backed up.
-          # Schedule is daily at 02:00; 26h allows one missed run plus slack
-          # before shouting.
+          # Scoped to the daily schedule on purpose: velero-weekly only runs
+          # every 7 days, so an unscoped matcher would keep this alert
+          # permanently firing on it. The weekly run has its own staleness
+          # alert in the velero chart values.
           - alert: VeleroBackupStale
             expr: >-
-              time() - velero_backup_last_successful_timestamp{schedule!=""} > 26 * 3600
+              time() - velero_backup_last_successful_timestamp{schedule="velero-daily"} > 26 * 3600
             for: 30m
             labels:
               severity: critical
@@ -220,6 +239,53 @@ additionalPrometheusRulesMap:
               summary: No successful Velero backup in 26h ({{ $labels.schedule }})
               description: >-
                 Last success was {{ $value | humanizeDuration }} ago.
+      # The Docker host runs ~29 stacks with a self-healing restart loop for
+      # unhealthy containers, which means a container can flap forever without
+      # anyone noticing. These are the alerts that make that visible.
+      - name: docker-host
+        rules:
+          - alert: DockerHostExporterDown
+            expr: up{job=~"docker-host-.*"} == 0
+            for: 10m
+            labels:
+              severity: critical
+            annotations:
+              summary: Docker host exporter {{ $labels.job }} unreachable
+              description: >-
+                No metrics from the Docker host for 10m. Either the box is
+                down or the exporters in infrastructure/monitoring-agents are.
+          - alert: DockerContainerRestartLoop
+            expr: >-
+              changes(container_start_time_seconds{job="docker-host-containers",name!=""}[1h]) > 3
+            for: 10m
+            labels:
+              severity: warning
+            annotations:
+              summary: Container {{ $labels.name }} is restart looping
+              description: >-
+                {{ $value }} restarts in the last hour on the Docker host.
+          - alert: DockerHostDiskFillingUp
+            expr: >-
+              node_filesystem_avail_bytes{job="docker-host-node",fstype!~"tmpfs|overlay"}
+              / node_filesystem_size_bytes{job="docker-host-node",fstype!~"tmpfs|overlay"} < 0.10
+            for: 30m
+            labels:
+              severity: critical
+            annotations:
+              summary: Docker host filesystem {{ $labels.mountpoint }} below 10% free
+              description: >-
+                {{ $value | humanizePercentage }} free. Backups land on this
+                box, so a full pool takes the backups down with it.
+          - alert: DockerHostMemoryPressure
+            expr: >-
+              node_memory_MemAvailable_bytes{job="docker-host-node"}
+              / node_memory_MemTotal_bytes{job="docker-host-node"} < 0.10
+            for: 30m
+            labels:
+              severity: warning
+            annotations:
+              summary: Docker host has less than 10% memory available
+              description: "{{ $value | humanizePercentage }} available."
       - name: longhorn
         rules:
           # robustness: 0 unknown, 1 healthy, 2 degraded, 3 faulted.
