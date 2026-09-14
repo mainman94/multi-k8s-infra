@@ -12,11 +12,11 @@ spec:
       ruleNames:
         - run-as-non-root
   match:
-    - any:
-        - resources:
-            kinds:
-              - DaemonSet
-            names:
-              - splunk-otel-collector-agent
-            namespaces:
-              - splunk-otel-collector
+    any:
+      - resources:
+          kinds:
+            - DaemonSet
+          names:
+            - splunk-otel-collector-agent
+          namespaces:
+            - splunk-otel-collector
