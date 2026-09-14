@@ -32,7 +32,7 @@ agent:
       cpu: 100m
       memory: 200Mi
   # Remap host os-release correctly for Talos's immutable filesystem
-  hostVolumes:
+  extraVolumes:
     - name: host-usr-lib-osrelease
       hostPath:
         path: /etc/os-release
