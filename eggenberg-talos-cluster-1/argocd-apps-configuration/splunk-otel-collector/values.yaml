@@ -14,6 +14,28 @@ secret:
   name: splunk-otel-collector-secret
 
 agent:
+  securityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 999
+    capabilities:
+      drop:
+        - ALL
+    seccompProfile:
+      type: RuntimeDefault
+
+  # Notwendige beschreibbare Pfade bei readOnlyRootFilesystem: true
+  extraVolumes:
+    - name: tmp-dir
+      emptyDir: {}
+    - name: var-run
+      emptyDir: {}
+  extraVolumeMounts:
+    - name: tmp-dir
+      mountPath: /tmp
+    - name: var-run
+      mountPath: /var/run
   resources:
     limits:
       cpu: 200m
