@@ -33,16 +33,9 @@ agent:
     requests:
       cpu: 100m
       memory: 200Mi
-  # Remap host os-release correctly for Talos's immutable filesystem
-  extraVolumes:
-    - name: host-usr-lib-osrelease
-      hostPath:
-        path: /etc/os-release
-        type: File
-  extraVolumeMounts:
-    - name: host-usr-lib-osrelease
-      mountPath: /hostfs/usr/lib/os-release
-      readOnly: true
+      # Note: Talos Linux has os-release at /etc/os-release, not /usr/lib/os-release
+      # The chart automatically mounts /usr/lib/os-release from host, which doesn't exist on Talos
+      # We may need to create a symlink on the host or use a different approach
 
 clusterReceiver:
   podSecurityContext:
