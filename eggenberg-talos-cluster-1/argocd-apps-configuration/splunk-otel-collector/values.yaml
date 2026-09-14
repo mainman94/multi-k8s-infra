@@ -42,17 +42,18 @@ agent:
     extensions:
       health_check:
         endpoint: 127.0.0.1:13133
-  # Override readiness and liveness probes to use localhost
-  readinessProbe:
-    httpGet:
-      path: /
-      port: 13133
-      host: 127.0.0.1
-  livenessProbe:
-    httpGet:
-      path: /
-      port: 13133
-      host: 127.0.0.1
+
+# Override readiness and liveness probes to use localhost for Talos compatibility
+readinessProbe:
+  httpGet:
+    path: /
+    port: 13133
+    host: 127.0.0.1
+livenessProbe:
+  httpGet:
+    path: /
+    port: 13133
+    host: 127.0.0.1
 
 clusterReceiver:
   podSecurityContext:
