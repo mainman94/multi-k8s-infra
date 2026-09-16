@@ -49,6 +49,18 @@ spec:
             http:
               - method: GET
                 path: /metrics
+    # Splunk cluster receiver scrapes the app's `up` metric for 24h uptime.
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: splunk-otel-collector
+      toPorts:
+        - ports:
+            - port: "3001"
+              protocol: TCP
+          rules:
+            http:
+              - method: GET
+                path: /metrics
   egress:
     # DNS via CoreDNS in kube-system
     - toEndpoints:
@@ -63,20 +75,11 @@ spec:
     # ServiceAccount token — see portfolio-app-rbac.yaml.
     - toEntities:
         - kube-apiserver
-    # Platform page golden signals: scrape contact-api's own /metrics
-    # directly (no Prometheus anymore) and drive /healthz for the "run load
-    # test" KEDA demo. Meshed same-namespace edge (both carry SPIFFE identities).
+    # Platform page golden signals: scrape contact-api's own /metrics directly.
     - toEndpoints:
         - matchLabels:
             app: contact-api
       toPorts:
-        - ports:
-            - port: "8080"
-              protocol: TCP
-          rules:
-            http:
-              - method: GET
-                path: /healthz
         - ports:
             - port: "9090"
               protocol: TCP
@@ -84,6 +87,19 @@ spec:
             http:
               - method: GET
                 path: /metrics
+    # The load-test demo must traverse KEDA's interceptor or its HTTP scaler
+    # cannot observe the requests. Host routing is restricted in the app.
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: keda
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+          rules:
+            http:
+              - method: GET
+                path: /api/contact
     # Platform page golden signals: scrape sibling portfolio-app replicas'
     # own /metrics (mirrors the ingress rule above).
     - toEndpoints:

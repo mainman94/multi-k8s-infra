@@ -33,6 +33,9 @@ spec:
                 name: portfolio-app-config
             - secretRef:
                 name: blog-repo-token
+            - secretRef:
+                name: portfolio-splunk-api
+                optional: true
           ports:
             - containerPort: 3000
               name: http

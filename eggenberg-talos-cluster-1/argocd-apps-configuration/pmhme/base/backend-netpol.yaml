@@ -46,20 +46,38 @@ spec:
                 path: "/healthz"
               - method: GET
                 path: "/readyz"
-    # Platform page: portfolio-app drives /healthz ("run load test" KEDA demo)
-    # and scrapes /metrics directly for golden signals (no Prometheus anymore).
-    # Meshed edge (mutual auth).
+    # Platform page scrapes /metrics directly for golden signals.
     - fromEndpoints:
         - matchLabels:
             app: portfolio-app
+      toPorts:
+        - ports:
+            - port: "9090"
+              protocol: TCP
+          rules:
+            http:
+              - method: GET
+                path: /metrics
+    # Public POST traffic and the harmless load-test GET both arrive through
+    # KEDA's HTTP interceptor. Without this edge Cilium drops the proxy hop.
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: keda
       toPorts:
         - ports:
             - port: "8080"
               protocol: TCP
           rules:
             http:
+              - method: POST
+                path: "/api/contact"
               - method: GET
-                path: "/healthz"
+                path: "/api/contact"
+    # Splunk cluster receiver ingests contact-api metrics for observability.
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: splunk-otel-collector
+      toPorts:
         - ports:
             - port: "9090"
               protocol: TCP

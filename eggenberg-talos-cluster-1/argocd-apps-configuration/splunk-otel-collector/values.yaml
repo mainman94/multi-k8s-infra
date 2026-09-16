@@ -75,6 +75,50 @@ agent:
       memory: 200Mi
 
 clusterReceiver:
+  config:
+    receivers:
+      # Retain the historical signals that /platform cannot derive from a
+      # point-in-time Kubernetes API read. SignalFlow queries these in Splunk.
+      prometheus/portfolio_platform:
+        # Keep the original Prometheus names so SignalFlow queries remain
+        # stable across collector normalization changes (notably `_total`).
+        trim_metric_suffixes: false
+        config:
+          scrape_configs:
+            - job_name: portfolio-app
+              scrape_interval: 30s
+              static_configs:
+                - targets:
+                    - portfolio-service.portfolio.svc.cluster.local:3001
+                  labels:
+                    namespace: portfolio
+                - targets:
+                    - portfolio-service.portfolio-dev.svc.cluster.local:3001
+                  labels:
+                    namespace: portfolio-dev
+                - targets:
+                    - portfolio-service.portfolio-test.svc.cluster.local:3001
+                  labels:
+                    namespace: portfolio-test
+            - job_name: kyverno
+              scrape_interval: 30s
+              static_configs:
+                - targets:
+                    - kyverno-svc-metrics.kyverno.svc.cluster.local:8000
+                    - kyverno-background-controller-metrics.kyverno.svc.cluster.local:8000
+                    - kyverno-cleanup-controller-metrics.kyverno.svc.cluster.local:8000
+                    - kyverno-reports-controller-metrics.kyverno.svc.cluster.local:8000
+    service:
+      pipelines:
+        metrics/portfolio_platform:
+          receivers:
+            - prometheus/portfolio_platform
+          processors:
+            - memory_limiter
+            - batch
+            - resource
+          exporters:
+            - signalfx
   resources:
     limits:
       cpu: 200m
