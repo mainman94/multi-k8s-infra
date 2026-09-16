@@ -8,3 +8,22 @@ interceptor:
   replicas:
     min: 1
     max: 4
+
+# Cluster's Kyverno baseline policy requires runAsNonRoot and
+# seccompProfile.type RuntimeDefault on every pod/container — the chart
+# doesn't set these by default.
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  privileged: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+podSecurityContext:
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
