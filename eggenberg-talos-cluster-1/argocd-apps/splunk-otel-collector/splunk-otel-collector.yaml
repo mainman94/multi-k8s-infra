@@ -10,7 +10,7 @@ spec:
   project: default
   sources:
     - repoURL: https://signalfx.github.io/splunk-otel-collector-chart
-      targetRevision: 0.159.0
+      targetRevision: 0.160.0
       chart: splunk-otel-collector
       helm:
         valueFiles:
