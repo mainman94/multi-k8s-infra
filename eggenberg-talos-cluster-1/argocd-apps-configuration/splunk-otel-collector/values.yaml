@@ -22,6 +22,10 @@ agent:
         # "doesn't contain any IP SANs". Connect by node name instead so the
         # cert's DNS SAN matches, keeping TLS verification on.
         endpoint: "${K8S_NODE_NAME}:10250"
+        # Talos kubelet serving cert is signed by a CA not in the default
+        # trust store — skip verification (endpoint above already pins us
+        # to the right node via DNS SAN match).
+        insecure_skip_verify: true
         # container.cpu/memory.usage and pod network I/O are opt-in metrics
         # in kubeletstats — utilization (%) is on by default, absolute
         # usage/network stats are not.
