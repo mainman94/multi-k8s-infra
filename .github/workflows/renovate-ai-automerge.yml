@@ -494,14 +494,17 @@ jobs:
               body
             });
 
-      - name: Fail on manual decision
+      # A manual decision must block auto-merge, not the human merge button.
+      # The required check therefore succeeds after recording the decision;
+      # the auto-merge step below remains gated to `automerge` only.
+      - name: Record manual-review decision
         if: steps.evaluate.outputs.decision == 'manual'
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         env:
           REASON: ${{ steps.evaluate.outputs.reason }}
         with:
           script: |
-            core.setFailed(`Manual review required: ${process.env.REASON ?? ""}`);
+            core.notice(`Manual review required: ${process.env.REASON ?? ""}`);
 
       - name: Enable auto-merge
         if: steps.evaluate.outputs.decision == 'automerge'
