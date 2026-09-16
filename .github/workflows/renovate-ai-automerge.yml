@@ -495,15 +495,43 @@ jobs:
             });
 
       # A manual decision must block auto-merge, not the human merge button.
-      # The required check therefore succeeds after recording the decision;
-      # the auto-merge step below remains gated to `automerge` only.
-      - name: Record manual-review decision
+      # The required check therefore succeeds after cancelling any auto-merge
+      # request that may have been enabled before this evaluation ran.
+      - name: Require manual merge
         if: steps.evaluate.outputs.decision == 'manual'
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         env:
           REASON: ${{ steps.evaluate.outputs.reason }}
         with:
           script: |
+            const pullRequestId = context.payload.pull_request.node_id;
+            const result = await github.graphql(
+              `query($pullRequestId: ID!) {
+                node(id: $pullRequestId) {
+                  ... on PullRequest {
+                    autoMergeRequest { enabledAt }
+                  }
+                }
+              }`,
+              { pullRequestId }
+            );
+
+            if (result.node?.autoMergeRequest) {
+              await github.graphql(
+                `mutation($pullRequestId: ID!) {
+                  disablePullRequestAutoMerge(input: {
+                    pullRequestId: $pullRequestId
+                  }) {
+                    pullRequest { number }
+                  }
+                }`,
+                { pullRequestId }
+              );
+              core.info("Disabled the existing auto-merge request.");
+            } else {
+              core.info("No existing auto-merge request to disable.");
+            }
+
             core.notice(`Manual review required: ${process.env.REASON ?? ""}`);
 
       - name: Enable auto-merge
