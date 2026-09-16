@@ -2,7 +2,6 @@ splunkObservability:
   realm: eu0
   metricsEnabled: true
   tracesEnabled: true
-  logsEnabled: true
 
 clusterName: eggenberg-talos-cluster-1
 
@@ -17,7 +16,7 @@ secret:
 agent:
   config:
     receivers:
-      kubeletstats:
+      kubelet_stats:
         # container.cpu/memory.usage and pod network I/O are opt-in metrics
         # in kubeletstats — utilization (%) is on by default, absolute
         # usage/network stats are not.
