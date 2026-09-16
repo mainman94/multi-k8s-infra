@@ -5,6 +5,9 @@ scaler:
   replicas: 1
 
 interceptor:
+  # v0.16 defaults to direct pod routing. Keep the established Service path so
+  # kube-proxy, session affinity and Service-level behavior remain unchanged.
+  directPodRouting: false
   replicas:
     min: 1
     max: 4
