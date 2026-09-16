@@ -43,7 +43,7 @@ agent:
         detectors:
           - env
           - system
-        override: true
+        override: false
   securityContext:
     allowPrivilegeEscalation: false
     readOnlyRootFilesystem: true
