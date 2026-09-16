@@ -11,7 +11,7 @@ spec:
   sources:
     - repoURL: https://kedacore.github.io/charts
       chart: keda-add-ons-http
-      targetRevision: 0.15.0
+      targetRevision: 0.16.0
       helm:
         valueFiles:
           - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/keda-http-add-on/values.yaml
