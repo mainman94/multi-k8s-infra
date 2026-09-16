@@ -1,0 +1,32 @@
+# Read-only K8s API access for the /platform page's live cluster state
+# (HPA status, pod images/counts) — replaces the Prometheus PromQL queries
+# that broke when the monitoring stack was removed. Scoped to this namespace
+# only; no cluster-wide access.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: portfolio-app
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: portfolio-app-platform-read
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+  - apiGroups: ["autoscaling"]
+    resources: ["horizontalpodautoscalers"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: portfolio-app-platform-read
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: portfolio-app-platform-read
+subjects:
+  - kind: ServiceAccount
+    name: portfolio-app

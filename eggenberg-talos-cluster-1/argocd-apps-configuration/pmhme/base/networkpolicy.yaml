@@ -36,10 +36,11 @@ spec:
             http:
               - method: GET
               - method: HEAD
-    # Prometheus metrics scrape from monitoring namespace
+    # /platform golden signals: sibling replicas scrape each other's /metrics
+    # directly (no Prometheus anymore — see egress rule below for the read side).
     - fromEndpoints:
         - matchLabels:
-            io.kubernetes.pod.namespace: monitoring
+            app: portfolio-app
       toPorts:
         - ports:
             - port: "3001"
@@ -58,18 +59,13 @@ spec:
         - ports:
             - port: "53"
               protocol: ANY
-    # Platform page: read cluster metrics from kube-prometheus-stack.
-    # No mutual auth (Prometheus has no SPIFFE identity), same trust boundary
-    # as the metrics-scrape ingress rule above (monitoring namespace).
-    - toEndpoints:
-        - matchLabels:
-            io.kubernetes.pod.namespace: monitoring
-      toPorts:
-        - ports:
-            - port: "9090"
-              protocol: TCP
-    # Platform page "run load test": drive contact-api /healthz so KEDA scales
-    # it. Meshed same-namespace edge (both carry SPIFFE identities).
+    # Platform page: read-only K8s API calls (HPA/pod info) via the mounted
+    # ServiceAccount token — see portfolio-app-rbac.yaml.
+    - toEntities:
+        - kube-apiserver
+    # Platform page golden signals: scrape contact-api's own /metrics
+    # directly (no Prometheus anymore) and drive /healthz for the "run load
+    # test" KEDA demo. Meshed same-namespace edge (both carry SPIFFE identities).
     - toEndpoints:
         - matchLabels:
             app: contact-api
@@ -81,6 +77,26 @@ spec:
             http:
               - method: GET
                 path: /healthz
+        - ports:
+            - port: "9090"
+              protocol: TCP
+          rules:
+            http:
+              - method: GET
+                path: /metrics
+    # Platform page golden signals: scrape sibling portfolio-app replicas'
+    # own /metrics (mirrors the ingress rule above).
+    - toEndpoints:
+        - matchLabels:
+            app: portfolio-app
+      toPorts:
+        - ports:
+            - port: "3001"
+              protocol: TCP
+          rules:
+            http:
+              - method: GET
+                path: /metrics
     # External HTTP/HTTPS for server-side fetches
     - toEntities:
         - world
@@ -90,13 +106,12 @@ spec:
               protocol: TCP
             - port: "443"
               protocol: TCP
-    # OTLP/HTTP trace export to Tempo. Missing before: portfolio-app had no
-    # egress rule to Tempo's receiver, so Cilium silently dropped every trace
-    # (default-deny once an endpoint is selected by any CiliumNetworkPolicy).
+    # OTLP/HTTP trace export to the splunk-otel-collector agent (default-deny
+    # once an endpoint is selected by any CiliumNetworkPolicy, so this rule
+    # must exist or every trace is silently dropped).
     - toEndpoints:
         - matchLabels:
-            io.kubernetes.pod.namespace: monitoring
-            app.kubernetes.io/name: tempo
+            io.kubernetes.pod.namespace: splunk-otel-collector
       toPorts:
         - ports:
             - port: "4318"

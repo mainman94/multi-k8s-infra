@@ -17,12 +17,8 @@ spec:
       labels:
         app: "portfolio-app"
         version: "v1"
-        # Feeds the alloy relabel rule -> Loki "app" log label
         app.kubernetes.io/name: pmhme-portfolio
         app.kubernetes.io/part-of: pmhme
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "3001"
     spec:
       imagePullSecrets:
         - name: docker-pull-secret
@@ -113,7 +109,10 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile:
           type: RuntimeDefault
-      automountServiceAccountToken: false
+      # Needed for the /platform page's read-only K8s API calls (HPA/pod
+      # info) — see portfolio-app-rbac.yaml for the scoped-down permissions.
+      serviceAccountName: portfolio-app
+      automountServiceAccountToken: true
   strategy:
     blueGreen:
       activeService: portfolio-service

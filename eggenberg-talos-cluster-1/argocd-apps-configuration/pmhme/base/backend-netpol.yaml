@@ -46,21 +46,9 @@ spec:
                 path: "/healthz"
               - method: GET
                 path: "/readyz"
-    # Prometheus metrics scrape from monitoring namespace.
-    - fromEndpoints:
-        - matchLabels:
-            io.kubernetes.pod.namespace: monitoring
-      toPorts:
-        - ports:
-            - port: "9090"
-              protocol: TCP
-          rules:
-            http:
-              - method: GET
-                path: /metrics
-    # Platform page "run load test": portfolio-app drives /healthz to scale
-    # contact-api via KEDA. Meshed edge (mutual auth); GET /healthz only, so it
-    # cannot reach /api/contact or /internal/* through this rule.
+    # Platform page: portfolio-app drives /healthz ("run load test" KEDA demo)
+    # and scrapes /metrics directly for golden signals (no Prometheus anymore).
+    # Meshed edge (mutual auth).
     - fromEndpoints:
         - matchLabels:
             app: portfolio-app
@@ -72,6 +60,13 @@ spec:
             http:
               - method: GET
                 path: "/healthz"
+        - ports:
+            - port: "9090"
+              protocol: TCP
+          rules:
+            http:
+              - method: GET
+                path: /metrics
   egress:
     - toEndpoints:
         - matchLabels:
@@ -107,12 +102,12 @@ spec:
         - ports:
             - port: "6379"
               protocol: TCP
-    # OTLP/HTTP trace export to Tempo. Without this rule Cilium silently drops
-    # every trace once this endpoint is selected by a CiliumNetworkPolicy.
+    # OTLP/HTTP trace export to the splunk-otel-collector agent. Without this
+    # rule Cilium silently drops every trace once this endpoint is selected
+    # by a CiliumNetworkPolicy.
     - toEndpoints:
         - matchLabels:
-            io.kubernetes.pod.namespace: monitoring
-            app.kubernetes.io/name: tempo
+            io.kubernetes.pod.namespace: splunk-otel-collector
       toPorts:
         - ports:
             - port: "4318"
@@ -166,14 +161,6 @@ spec:
       toPorts:
         - ports:
             - port: "8000"
-              protocol: TCP
-    # Prometheus metrics scrape from monitoring namespace.
-    - fromEndpoints:
-        - matchLabels:
-            io.kubernetes.pod.namespace: monitoring
-      toPorts:
-        - ports:
-            - port: "9187"
               protocol: TCP
   egress:
     - toEndpoints:
@@ -237,19 +224,6 @@ spec:
         - ports:
             - port: "8222"
               protocol: TCP
-    # Prometheus metrics scrape from monitoring namespace (nats-exporter sidecar).
-    # No mutual auth.
-    - fromEndpoints:
-        - matchLabels:
-            io.kubernetes.pod.namespace: monitoring
-      toPorts:
-        - ports:
-            - port: "7777"
-              protocol: TCP
-          rules:
-            http:
-              - method: GET
-                path: /metrics
   egress:
     - toEndpoints:
         - matchLabels:
@@ -275,18 +249,6 @@ spec:
         - ports:
             - port: "8081"
               protocol: TCP
-    # Prometheus metrics scrape from monitoring namespace. No mutual auth.
-    - fromEndpoints:
-        - matchLabels:
-            io.kubernetes.pod.namespace: monitoring
-      toPorts:
-        - ports:
-            - port: "9090"
-              protocol: TCP
-          rules:
-            http:
-              - method: GET
-                path: /metrics
   egress:
     # matchPattern "*" does not widen what may be resolved; it puts DNS through
     # Cilium's proxy so the toFQDNs rule below can learn the name -> IP mapping.
@@ -320,12 +282,12 @@ spec:
         - ports:
             - port: "443"
               protocol: TCP
-    # OTLP/HTTP trace export to Tempo. Without this rule Cilium silently drops
-    # every trace once this endpoint is selected by a CiliumNetworkPolicy.
+    # OTLP/HTTP trace export to the splunk-otel-collector agent. Without this
+    # rule Cilium silently drops every trace once this endpoint is selected
+    # by a CiliumNetworkPolicy.
     - toEndpoints:
         - matchLabels:
-            io.kubernetes.pod.namespace: monitoring
-            app.kubernetes.io/name: tempo
+            io.kubernetes.pod.namespace: splunk-otel-collector
       toPorts:
         - ports:
             - port: "4318"
@@ -346,18 +308,6 @@ spec:
         - ports:
             - port: "8081"
               protocol: TCP
-    # Prometheus metrics scrape from monitoring namespace. No mutual auth.
-    - fromEndpoints:
-        - matchLabels:
-            io.kubernetes.pod.namespace: monitoring
-      toPorts:
-        - ports:
-            - port: "9090"
-              protocol: TCP
-          rules:
-            http:
-              - method: GET
-                path: /metrics
   egress:
     # matchPattern "*" does not widen what may be resolved; it puts DNS through
     # Cilium's proxy so the toFQDNs rule below can learn the name -> IP mapping.
@@ -398,12 +348,12 @@ spec:
             - port: "25"
               protocol: TCP
               # yamllint enable rule:line-length
-    # OTLP/HTTP trace export to Tempo. Without this rule Cilium silently drops
-    # every trace once this endpoint is selected by a CiliumNetworkPolicy.
+    # OTLP/HTTP trace export to the splunk-otel-collector agent. Without this
+    # rule Cilium silently drops every trace once this endpoint is selected
+    # by a CiliumNetworkPolicy.
     - toEndpoints:
         - matchLabels:
-            io.kubernetes.pod.namespace: monitoring
-            app.kubernetes.io/name: tempo
+            io.kubernetes.pod.namespace: splunk-otel-collector
       toPorts:
         - ports:
             - port: "4318"
