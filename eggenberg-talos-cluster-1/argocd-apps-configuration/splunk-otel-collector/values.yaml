@@ -18,9 +18,10 @@ agent:
     receivers:
       kubelet_stats:
         # Talos kubelet serving certs have no IP SANs, only the node name —
-        # the receiver connects by node IP by default, so verification
-        # always fails with "doesn't contain any IP SANs".
-        insecure_skip_verify: true
+        # the chart's default endpoint (node IP) fails verification with
+        # "doesn't contain any IP SANs". Connect by node name instead so the
+        # cert's DNS SAN matches, keeping TLS verification on.
+        endpoint: "${K8S_NODE_NAME}:10250"
         # container.cpu/memory.usage and pod network I/O are opt-in metrics
         # in kubeletstats — utilization (%) is on by default, absolute
         # usage/network stats are not.

@@ -1,0 +1,7 @@
+apiVersion: http.keda.sh/v1alpha1
+kind: HTTPScaledObject
+metadata:
+  name: contact-api-scaledobject
+spec:
+  hosts:
+    - test.hauptmann.dev

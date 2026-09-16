@@ -1,0 +1,22 @@
+# Allows HTTPRoutes in the pmhme namespaces to send /api/contact traffic to
+# the interceptor-proxy Service here in keda — Gateway API requires an
+# explicit grant for any cross-namespace backendRef.
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: pmhme-httproute-to-interceptor
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: portfolio
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: portfolio-dev
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: portfolio-test
+  to:
+    - group: ""
+      kind: Service
+      name: keda-add-ons-http-interceptor-proxy

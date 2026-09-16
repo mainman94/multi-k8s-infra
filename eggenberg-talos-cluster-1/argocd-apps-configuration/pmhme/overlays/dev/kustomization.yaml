@@ -36,6 +36,7 @@ patches:
       kind: Rollout
       name: contact-api
   - path: httproute-patch.yaml
+  - path: httpscaledobject-patch.yaml
   - path: configmap-patch.yaml
     target:
       kind: ConfigMap

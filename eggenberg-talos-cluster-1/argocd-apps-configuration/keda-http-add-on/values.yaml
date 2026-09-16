@@ -1,0 +1,10 @@
+# Homelab-sized footprint — chart defaults (scaler: 3 replicas, interceptor:
+# 3-50 replicas) are built for production HTTP volume, not a 2-node cluster
+# scaling one low-traffic contact form endpoint.
+scaler:
+  replicas: 1
+
+interceptor:
+  replicas:
+    min: 1
+    max: 4

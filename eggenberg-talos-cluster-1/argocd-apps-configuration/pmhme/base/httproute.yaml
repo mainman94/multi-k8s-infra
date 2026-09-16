@@ -11,14 +11,17 @@ spec:
   hostnames:
     - hauptmann.dev
   rules:
-    # Public contact form submissions go to the contact-api (same namespace).
+    # Public contact form submissions go through the keda-http-add-on
+    # interceptor (routes by Host+path to contact-api, see keda.yaml
+    # HTTPScaledObject), which also drives request-rate autoscaling.
     # Only /api/contact is exposed; /internal/* is never routed.
     - matches:
         - path:
             type: PathPrefix
             value: /api/contact
       backendRefs:
-        - name: contact-api
+        - name: keda-add-ons-http-interceptor-proxy
+          namespace: keda
           port: 8080
     - matches:
         - path:

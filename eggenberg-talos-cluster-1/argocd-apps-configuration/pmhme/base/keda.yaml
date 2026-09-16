@@ -1,12 +1,12 @@
-# KEDA ScaledObject: scales contact-api horizontally based on HTTP request rate
-# scraped from Prometheus. Idle (< 3 req/s avg): 1 replica. Burst: up to 4.
-# Tuned to be responsive so the /platform "run load test" button visibly drives
-# a 1->4 scale-up and back: low threshold, 40s rate window (contact-api is
-# scraped every 10s -> 4 samples), 15s polling, and an aggressive scale-up /
-# fast (30s) scale-down HPA behavior. A shorter rate() window reacts faster to
-# load starting and drains faster when it stops, so scale-down isn't delayed.
-apiVersion: keda.sh/v1alpha1
-kind: ScaledObject
+# KEDA HTTPScaledObject: scales contact-api horizontally based on live HTTP
+# request rate through the keda-http-add-on interceptor (no Prometheus
+# dependency — the interceptor proxies /api/contact traffic itself, see
+# httproute.yaml). Idle (< 3 req/s avg over 40s): 1 replica. Burst: up to 4.
+# Tuned to be responsive so the /platform "run load test" button visibly
+# drives a 1->4 scale-up and back: low threshold, 40s window, aggressive
+# scale-up / fast (30s) scale-down HPA behavior.
+apiVersion: http.keda.sh/v1alpha1
+kind: HTTPScaledObject
 metadata:
   name: contact-api-scaledobject
 spec:
@@ -14,29 +14,18 @@ spec:
     apiVersion: argoproj.io/v1alpha1
     kind: Rollout
     name: contact-api
-  minReplicaCount: 1
-  maxReplicaCount: 4
-  pollingInterval: 15
-  cooldownPeriod: 30
-  advanced:
-    horizontalPodAutoscalerConfig:
-      behavior:
-        scaleUp:
-          stabilizationWindowSeconds: 0
-          policies:
-            - type: Pods
-              value: 4
-              periodSeconds: 15
-        scaleDown:
-          stabilizationWindowSeconds: 30
-          policies:
-            - type: Pods
-              value: 4
-              periodSeconds: 30
-  triggers:
-    - type: prometheus
-      metadata:
-        serverAddress: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
-        metricName: contact_api_http_requests_rate
-        query: sum(rate(contact_api_http_requests_total{namespace="NAMESPACE_PLACEHOLDER"}[40s]))
-        threshold: "3"
+    service: contact-api
+    port: 8080
+  hosts:
+    - hauptmann.dev
+  pathPrefixes:
+    - /api/contact
+  replicas:
+    min: 1
+    max: 4
+  scaledownPeriod: 30
+  scalingMetric:
+    requestRate:
+      granularity: 1s
+      window: 40s
+      targetValue: 3
