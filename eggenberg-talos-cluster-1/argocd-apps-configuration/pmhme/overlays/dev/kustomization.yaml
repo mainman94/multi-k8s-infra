@@ -13,7 +13,7 @@ components:
   - ../../components/keda-ns-scoped
 images:
   - name: ghcr.io/mainman94/pmhme
-    newTag: 0.26.8
+    newTag: 0.26.9
   - name: ghcr.io/mainman94/contact-api
     newTag: 0.9.3
   - name: ghcr.io/mainman94/notifier-telegram
