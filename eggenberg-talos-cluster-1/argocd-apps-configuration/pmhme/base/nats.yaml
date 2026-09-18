@@ -26,7 +26,7 @@ spec:
       containers:
         - name: nats
           # Digest-pinned for immutability; tag kept for readability (Renovate-bumpable).
-          image: docker.io/nats:2-alpine@sha256:a6a00804d940a5325b9ab7b91886dc27d5bde544a45948ef292c7811e36f0e9b
+          image: docker.io/nats:2-alpine@sha256:ac8f88a6494bffc2c2a5289a0ca61cb28a9145c11ba5677cf24265d07f46d8d4
           imagePullPolicy: Always
           # Enable the HTTP monitoring endpoint for health probes.
           args:
