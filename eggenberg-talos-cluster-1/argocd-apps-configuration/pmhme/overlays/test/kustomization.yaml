@@ -17,7 +17,7 @@ images:
 - name: ghcr.io/mainman94/notifier-email
   newTag: 0.3.1
 - name: ghcr.io/mainman94/notifier-telegram
-  newTag: 0.3.2
+  newTag: 0.3.3
 - name: ghcr.io/mainman94/pmhme
   newTag: 0.26.9
 patches:
