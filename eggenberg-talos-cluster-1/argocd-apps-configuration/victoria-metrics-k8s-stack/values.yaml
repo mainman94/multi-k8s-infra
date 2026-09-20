@@ -98,6 +98,20 @@ kubeControllerManager:
           tlsConfig:
             insecureSkipVerify: true
 
+# etcd is a Talos machined service, not a k8s pod, so the chart's default
+# selector-based Service (component: etcd) never matches anything. Point
+# it at the 3 control-plane node IPs directly, on the metrics listener
+# port configured in homelab/terraform/talos/patch.yaml (2381, not the
+# mTLS client port 2379).
+kubeEtcd:
+  endpoints:
+    - 192.168.0.53
+    - 192.168.0.65
+    - 192.168.0.101
+  service:
+    port: 2381
+    targetPort: 2381
+
 # Alertmanager config comes from an externally-managed Secret (ExternalSecret
 # in this same directory, sourced from OpenBao prod/discord) instead of
 # `alertmanager.config`, so the Discord webhook URL never lands in git.

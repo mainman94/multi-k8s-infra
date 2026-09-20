@@ -16,7 +16,7 @@ spec:
             io.kubernetes.pod.namespace: trivy-system
     - fromEndpoints:
         - matchLabels:
-            io.kubernetes.pod.namespace: monitoring
+            io.kubernetes.pod.namespace: victoria-metrics-k8s-stack
       toPorts:
         - ports:
             - port: "8080"

@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: longhorn-manager-vmagent-metrics
+  namespace: longhorn-system
+spec:
+  # Additive to the chart's own "longhorn-manager" NetworkPolicy (multiple
+  # NetworkPolicies selecting the same pod are OR'd for ingress) — the
+  # chart's policy only allows traffic from Longhorn's own components, with
+  # no rule for cross-namespace Prometheus/vmagent scraping.
+  podSelector:
+    matchLabels:
+      app: longhorn-manager
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: victoria-metrics-k8s-stack
+      ports:
+        - protocol: TCP
+          port: 9500
