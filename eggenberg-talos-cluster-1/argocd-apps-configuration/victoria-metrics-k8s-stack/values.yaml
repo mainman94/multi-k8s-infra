@@ -63,6 +63,34 @@ vmagent:
       limits:
         cpu: 250m
         memory: 512Mi
+    extraArgs:
+      # apiserver /metrics on one control-plane node exceeds the 16Mi default,
+      # tripping KubeAPIInstanceUnreachable even though the target is healthy.
+      promscrape.maxScrapeSize: 32MiB
+
+# Talos control-plane certs for scheduler/controller-manager are self-signed
+# for localhost/127.0.0.1 only, so verifying against the node IP always
+# fails TLS and fires KubeSchedulerInstanceUnreachable /
+# KubeControllerManagerInstanceUnreachable even though the endpoint is up.
+kubeScheduler:
+  vmScrape:
+    spec:
+      endpoints:
+        - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+          port: http-metrics
+          scheme: https
+          tlsConfig:
+            insecureSkipVerify: true
+
+kubeControllerManager:
+  vmScrape:
+    spec:
+      endpoints:
+        - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+          port: http-metrics
+          scheme: https
+          tlsConfig:
+            insecureSkipVerify: true
 
 # Alertmanager config comes from an externally-managed Secret (ExternalSecret
 # in this same directory, sourced from OpenBao prod/discord) instead of
