@@ -46,8 +46,10 @@ spec:
               value: "8081"
             - name: METRICS_PORT
               value: "9090"
-            - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: http://tempo.monitoring.svc.cluster.local:4318
+            # No OTEL_EXPORTER_OTLP_ENDPOINT: was already pointing at a
+            # long-removed Tempo, never migrated. Traces-only (metrics are
+            # pull-based on METRICS_PORT above); tracing.go no longer even
+            # imports a trace exporter, just generates/propagates IDs.
             - name: SMTP_HOST
               valueFrom:
                 secretKeyRef:

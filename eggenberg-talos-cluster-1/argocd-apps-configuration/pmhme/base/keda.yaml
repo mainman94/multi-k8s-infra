@@ -1,12 +1,17 @@
-# KEDA HTTPScaledObject: scales contact-api horizontally based on live HTTP
-# request rate through the keda-http-add-on interceptor (no Prometheus
-# dependency — the interceptor proxies /api/contact traffic itself, see
-# httproute.yaml). Idle (< 3 req/s avg over 40s): 1 replica. Burst: up to 4.
-# Tuned to be responsive so the /platform "run load test" button visibly
-# drives a 1->4 scale-up and back: low threshold, 40s window, aggressive
-# scale-up / fast (30s) scale-down HPA behavior.
-apiVersion: http.keda.sh/v1alpha1
-kind: HTTPScaledObject
+# KEDA ScaledObject: scales contact-api on live HTTP request rate, read from
+# VictoriaMetrics (vmsingle-vm), which scrapes cilium-envoy's per-backend
+# stats via envoy.prometheus.serviceMonitor in bootstrap/cilium/values.yaml.
+# Replaces the old HTTPScaledObject + keda-http-add-on interceptor: traffic
+# now goes straight to contact-api (see httproute.yaml) and KEDA reads the
+# rate out-of-band instead of proxying every request through an interceptor.
+#
+# envoy_cluster_upstream_rq_total{envoy_cluster_name="cilium/cilium-gateway-public/<namespace>_contact-api_8080"}
+# verified live on-cluster (kubectl port-forward into a cilium-envoy pod,
+# port 9964, /metrics) - Cilium names each Envoy cluster
+# "cilium/cilium-gateway-<gateway>/<backend-namespace>_<backend-service>_<port>",
+# one per HTTPRoute backendRef, so this counts only contact-api's own traffic.
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
 metadata:
   name: contact-api-scaledobject
 spec:
@@ -14,18 +19,17 @@ spec:
     apiVersion: argoproj.io/v1alpha1
     kind: Rollout
     name: contact-api
-    service: contact-api
-    port: 8080
-  hosts:
-    - hauptmann.dev
-  pathPrefixes:
-    - /api/contact
-  replicas:
-    min: 1
-    max: 4
-  scaledownPeriod: 30
-  scalingMetric:
-    requestRate:
-      granularity: 1s
-      window: 40s
-      targetValue: 3
+  minReplicaCount: 1
+  maxReplicaCount: 4
+  pollingInterval: 15
+  cooldownPeriod: 30
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://vmsingle-vm.victoria-metrics-k8s-stack.svc.cluster.local:8428
+        metricName: contact_api_request_rate
+        threshold: "3"
+        # Namespace-scoped so dev/test overlays (see httpscaledobject-patch.yaml)
+        # can override just the backend-namespace segment of the cluster name.
+        query: >-
+          sum(rate(envoy_cluster_upstream_rq_total{envoy_cluster_name="cilium/cilium-gateway-public/portfolio_contact-api_8080"}[1m]))

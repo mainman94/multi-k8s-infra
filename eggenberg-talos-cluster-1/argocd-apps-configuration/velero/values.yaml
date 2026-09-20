@@ -112,15 +112,12 @@ resources:
     cpu: 500m
     memory: 512Mi
 
-# Metrics endpoint stays up (harmless, no consumer yet); ServiceMonitor and
-# PrometheusRule are gone with kube-prometheus-stack (replaced by
-# splunk-otel-collector) — those CRDs no longer exist.
 metrics:
   enabled: true
   serviceMonitor:
-    enabled: false
+    enabled: true
   prometheusRule:
-    enabled: false
+    enabled: true
 
 # Kopia configuration for PV backups. The node agent does the actual file
 # system backup; what gets backed up is decided by

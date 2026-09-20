@@ -13,10 +13,8 @@ admissionController:
     limits:
       cpu: 500m
       memory: 384Mi
-  # kube-prometheus-stack is gone (replaced by splunk-otel-collector); the
-  # ServiceMonitor CRD no longer exists, so keep this disabled.
   serviceMonitor:
-    enabled: false
+    enabled: true
 
 backgroundController:
   replicas: 1

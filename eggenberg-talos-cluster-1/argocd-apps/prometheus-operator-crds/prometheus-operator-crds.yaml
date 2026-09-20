@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prometheus-operator-crds
+  namespace: argocd
+  labels:
+    category: monitoring
+  annotations:
+    # sync-wave 0 so the CRDs exist before victoria-metrics-k8s-stack's
+    # operator tries to enable its own serviceMonitor / Prometheus-CRD
+    # converter against them.
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  # yamllint disable rule:line-length
+  project: default
+  sources:
+    # CRDs only (ServiceMonitor/PodMonitor/PrometheusRule/Probe) - no controller
+    # pods. VictoriaMetrics' operator watches these and converts them into its
+    # own VMServiceScrape/VMPodScrape/VMRule/VMProbe, so app charts that still
+    # ship a `serviceMonitor.enabled` toggle keep working unchanged.
+    - repoURL: https://prometheus-community.github.io/helm-charts
+      targetRevision: 32.0.0
+      chart: prometheus-operator-crds
+      helm:
+        valueFiles:
+          - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/prometheus-operator-crds/values.yaml
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
+      targetRevision: HEAD
+      ref: values
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
+      targetRevision: HEAD
+      path: "eggenberg-talos-cluster-1/argocd-apps-configuration/prometheus-operator-crds"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: prometheus-operator-crds
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    # yamllint enable rule:line-length

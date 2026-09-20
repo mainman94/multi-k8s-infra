@@ -9,6 +9,8 @@ data:
   # /platform page reads this env's own namespace (button scales it too).
   OPS_NAMESPACE: "portfolio-test"
   SITE_URL: "https://test.hauptmann.dev"
+  # contact-api lives in this overlay's own namespace.
+  LOAD_TEST_URL: "http://contact-api.portfolio-test.svc.cluster.local:8080/api/contact"
   # No analytics in non-prod — blank both so umami stays off (keeps prod stats clean).
   UMAMI_SCRIPT_URL: ""
   UMAMI_WEBSITE_ID: ""

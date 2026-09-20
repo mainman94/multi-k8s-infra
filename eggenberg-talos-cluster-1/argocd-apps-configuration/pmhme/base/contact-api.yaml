@@ -52,8 +52,10 @@ spec:
               value: "10"
             - name: LOG_LEVEL
               value: info
-            - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: http://splunk-otel-collector-agent.splunk-otel-collector.svc.cluster.local:4318
+            # No OTEL_EXPORTER_OTLP_ENDPOINT: that was traces-only (metrics
+            # are pull-based on the `metrics` port below) and there's been no
+            # trace backend since Tempo was removed. src/tracing.ts no longer
+            # even imports a trace exporter, just generates/propagates IDs.
             - name: OTEL_SERVICE_NAME
               value: hauptmann-contact-api
             - name: DATABASE_URL

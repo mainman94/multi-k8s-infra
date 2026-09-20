@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: victoria-metrics-k8s-stack
+  namespace: argocd
+  labels:
+    category: monitoring
+  annotations:
+    # sync-wave 1: after prometheus-operator-crds (wave 0), whose CRDs the
+    # operator's serviceMonitor + Prometheus-CRD converter depend on.
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  # yamllint disable rule:line-length
+  project: default
+  sources:
+    - repoURL: https://victoriametrics.github.io/helm-charts/
+      targetRevision: 0.92.1
+      chart: victoria-metrics-k8s-stack
+      helm:
+        valueFiles:
+          - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/victoria-metrics-k8s-stack/values.yaml
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
+      targetRevision: HEAD
+      ref: values
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
+      targetRevision: HEAD
+      path: "eggenberg-talos-cluster-1/argocd-apps-configuration/victoria-metrics-k8s-stack"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: victoria-metrics-k8s-stack
+  syncPolicy:
+    managedNamespaceMetadata:
+      labels:
+        # prometheus-node-exporter's DaemonSet needs hostNetwork/hostPID/hostPath
+        # to read host /proc and /sys; PSS baseline (the namespace default)
+        # rejects that. Same reasoning as splunk-otel-collector before it.
+        pod-security.kubernetes.io/enforce: privileged
+        pod-security.kubernetes.io/audit: privileged
+        pod-security.kubernetes.io/warn: privileged
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    # yamllint enable rule:line-length

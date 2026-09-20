@@ -9,13 +9,15 @@ data:
   LOG_LEVEL: "info"
   TELEMETRY_ENABLED: "true"
   OTEL_SERVICE_NAME: "hauptmann-portfolio"
-  # Splunk otel-collector agent OTLP/HTTP receiver. Egress opened in networkpolicy.yaml (port 4318).
-  OTEL_EXPORTER_OTLP_ENDPOINT: "http://splunk-otel-collector-agent.splunk-otel-collector.svc.cluster.local:4318"
-  # Platform page: API-scoped SignalFlow queries for historical Splunk metrics.
-  SPLUNK_REALM: "eu0"
+  # No OTEL_EXPORTER_OTLP_ENDPOINT: that was traces-only (app metrics are
+  # pull-based, scraped by VM's ServiceMonitor - see servicemonitor.yaml) and
+  # there's been no trace backend since Tempo was removed. The frontend repo's
+  # telemetry.ts no longer even imports a trace exporter.
+  # Platform page: live cluster-metrics panel, queried via VM's PromQL-compatible API.
+  PROMETHEUS_URL: "http://vmsingle-vm.victoria-metrics-k8s-stack.svc.cluster.local:8428"
   OPS_NAMESPACE: "portfolio"
-  # Internal KEDA HTTP interceptor; the Host header is derived from SITE_URL.
-  LOAD_TEST_URL: "http://keda-add-ons-http-interceptor-proxy.keda.svc.cluster.local:8080/api/contact"
+  # contact-api is now called directly (no interceptor hop, see httproute.yaml).
+  LOAD_TEST_URL: "http://contact-api.portfolio.svc.cluster.local:8080/api/contact"
   # Origin for canonical/OG URLs. Overridden per env so dev/test self-canonicalise.
   SITE_URL: "https://hauptmann.dev"
   # Analytics: shipped only when both are set. dev/test blank them to opt out.

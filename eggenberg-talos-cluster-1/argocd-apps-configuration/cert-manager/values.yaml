@@ -37,9 +37,7 @@ cainjector:
     limits:
       cpu: 200m
       memory: 384Mi
-# kube-prometheus-stack is gone (replaced by splunk-otel-collector); the
-# ServiceMonitor CRD no longer exists, so keep this disabled.
 prometheus:
   enabled: true
   servicemonitor:
-    enabled: false
+    enabled: true

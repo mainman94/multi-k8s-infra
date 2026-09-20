@@ -1,0 +1,37 @@
+# portfolio-app's and contact-api's own /metrics (pull-based OTel/Prometheus
+# exporters, see service.yaml / contact-api.yaml). Previously scraped by a
+# hardcoded prometheus job inside splunk-otel-collector's clusterReceiver;
+# now standard ServiceMonitors VictoriaMetrics' operator converts to
+# VMServiceScrapes. The portfolio /platform page also scrapes these same
+# endpoints directly for its live golden-signals panel (src/utils/prom-scrape.ts
+# in the frontend repo) - this ServiceMonitor is the separate path that gets
+# the data into VM for history/alerting.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: portfolio-app
+  labels:
+    app: portfolio-app
+spec:
+  selector:
+    matchLabels:
+      app: portfolio-app
+  endpoints:
+    - port: metrics
+      interval: 30s
+      path: /metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: contact-api
+  labels:
+    app: contact-api
+spec:
+  selector:
+    matchLabels:
+      app: contact-api
+  endpoints:
+    - port: metrics
+      interval: 30s
+      path: /metrics

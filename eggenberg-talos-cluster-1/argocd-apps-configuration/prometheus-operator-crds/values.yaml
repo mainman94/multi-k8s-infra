@@ -1,0 +1,2 @@
+# Defaults install every CRD (ServiceMonitor, PodMonitor, PrometheusRule,
+# Probe, ...) cluster-wide. Nothing to override for a CRDs-only chart.
