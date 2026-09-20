@@ -17,6 +17,12 @@ fullnameOverride: vm
 # victoria-metrics-k8s-stack-grafana -o jsonpath='{.data.admin-password}' | base64 -d`.
 grafana:
   enabled: true
+  persistence:
+    enabled: true
+    type: pvc
+    accessModes:
+      - ReadWriteOnce
+    size: 2Gi
   resources:
     requests:
       cpu: 25m
