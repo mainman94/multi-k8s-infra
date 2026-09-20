@@ -29,8 +29,14 @@ patches:
     kind: ExternalSecret
     name: contact-db
 - patch: |-
+    # JSON6902 by index, not strategic merge: kustomize has no OpenAPI
+    # schema for the Rollout CRD, so a strategic-merge patch here would
+    # replace the whole `env` list instead of merging by name (verified -
+    # it silently wiped every other env var). Index 5 = OTEL_SERVICE_NAME
+    # in base's env list (pmhme/base/contact-api.yaml) - re-check this
+    # index if that list's order/length ever changes.
     - op: replace
-      path: /spec/template/spec/containers/0/env/6/value
+      path: /spec/template/spec/containers/0/env/5/value
       value: hauptmann-contact-api-test
   target:
     kind: Rollout
