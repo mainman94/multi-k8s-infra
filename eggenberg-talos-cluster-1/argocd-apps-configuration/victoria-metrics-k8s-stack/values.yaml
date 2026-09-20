@@ -9,12 +9,23 @@
 # trigger (pmhme/base/keda.yaml) and Falco's alertmanager hostport.
 fullnameOverride: vm
 
-# No Grafana: VMUI covers ad-hoc queries, matching the earlier decision not
-# to run Grafana. Dashboard sync is pointless without Grafana to sync into.
+# Exposed at grafana.hauptmann.dev (see httproute.yaml + referencegrant.yaml
+# in this same directory). Admin credentials: chart auto-generates a random
+# password in the Secret "victoria-metrics-k8s-stack-grafana" (key
+# admin-password) since no adminPassword/existingSecret is set here -
+# `kubectl -n victoria-metrics-k8s-stack get secret
+# victoria-metrics-k8s-stack-grafana -o jsonpath='{.data.admin-password}' | base64 -d`.
 grafana:
-  enabled: false
+  enabled: true
+  resources:
+    requests:
+      cpu: 25m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
 defaultDashboards:
-  enabled: false
+  enabled: true
 
 victoria-metrics-operator:
   resources:
