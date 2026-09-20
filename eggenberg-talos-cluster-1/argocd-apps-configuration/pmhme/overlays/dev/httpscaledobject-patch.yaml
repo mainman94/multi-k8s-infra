@@ -1,7 +1,13 @@
-apiVersion: http.keda.sh/v1alpha1
-kind: HTTPScaledObject
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
 metadata:
   name: contact-api-scaledobject
 spec:
-  hosts:
-    - dev.hauptmann.dev
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://vmsingle-vm.victoria-metrics-k8s-stack.svc.cluster.local:8428
+        metricName: contact_api_request_rate
+        threshold: "3"
+        query: >-
+          sum(rate(envoy_cluster_upstream_rq_total{envoy_cluster_name="cilium/cilium-gateway-public/portfolio-dev_contact-api_8080"}[1m]))

@@ -13,11 +13,9 @@ persistence:
   defaultClassReplicaCount: 2
 ingress:
   enabled: false
-# kube-prometheus-stack is gone (replaced by splunk-otel-collector); the
-# ServiceMonitor CRD no longer exists, so keep this disabled.
 metrics:
   serviceMonitor:
-    enabled: false
+    enabled: true
 csi:
   attacherReplicaCount: "2"
   provisionerReplicaCount: "2"

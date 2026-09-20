@@ -1,0 +1,88 @@
+# yamllint disable rule:line-length
+# VictoriaMetrics k8s-stack: replaces splunk-otel-collector for cluster +
+# app metrics, and provides Discord alerting via vmalertmanager (see the
+# vmalertmanager-config ExternalSecret in this same directory).
+#
+# fullnameOverride pins every CR to a predictable name ("vm"), so the
+# operator's generated Services are always vmsingle-vm / vmagent-vm /
+# vmalertmanager-vm — used directly by contact-api's KEDA prometheus
+# trigger (pmhme/base/keda.yaml) and Falco's alertmanager hostport.
+fullnameOverride: vm
+
+# No Grafana: VMUI covers ad-hoc queries, matching the earlier decision not
+# to run Grafana. Dashboard sync is pointless without Grafana to sync into.
+grafana:
+  enabled: false
+defaultDashboards:
+  enabled: false
+
+victoria-metrics-operator:
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+vmsingle:
+  spec:
+    replicaCount: 1
+    retentionPeriod: "3"
+    resources:
+      requests:
+        cpu: 50m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
+    storage:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 20Gi
+
+vmagent:
+  spec:
+    resources:
+      requests:
+        cpu: 25m
+        memory: 128Mi
+      limits:
+        cpu: 250m
+        memory: 512Mi
+
+# Alertmanager config comes from an externally-managed Secret (ExternalSecret
+# in this same directory, sourced from OpenBao prod/discord) instead of
+# `alertmanager.config`, so the Discord webhook URL never lands in git.
+alertmanager:
+  spec:
+    replicaCount: 1
+    configSecret: vmalertmanager-config
+    resources:
+      requests:
+        cpu: 15m
+        memory: 32Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
+
+kube-state-metrics:
+  resources:
+    requests:
+      cpu: 15m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 256Mi
+
+prometheus-node-exporter:
+  resources:
+    requests:
+      cpu: 15m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+      # yamllint enable rule:line-length

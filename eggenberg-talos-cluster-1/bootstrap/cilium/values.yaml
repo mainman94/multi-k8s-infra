@@ -134,16 +134,22 @@ hubble:
       - icmp
       - http
 
-# kube-prometheus-stack is gone (replaced by splunk-otel-collector); the
-# ServiceMonitor CRD no longer exists, so keep this disabled.
+# cilium-agent's own metrics (port 9962).
 prometheus:
   metricsService: true
   enabled: true
   port: 9962
   serviceMonitor:
-    enabled: false
+    enabled: true
 
 envoy:
+  # cilium-envoy's own metrics (port 9964, separate Service/ServiceMonitor
+  # from cilium-agent above). Feeds contact-api's KEDA prometheus trigger via
+  # envoy_cluster_upstream_rq_total, see pmhme/base/keda.yaml.
+  prometheus:
+    enabled: true
+    serviceMonitor:
+      enabled: true
   log:
     path: /dev/stdout
     defaultLevel: info

@@ -49,10 +49,11 @@ spec:
             http:
               - method: GET
                 path: /metrics
-    # Splunk cluster receiver scrapes the app's `up` metric for 24h uptime.
+    # vmagent scrapes the app's `up` metric for 24h uptime (see the
+    # portfolio-app ServiceMonitor in servicemonitor.yaml).
     - fromEndpoints:
         - matchLabels:
-            io.kubernetes.pod.namespace: splunk-otel-collector
+            io.kubernetes.pod.namespace: victoria-metrics-k8s-stack
       toPorts:
         - ports:
             - port: "3001"
@@ -87,11 +88,11 @@ spec:
             http:
               - method: GET
                 path: /metrics
-    # The load-test demo must traverse KEDA's interceptor or its HTTP scaler
-    # cannot observe the requests. Host routing is restricted in the app.
+    # Load-test demo hits contact-api directly (see httproute.yaml - no more
+    # KEDA interceptor hop; scaling is read out-of-band from VictoriaMetrics).
     - toEndpoints:
         - matchLabels:
-            io.kubernetes.pod.namespace: keda
+            app: contact-api
       toPorts:
         - ports:
             - port: "8080"
@@ -121,14 +122,4 @@ spec:
             - port: "80"
               protocol: TCP
             - port: "443"
-              protocol: TCP
-    # OTLP/HTTP trace export to the splunk-otel-collector agent (default-deny
-    # once an endpoint is selected by any CiliumNetworkPolicy, so this rule
-    # must exist or every trace is silently dropped).
-    - toEndpoints:
-        - matchLabels:
-            io.kubernetes.pod.namespace: splunk-otel-collector
-      toPorts:
-        - ports:
-            - port: "4318"
               protocol: TCP

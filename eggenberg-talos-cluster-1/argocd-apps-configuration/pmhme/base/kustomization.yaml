@@ -12,6 +12,7 @@ resources:
   - rollout.yaml
   - service.yaml
   - service-preview.yaml
+  - servicemonitor.yaml
   - httproute.yaml
   - analysis-template.yaml
   - pdb.yaml
@@ -26,7 +27,6 @@ resources:
   - contact-smtp-externalsecret.yaml
   - contact-db-externalsecret.yaml
   - blog-repo-token-externalsecret.yaml
-  - splunk-api-token-externalsecret.yaml
   - docker-pull-secret-externalsecret.yaml
   - backend-netpol.yaml
   - backend-pdb.yaml

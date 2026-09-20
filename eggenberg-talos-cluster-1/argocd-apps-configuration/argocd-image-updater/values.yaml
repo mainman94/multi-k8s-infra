@@ -107,9 +107,7 @@ metrics:
     # -- Metrics service port
     servicePort: 8443
   serviceMonitor:
-    # kube-prometheus-stack is gone (replaced by splunk-otel-collector); the
-    # ServiceMonitor CRD no longer exists, so keep this disabled.
-    enabled: false
+    enabled: true
     # promtheus: kube-prometheus
 
     # -- Prometheus ServiceMonitor namespace

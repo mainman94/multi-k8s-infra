@@ -38,9 +38,7 @@ Everything's managed through Git. Push a change, ArgoCD deploys it. Simple.
 - **External Secrets Operator + OpenBao** - Secret management
 
 **Observability**
-- **Kube-Prometheus-Stack** - Metrics, Grafana, Alertmanager
-- **Loki + Alloy** - Log aggregation & collection
-- **Tempo** - Distributed tracing (OTLP)
+- **VictoriaMetrics k8s-stack** - Metrics + Discord alerting (vmalertmanager)
 - **Uptime Kuma** - Uptime checks
 
 **Security & policy**

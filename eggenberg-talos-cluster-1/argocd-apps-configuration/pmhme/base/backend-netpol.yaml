@@ -58,25 +58,24 @@ spec:
             http:
               - method: GET
                 path: /metrics
-    # Public POST traffic and the harmless load-test GET both arrive through
-    # KEDA's HTTP interceptor. Without this edge Cilium drops the proxy hop.
+    # Load-test demo: portfolio-app calls contact-api directly now (no more
+    # KEDA interceptor hop, see pmhme/base/httproute.yaml + keda.yaml).
     - fromEndpoints:
         - matchLabels:
-            io.kubernetes.pod.namespace: keda
+            app: portfolio-app
       toPorts:
         - ports:
             - port: "8080"
               protocol: TCP
           rules:
             http:
-              - method: POST
-                path: "/api/contact"
               - method: GET
                 path: "/api/contact"
-    # Splunk cluster receiver ingests contact-api metrics for observability.
+    # vmagent scrapes contact-api's own /metrics (see the ServiceMonitor in
+    # servicemonitor.yaml).
     - fromEndpoints:
         - matchLabels:
-            io.kubernetes.pod.namespace: splunk-otel-collector
+            io.kubernetes.pod.namespace: victoria-metrics-k8s-stack
       toPorts:
         - ports:
             - port: "9090"
@@ -119,16 +118,6 @@ spec:
       toPorts:
         - ports:
             - port: "6379"
-              protocol: TCP
-    # OTLP/HTTP trace export to the splunk-otel-collector agent. Without this
-    # rule Cilium silently drops every trace once this endpoint is selected
-    # by a CiliumNetworkPolicy.
-    - toEndpoints:
-        - matchLabels:
-            io.kubernetes.pod.namespace: splunk-otel-collector
-      toPorts:
-        - ports:
-            - port: "4318"
               protocol: TCP
 ---
 # CNPG instance pods (contact-postgres cluster). No Cilium mutual auth on any
@@ -300,16 +289,6 @@ spec:
         - ports:
             - port: "443"
               protocol: TCP
-    # OTLP/HTTP trace export to the splunk-otel-collector agent. Without this
-    # rule Cilium silently drops every trace once this endpoint is selected
-    # by a CiliumNetworkPolicy.
-    - toEndpoints:
-        - matchLabels:
-            io.kubernetes.pod.namespace: splunk-otel-collector
-      toPorts:
-        - ports:
-            - port: "4318"
-              protocol: TCP
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -366,16 +345,6 @@ spec:
             - port: "25"
               protocol: TCP
               # yamllint enable rule:line-length
-    # OTLP/HTTP trace export to the splunk-otel-collector agent. Without this
-    # rule Cilium silently drops every trace once this endpoint is selected
-    # by a CiliumNetworkPolicy.
-    - toEndpoints:
-        - matchLabels:
-            io.kubernetes.pod.namespace: splunk-otel-collector
-      toPorts:
-        - ports:
-            - port: "4318"
-              protocol: TCP
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy

@@ -36,9 +36,10 @@ resources:
     cpu: 500m
     memory: 512Mi
 
-# Forward Falco alerts to the cluster's Alertmanager. Its root route already
-# sends everything (except Watchdog/InfoInhibitor) to Discord, so this rides
-# the existing pipeline with no extra PrometheusRule/AlertmanagerConfig needed.
+# Forward Falco alerts to vmalertmanager. Its root route already sends
+# everything to Discord (see victoria-metrics-k8s-stack's
+# vmalertmanager-config ExternalSecret), so this rides the existing pipeline
+# with no extra VMRule/VMAlertmanagerConfig needed.
 falcosidekick:
   enabled: true
   resources:
@@ -50,8 +51,7 @@ falcosidekick:
       memory: 128Mi
   config:
     alertmanager:
-      hostport: "http://kube-prometheus-stack-alertmanager.monitoring.svc.cluster.local:9093"
-      # v1 API was removed in Alertmanager 0.27+ (kube-prometheus-stack 88.x ships it).
+      hostport: "http://vmalertmanager-vm.victoria-metrics-k8s-stack.svc.cluster.local:9093"
       endpoint: "/api/v2/alerts"
       # Falco alert priorities below this are dropped before reaching Discord.
       minimumpriority: "warning"

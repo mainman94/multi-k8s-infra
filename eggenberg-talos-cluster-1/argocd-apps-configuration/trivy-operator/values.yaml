@@ -82,10 +82,8 @@ nodeCollector:
       hostPath:
         path: /etc/cni/net.d/
 
-# kube-prometheus-stack is gone (replaced by splunk-otel-collector); the
-# ServiceMonitor CRD no longer exists, so keep this disabled.
 serviceMonitor:
-  enabled: false
+  enabled: true
 
 # Operator controller. Memory scales with the number of scanned workloads (informer
 # cache + report objects) — 256Mi OOMKilled on a full-cluster scan, so give it headroom.

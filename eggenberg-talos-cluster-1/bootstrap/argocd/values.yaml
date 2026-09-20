@@ -3,10 +3,8 @@ applicationSet:
     enabled: true
     service:
       portName: http-metrics
-    # kube-prometheus-stack is gone (replaced by splunk-otel-collector); the
-    # ServiceMonitor CRD no longer exists, so keep this disabled.
     serviceMonitor:
-      enabled: false
+      enabled: true
   resources:
     requests:
       cpu: 10m
@@ -17,10 +15,8 @@ applicationSet:
 notifications:
   metrics:
     enabled: true
-    # kube-prometheus-stack is gone (replaced by splunk-otel-collector); the
-    # ServiceMonitor CRD no longer exists, so keep this disabled.
     serviceMonitor:
-      enabled: false
+      enabled: true
   resources:
     requests:
       cpu: 10m
@@ -33,10 +29,8 @@ server:
     enabled: true
     service:
       portName: http-metrics
-    # kube-prometheus-stack is gone (replaced by splunk-otel-collector); the
-    # ServiceMonitor CRD no longer exists, so keep this disabled.
     serviceMonitor:
-      enabled: false
+      enabled: true
   resources:
     requests:
       cpu: 20m
@@ -164,10 +158,8 @@ redis:
     enabled: true
     service:
       portName: http-metrics
-    # kube-prometheus-stack is gone (replaced by splunk-otel-collector); the
-    # ServiceMonitor CRD no longer exists, so keep this disabled.
     serviceMonitor:
-      enabled: false
+      enabled: true
   resources:
     requests:
       cpu: 10m
@@ -180,10 +172,8 @@ controller:
     enabled: true
     service:
       portName: http-metrics
-    # kube-prometheus-stack is gone (replaced by splunk-otel-collector); the
-    # ServiceMonitor CRD no longer exists, so keep this disabled.
     serviceMonitor:
-      enabled: false
+      enabled: true
   # 7d peak: 883m/2748Mi (sync-heavy across ~29 apps). Sized above that peak.
   resources:
     requests:
@@ -197,10 +187,8 @@ repoServer:
     enabled: true
     service:
       portName: http-metrics
-    # kube-prometheus-stack is gone (replaced by splunk-otel-collector); the
-    # ServiceMonitor CRD no longer exists, so keep this disabled.
     serviceMonitor:
-      enabled: false
+      enabled: true
   resources:
     requests:
       cpu: 50m
@@ -220,10 +208,8 @@ dex:
     enabled: true
     service:
       portName: http-metrics
-    # kube-prometheus-stack is gone (replaced by splunk-otel-collector); the
-    # ServiceMonitor CRD no longer exists, so keep this disabled.
     serviceMonitor:
-      enabled: false
+      enabled: true
   resources:
     requests:
       cpu: 10m
