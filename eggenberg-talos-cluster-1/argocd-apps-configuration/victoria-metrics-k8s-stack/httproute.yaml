@@ -1,0 +1,21 @@
+# Exposes Grafana at grafana.hauptmann.dev. Lives in the `cilium` namespace
+# (already in the Gateway's https listener namespace selector, see
+# cilium-gateway/gateway-api.yaml) with a cross-namespace backendRef into
+# victoria-metrics-k8s-stack, same pattern the old kube-prometheus-stack
+# Grafana route used.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: grafana
+  namespace: cilium
+spec:
+  parentRefs:
+    - name: public
+      sectionName: https
+  hostnames:
+    - grafana.hauptmann.dev
+  rules:
+    - backendRefs:
+        - name: victoria-metrics-k8s-stack-grafana
+          namespace: victoria-metrics-k8s-stack
+          port: 80

@@ -1,0 +1,15 @@
+# Allows the cilium-namespace HTTPRoute (httproute.yaml) to backendRef the
+# Grafana Service in this namespace.
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: allow-cilium-route-grafana
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: cilium
+  to:
+    - group: ""
+      kind: Service
+      name: victoria-metrics-k8s-stack-grafana
