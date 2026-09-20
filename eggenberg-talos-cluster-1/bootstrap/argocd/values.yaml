@@ -154,6 +154,11 @@ configs:
 # yamllint enable rule:line-length
 
 redis:
+  # redis.metrics only creates the Service + ServiceMonitor; the exporter
+  # sidecar that actually serves :9121 needs this separate flag, without
+  # which the Service has zero endpoints (ScrapePoolHasNoTargets).
+  exporter:
+    enabled: true
   metrics:
     enabled: true
     service:

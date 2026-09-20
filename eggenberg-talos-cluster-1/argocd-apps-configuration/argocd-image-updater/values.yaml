@@ -107,7 +107,12 @@ metrics:
     # -- Metrics service port
     servicePort: 8443
   serviceMonitor:
-    enabled: true
+    # Chart's ServiceMonitor has no way to attach a bearer token, but the
+    # controller's metrics endpoint (controller-runtime secure metrics
+    # server) requires one — RBAC-authenticated same as kube-scheduler.
+    # Disabled here; a hand-written VMServiceScrape with bearerTokenFile
+    # replaces it (see vmservicescrape-metrics.yaml).
+    enabled: false
     # promtheus: kube-prometheus
 
     # -- Prometheus ServiceMonitor namespace
