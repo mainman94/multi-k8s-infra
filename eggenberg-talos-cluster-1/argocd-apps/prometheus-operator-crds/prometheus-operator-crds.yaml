@@ -6,10 +6,12 @@ metadata:
   labels:
     category: monitoring
   annotations:
-    # sync-wave 0 so the CRDs exist before victoria-metrics-k8s-stack's
-    # operator tries to enable its own serviceMonitor / Prometheus-CRD
-    # converter against them.
-    argocd.argoproj.io/sync-wave: "0"
+    # sync-wave -1: strictly before wave 0 (cilium's implicit default - it
+    # has serviceMonitor.enabled: true and needs these CRDs to exist by the
+    # time it applies, not just at helm-template time) and before wave 1
+    # (victoria-metrics-k8s-stack's operator, whose serviceMonitor +
+    # Prometheus-CRD converter depend on them too).
+    argocd.argoproj.io/sync-wave: "-1"
 spec:
   # yamllint disable rule:line-length
   project: default

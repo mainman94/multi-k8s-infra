@@ -141,6 +141,13 @@ prometheus:
   port: 9962
   serviceMonitor:
     enabled: true
+    # helm template (what ArgoCD's repo-server runs) can't see the live
+    # cluster's CRDs, so the chart's own validate.yaml fails closed unless
+    # told to trust they exist. They do: prometheus-operator-crds installs
+    # them (sync-wave 0, before this bootstrap chart ever needs them). This
+    # single flag also gates envoy.prometheus.serviceMonitor below - same
+    # validate.yaml check, one shared switch.
+    trustCRDsExist: true
 
 envoy:
   # cilium-envoy's own metrics (port 9964, separate Service/ServiceMonitor
