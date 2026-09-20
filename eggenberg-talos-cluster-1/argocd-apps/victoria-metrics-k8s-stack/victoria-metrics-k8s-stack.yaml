@@ -14,7 +14,7 @@ spec:
   project: default
   sources:
     - repoURL: https://victoriametrics.github.io/helm-charts/
-      targetRevision: 0.92.1
+      targetRevision: 0.93.0
       chart: victoria-metrics-k8s-stack
       helm:
         valueFiles:
