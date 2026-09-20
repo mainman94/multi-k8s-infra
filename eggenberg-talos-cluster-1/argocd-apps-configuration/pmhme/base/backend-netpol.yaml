@@ -231,6 +231,15 @@ spec:
         - ports:
             - port: "8222"
               protocol: TCP
+    # vmagent scrapes the nats-exporter metrics port. No mutual auth: vmagent
+    # has no SPIFFE identity, same rationale as the KEDA poll above.
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: victoria-metrics-k8s-stack
+      toPorts:
+        - ports:
+            - port: "7777"
+              protocol: TCP
   egress:
     - toEndpoints:
         - matchLabels:
