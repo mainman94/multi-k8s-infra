@@ -150,6 +150,8 @@ prometheus-node-exporter:
       cpu: 15m
       memory: 32Mi
     limits:
-      cpu: 100m
+      # 100m throttled on scrape bursts despite ~1-12m average usage
+      # (CFS quota throttles on the burst, not the average).
+      cpu: 200m
       memory: 128Mi
       # yamllint enable rule:line-length
