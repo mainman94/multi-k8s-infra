@@ -78,6 +78,16 @@ vmagent:
       # tripping KubeAPIInstanceUnreachable even though the target is healthy.
       promscrape.maxScrapeSize: 32MiB
 
+# RecordingRulesNoData: histogram_quantile() on scheduler_scheduling_*
+# recording rules returns NaN (dropped, so 0 samples) whenever the scheduler
+# has zero rate over the 5m window - normal on this homelab cluster, which
+# barely schedules pods. Same class of false positive as the scheduler/
+# CPUThrottlingHigh tuning below, so the meta-alert is disabled outright.
+defaultRules:
+  rules:
+    RecordingRulesNoData:
+      enabled: false
+
 # Talos control-plane certs for scheduler/controller-manager are self-signed
 # for localhost/127.0.0.1 only, so verifying against the node IP always
 # fails TLS and fires KubeSchedulerInstanceUnreachable /
