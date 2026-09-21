@@ -111,6 +111,14 @@ kubeEtcd:
   service:
     port: 2381
     targetPort: 2381
+  # Talos's etcd metrics listener on 2381 is plain HTTP (only the client/peer
+  # ports are TLS) — the chart's default vmScrape assumes https, which fails
+  # with "server gave HTTP response to HTTPS client".
+  vmScrape:
+    spec:
+      endpoints:
+        - port: http-metrics
+          scheme: http
 
 # Alertmanager config comes from an externally-managed Secret (ExternalSecret
 # in this same directory, sourced from OpenBao prod/discord) instead of
