@@ -51,7 +51,9 @@ vmsingle:
         cpu: 50m
         memory: 256Mi
       limits:
-        cpu: 500m
+        # CFS quota throttles on burst, not average: CPUThrottlingHigh fired
+        # at ~500m limit despite low average usage.
+        cpu: 1000m
         memory: 1Gi
     storage:
       accessModes:
@@ -67,7 +69,9 @@ vmagent:
         cpu: 25m
         memory: 128Mi
       limits:
-        cpu: 250m
+        # CFS quota throttles on burst, not average: CPUThrottlingHigh fired
+        # at ~250m limit despite low average usage.
+        cpu: 500m
         memory: 512Mi
     extraArgs:
       # apiserver /metrics on one control-plane node exceeds the 16Mi default,
