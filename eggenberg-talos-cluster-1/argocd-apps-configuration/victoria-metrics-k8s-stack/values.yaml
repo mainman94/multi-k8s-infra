@@ -17,6 +17,12 @@ fullnameOverride: vm
 # victoria-metrics-k8s-stack-grafana -o jsonpath='{.data.admin-password}' | base64 -d`.
 grafana:
   enabled: true
+  grafana.ini:
+    server:
+      # Without root_url Grafana defaults to localhost:3000, so the OAuth
+      # redirect_uri it sends to Pocket ID doesn't match the callback
+      # registered there and login fails.
+      root_url: https://grafana.hauptmann.dev
   persistence:
     enabled: true
     type: pvc
