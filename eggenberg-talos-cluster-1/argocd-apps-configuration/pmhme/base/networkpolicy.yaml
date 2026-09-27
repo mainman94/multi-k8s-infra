@@ -127,7 +127,8 @@ spec:
           rules:
             http:
               - method: GET
-                path: /api/v1/query
+                # Cilium full-matches the regex against :path incl. query string.
+                path: '/api/v1/query\?.*'
     # External HTTP/HTTPS for server-side fetches
     - toEntities:
         - world
