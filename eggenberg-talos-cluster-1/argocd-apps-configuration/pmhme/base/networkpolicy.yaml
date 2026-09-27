@@ -114,6 +114,20 @@ spec:
             http:
               - method: GET
                 path: /metrics
+    # Platform page / hero: 24h uptime + Kyverno breakdown via vmsingle's
+    # PromQL API (PROMETHEUS_URL in configmap.yaml, see vm-metrics.ts).
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: victoria-metrics-k8s-stack
+            app.kubernetes.io/name: vmsingle
+      toPorts:
+        - ports:
+            - port: "8428"
+              protocol: TCP
+          rules:
+            http:
+              - method: GET
+                path: /api/v1/query
     # External HTTP/HTTPS for server-side fetches
     - toEntities:
         - world
