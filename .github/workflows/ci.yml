@@ -22,7 +22,7 @@ jobs:
         with:
           persist-credentials: false
 
-      # kubectl (which carries kustomize), kube-linter, python, pre-commit,
+      # kubectl (which carries kustomize), kube-linter, python, prek,
       # actionlint and shellcheck, all at the versions in mise.toml — the same
       # file the dev container installs from. These used to be pinned in this
       # workflow while the dev container installed `latest`.
@@ -30,8 +30,8 @@ jobs:
 
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
-          path: ~/.cache/pre-commit
-          key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+          path: ~/.cache/prek
+          key: prek-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
 
       - name: Run every hook
-        run: pre-commit run --all-files --show-diff-on-failure
+        run: prek run --all-files --show-diff-on-failure

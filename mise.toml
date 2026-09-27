@@ -15,10 +15,10 @@ kubectl = "1.37.1"
 kube-linter = "0.8.3"
 kubeconform = "0.8.0"
 
-# pre-commit builds the rest of the hook toolchain — yamlfmt, shfmt,
+# prek builds the rest of the hook toolchain — yamlfmt, shfmt,
 # gitleaks — into its own cached envs.
 python = "3.14"
-pre-commit = "4.6.2"
+prek = "0.5.3"
 
 # actionlint shells out to shellcheck for `run:` blocks; shellcheck also
 # covers scripts/.

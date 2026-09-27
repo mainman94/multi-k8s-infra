@@ -65,7 +65,7 @@ reaches `main` reaches the cluster, and `make preflight` is the last gate.
 `.devcontainer/` provides helm; everything else comes from mise.
 
 **Tool versions live in `mise.toml` and nowhere else** — kubectl (which
-carries kustomize), kube-linter, kubeconform, python, pre-commit, actionlint,
+carries kustomize), kube-linter, kubeconform, python, prek, actionlint,
 shellcheck and trivy. The dev container's post-create runs `mise install`, and
 CI installs from the same file with `jdx/mise-action`. CI used to pin kubectl
 v1.34.1 and kube-linter v0.8.3 in workflow env blocks while the dev container

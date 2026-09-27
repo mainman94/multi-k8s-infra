@@ -22,7 +22,7 @@ tools: ## Install the pinned toolchain from mise.toml
 
 .PHONY: hooks
 hooks: ## Install the git pre-commit hook
-	pre-commit install
+	prek install
 
 .PHONY: preflight
 preflight: ## Full gate: hooks + kube-linter + every kustomize build
@@ -30,12 +30,12 @@ preflight: ## Full gate: hooks + kube-linter + every kustomize build
 
 .PHONY: lint
 lint: ## Run every pre-commit hook over the whole tree
-	pre-commit run --all-files
+	prek run --all-files
 
 .PHONY: fmt
 fmt: ## Reformat YAML and shell in place
-	pre-commit run yamlfmt --all-files || true
-	pre-commit run shfmt-src --all-files || true
+	prek run yamlfmt --all-files || true
+	prek run shfmt-src --all-files || true
 
 .PHONY: kustomize
 kustomize: ## Build every overlay and base
@@ -91,4 +91,4 @@ scan-images: ## CVE scan every image the repo's own apps run (advisory)
 
 .PHONY: update-hooks
 update-hooks: ## Bump pinned hook revisions
-	pre-commit autoupdate
+	prek update

@@ -27,7 +27,7 @@ needed to register it** — no manual wiring.
    `templates/values.yaml`. Set sane resource requests/limits (kube-linter flags missing ones).
 3. If the chart needs Kustomize instead of raw Helm values, mirror the `pmhme` layout
    (`base/` + `overlays/` + `components/`) and point the third source `path` at the base.
-4. Run `/preflight` (or `pre-commit run --all-files`) to format + lint before committing.
+4. Run `/preflight` (or `prek run --all-files`) to format + lint before committing.
 5. Remind the user: commit + push → ArgoCD syncs. Do not `kubectl apply`.
 
 ## Notes

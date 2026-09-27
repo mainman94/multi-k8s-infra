@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Provision the dev container. Every tool the repo's checks need — kubectl
-# (which carries kustomize), kube-linter, kubeconform, python, pre-commit,
+# (which carries kustomize), kube-linter, kubeconform, python, prek,
 # actionlint, shellcheck, trivy — is pinned in mise.toml, so this installs
 # mise and lets it do the rest. CI installs from the same file, which is what
 # keeps a local `make preflight` honest.
@@ -23,10 +23,10 @@ mise trust
 mise install
 
 echo "==> installing the git hook"
-mise exec -- pre-commit install
+mise exec -- prek install
 
 echo "==> warming hook environments"
-mise exec -- pre-commit install-hooks
+mise exec -- prek prepare-hooks
 
 cat <<'MSG'
 
