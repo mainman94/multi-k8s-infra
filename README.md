@@ -82,7 +82,7 @@ Done. ArgoCD takes over from here.
 ## Making Changes
 
 1. `make tools` once — installs the pinned toolchain (kubectl, kustomize,
-   kubeconform, kube-linter, trivy, pre-commit, …) from `mise.toml`. CI installs
+   kubeconform, kube-linter, trivy, prek, …) from `mise.toml`. CI installs
    from the same file, so a local run and a CI run agree on versions.
 2. Edit config in `eggenberg-talos-cluster-1/argocd-apps-configuration/<app>/values.yaml`
 3. `make preflight` — the hooks, kube-linter, and a `kubectl kustomize` build of

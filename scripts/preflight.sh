@@ -10,10 +10,10 @@ fail=0
 hr() { printf '\n=== %s ===\n' "$1"; }
 
 hr "pre-commit (formatting, schema, hygiene)"
-if command -v pre-commit >/dev/null 2>&1; then
-  pre-commit run --all-files || fail=1
+if command -v prek >/dev/null 2>&1; then
+  prek run --all-files || fail=1
 else
-  echo "pre-commit MISSING — skipped (install: pip install pre-commit)"
+  echo "prek MISSING — skipped (install: mise install)"
 fi
 
 hr "kube-linter"

@@ -16,6 +16,6 @@ Run repo validation and report failures concisely.
 
 ## What it checks
 
-- `pre-commit run --all-files` — yamlfmt formatting + any other configured hooks.
+- `prek run --all-files` — yamlfmt formatting + any other configured hooks.
 - `kube-linter lint` — if the binary is available (else skipped with a note).
 - `kubectl kustomize` build of every `overlays/*` and `base/` dir — catches broken Kustomize.
