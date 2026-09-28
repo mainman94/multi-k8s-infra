@@ -18,7 +18,7 @@ kubeconform = "0.8.0"
 # prek builds the rest of the hook toolchain — yamlfmt, shfmt,
 # gitleaks — into its own cached envs.
 python = "3.14"
-prek = "0.5.3"
+prek = "0.5.4"
 
 # actionlint shells out to shellcheck for `run:` blocks; shellcheck also
 # covers scripts/.
