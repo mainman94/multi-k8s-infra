@@ -5,6 +5,15 @@
 driver:
   kind: modern_ebpf
 
+# PAUSED: no node carries this label, so the DaemonSet schedules zero pods.
+# Talos v1.14.2 ships kernel 6.18.54, whose BPF verifier rejects the
+# modern_ebpf `signal_deliver` program in Falco 0.45.0 / libs 0.26.0
+# ("R9 invalid mem access 'scalar'"), so Falco crashloops on every node.
+# Fixed upstream in falcosecurity/libs#3119 but not released yet. Remove this
+# block once the chart ships a Falco built on a libs release with that fix.
+nodeSelector:
+  falco-paused/libs-3119: "true"
+
 # The falcoctl init/sidecar containers fail cosign signature verification for
 # the container plugin artifact ("no valid bundles exist in registry") — an
 # upstream GHCR/sigstore issue on that image tag, not a trust problem on our
