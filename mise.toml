@@ -26,4 +26,4 @@ actionlint = "1.7.12"
 shellcheck = "0.11.0"
 
 # `make scan` / `make scan-images`.
-trivy = "0.74.0"
+trivy = "0.75.0"
