@@ -34,6 +34,7 @@ find "$CLUSTER_DIR" -type f \( -name '*.yaml' -o -name '*.yml' \) \
   -not -path './.github/*' \
   -not -path './.claude/*' \
   -not -name 'values.yaml' \
+  -not -name 'chart-version.yaml' \
   -not -name 'kustomization.yaml' \
   -not -name '.kube-linter.yaml' \
   -not -name '.pre-commit-config.yaml' \
