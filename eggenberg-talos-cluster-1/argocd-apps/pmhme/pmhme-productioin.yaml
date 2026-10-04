@@ -5,7 +5,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: pmhme-portfolio-test
+  name: pmhme-portfolio-prod
   namespace: argocd
   labels:
     category: app
