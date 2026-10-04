@@ -11,6 +11,9 @@ metadata:
 spec:
   promotionPolicies:
     - stageSelector:
+        name: dev
+      autoPromotionEnabled: true
+    - stageSelector:
         name: test
       autoPromotionEnabled: true
     # prod is promoted by hand. Freight reaches this stage only after test's

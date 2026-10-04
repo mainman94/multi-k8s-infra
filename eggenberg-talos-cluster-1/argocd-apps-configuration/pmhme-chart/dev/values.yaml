@@ -1,0 +1,34 @@
+# Values for the pmhme Helm chart (mainman94/portfolio, charts/pmhme) in the
+# dev stage. The image tags below are written by the Kargo `dev` stage
+# (helm-update-image); do not hand-edit them.
+environment: dev
+notificationSink:
+  enabled: true
+httpRoute:
+  hostnames:
+    - dev.hauptmann.dev
+externalSecrets:
+  contactDb:
+    passwordProperty: POSTGRES_PASSWORD_DEV
+web:
+  image:
+    tag: 0.27.3
+  config:
+    STAGE: dev
+    LOG_LEVEL: debug
+    OTEL_SERVICE_NAME: hauptmann-portfolio-dev
+    SITE_URL: https://dev.hauptmann.dev
+    BLOG_REPO_CONTENT_PATH: test
+    # No analytics outside production.
+    UMAMI_SCRIPT_URL: ""
+    UMAMI_WEBSITE_ID: ""
+contactApi:
+  image:
+    tag: 0.10.0
+  otelServiceName: hauptmann-contact-api-dev
+notifierTelegram:
+  image:
+    tag: 0.4.0
+notifierEmail:
+  image:
+    tag: 0.4.0

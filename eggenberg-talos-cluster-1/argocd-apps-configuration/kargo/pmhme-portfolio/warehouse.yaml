@@ -10,12 +10,12 @@ spec:
   # manifest valid on its own terms.
   interval: 5m0s
   subscriptions:
-    - git:
-        repoURL: https://github.com/mainman94/multi-k8s-infra.git
-        branch: main
-        commitSelectionStrategy: NewestFromBranch
-        includePaths:
-          - eggenberg-talos-cluster-1/argocd-apps-configuration/pmhme/overlays/dev/kustomization.yaml
+    # The chart is part of the freight: a chart release and the image tags it
+    # was tested with travel together through dev, test and prod.
+    - chart:
+        repoURL: oci://ghcr.io/mainman94/charts/pmhme
+        semverConstraint: '>=0.1.0'
+        discoveryLimit: 5
     - image:
         repoURL: ghcr.io/mainman94/pmhme
         imageSelectionStrategy: SemVer
