@@ -1,0 +1,3 @@
+# Chart version deployed to test; written by the Kargo `test` stage, do not hand-edit.
+# Not a Helm values file: it only makes chart-only promotions produce a git diff.
+chartVersion: 0.1.0
