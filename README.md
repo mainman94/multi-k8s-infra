@@ -33,8 +33,7 @@ Everything's managed through Git. Push a change, ArgoCD deploys it. Simple.
 
 **Delivery & GitOps**
 - **Argo Suite** - CD, Workflows, Events, Rollouts (blue/green + canary)
-- **Kargo** - Progressive delivery (dev → test → prod)
-- **argocd-image-updater** - Dev-overlay image bumps
+- **Kargo** - Progressive delivery (dev → test → prod); promotes the pmhme chart version + image tags
 - **External Secrets Operator + OpenBao** - Secret management
 
 **Observability**
@@ -95,7 +94,7 @@ Done. ArgoCD takes over from here.
 upstream and CRD catalogs (needs network), `make scan` runs the trivy config
 scan, `make images` lists every image the repo's own apps actually run.
 
-Custom apps (`pmhme`) use Kustomize (`base/` + `overlays/{dev,test,production}` + `components/`) instead of raw Helm values. Never `kubectl apply` app changes, and don't hand-edit image tags managed by argocd-image-updater / Kargo.
+The custom app (`pmhme`) runs from its own Helm chart (published to `ghcr.io/mainman94/charts` by `mainman94/portfolio`) with one values file per stage in `argocd-apps-configuration/pmhme-chart/{dev,test,production}/`. Never `kubectl apply` app changes, and don't hand-edit image tags or the chart version managed by Kargo.
 
 ### What a pull request runs
 

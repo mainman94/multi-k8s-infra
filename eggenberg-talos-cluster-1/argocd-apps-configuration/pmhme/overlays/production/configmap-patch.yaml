@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: portfolio-app-config
-data:
-  STAGE: "production"
-  LOG_LEVEL: "warn"
-  BLOG_REPO_CONTENT_PATH: ""

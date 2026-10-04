@@ -38,13 +38,6 @@ repos:
     rev: v0.21.0
     hooks:
       - id: yamlfmt
-        # Kargo rewrites these on every promotion (kustomize-set-image) and
-        # writes kyaml's indentless list style. Reformatting them here only
-        # produces a diff that the next promotion flips straight back, so the
-        # working tree is never clean. The exclusion lives here rather than in
-        # .yamlfmt because yamlfmt ignores its own `exclude` list when the
-        # files are handed to it as arguments, which is what pre-commit does.
-        exclude: ^eggenberg-talos-cluster-1/argocd-apps-configuration/pmhme/overlays/[^/]+/kustomization\.yaml$
 
   # shellcheck-py, not the upstream shellcheck repo: it ships the binary in a
   # wheel, so the hook needs no Docker daemon.
@@ -87,12 +80,12 @@ repos:
   - repo: local
     hooks:
       # A base or overlay that does not build is a manifest ArgoCD cannot
-      # sync. Cheap enough to run on every touch of the Kustomize tree.
+      # sync. Cheap enough to run on every touch of the app configuration.
       - id: kustomize-build
         name: kustomize build (overlays + bases)
         entry: scripts/kustomize-build.sh
         language: script
-        files: ^eggenberg-talos-cluster-1/argocd-apps-configuration/pmhme/
+        files: ^eggenberg-talos-cluster-1/argocd-apps-configuration/
         pass_filenames: false
 
       - id: kube-linter

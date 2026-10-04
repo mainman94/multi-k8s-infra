@@ -38,7 +38,6 @@ find "$CLUSTER_DIR" -type f \( -name '*.yaml' -o -name '*.yml' \) \
   -not -name '.kube-linter.yaml' \
   -not -name '.pre-commit-config.yaml' \
   -not -name 'mise.toml' \
-  -not -name 'image-updater-dev.yaml' \
   -not -name '*-patch.yaml' \
   -print0 | xargs -0 kubeconform \
     -verbose \

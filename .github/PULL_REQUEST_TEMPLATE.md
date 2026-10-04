@@ -14,5 +14,5 @@
 - [ ] New app: manifest added under `argocd-apps/<name>/` — the app-of-apps
       recurses, so there is no manual wiring to do
 - [ ] Secrets go through External Secrets + OpenBao; nothing plaintext
-- [ ] Image tags in `pmhme` overlays left to argocd-image-updater / Kargo,
+- [ ] Image tags and chart version in `pmhme-chart/*/values.yaml` left to Kargo,
       unless a hand-edit is the point of this PR

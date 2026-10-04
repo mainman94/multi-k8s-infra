@@ -1,0 +1,29 @@
+# Values for the pmhme Helm chart (mainman94/portfolio, charts/pmhme) in the
+# production stage. The image tags below are written by the Kargo `prod` stage
+# (yaml-update); do not hand-edit them.
+environment: production
+httpRoute:
+  parentRef:
+    name: public
+    namespace: cilium
+    sectionName: https-root
+  hostnames:
+    - hauptmann.dev
+web:
+  replicaCount: 3
+  image:
+    tag: 0.28.0
+  config:
+    STAGE: production
+    LOG_LEVEL: warn
+    # Blog posts live in the content repo's root in production.
+    BLOG_REPO_CONTENT_PATH: ""
+contactApi:
+  image:
+    tag: 0.11.0
+notifierTelegram:
+  image:
+    tag: 0.4.1
+notifierEmail:
+  image:
+    tag: 0.4.1

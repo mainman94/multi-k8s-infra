@@ -17,8 +17,8 @@ Focus exclusively on `*.yaml` under `eggenberg-talos-cluster-1/`.
 
 - **Resource limits/requests** missing on workloads (kube-linter flags these; catch before it does).
 - **securityContext**: privileged, runAsRoot, missing readOnlyRootFilesystem where feasible.
-- **Image tags**: hand-edited tags on apps managed by argocd-image-updater / Kargo (see
-  `pmhme` overlays + `kargo/`) — flag; those should flow through automation, not manual edits.
+- **Image tags**: hand-edited tags on apps managed by Kargo (see
+  `pmhme-chart/` values + `kargo/`) — flag; those should flow through automation, not manual edits.
 - **Secrets**: any plaintext secret / credential / token inlined — must go through Infisical.
 - **ArgoCD Application shape**: 3-source pattern intact (chart + `ref: values` + config `path`),
   `syncPolicy.automated`, correct `namespace`, `CreateNamespace=true` when needed.

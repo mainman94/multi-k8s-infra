@@ -33,5 +33,5 @@ needed to register it** — no manual wiring.
 ## Notes
 
 - Keep the 3-source pattern (chart + `ref: values` + config `path`) — see template.
-- Never pin image tags that argocd-image-updater / Kargo manages.
+- Never pin image tags that Kargo manages.
 - Secrets go through Infisical, never inline.
