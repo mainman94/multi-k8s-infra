@@ -1,4 +1,7 @@
 # yamllint disable rule:line-length
+# Test runs the pmhme Helm chart (published to GHCR by mainman94/portfolio).
+# The Kargo `test` stage owns two things: the chart version (targetRevision of
+# the first source) and the image tags in test/values.yaml.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -11,9 +14,16 @@ metadata:
 spec:
   project: default
   sources:
+    - repoURL: ghcr.io/mainman94/charts
+      chart: pmhme
+      targetRevision: 0.1.0
+      helm:
+        releaseName: pmhme
+        valueFiles:
+          - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/pmhme-chart/test/values.yaml
     - repoURL: https://github.com/mainman94/multi-k8s-infra
-      targetRevision: HEAD
-      path: "eggenberg-talos-cluster-1/argocd-apps-configuration/pmhme/overlays/test"
+      targetRevision: main
+      ref: values
   destination:
     server: https://kubernetes.default.svc
     namespace: portfolio-test
@@ -23,6 +33,11 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: restricted
+        pod-security.kubernetes.io/audit: restricted
+        pod-security.kubernetes.io/warn: restricted
   ignoreDifferences:
     - group: argoproj.io
       kind: Rollout

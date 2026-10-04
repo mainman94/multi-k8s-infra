@@ -16,7 +16,6 @@ reaches `main` reaches the cluster, and `make preflight` is the last gate.
 | `make fmt`                     | Reformat YAML and shell in place                    |
 | `make kustomize`               | Build every overlay and base                        |
 | `make kubeconform`             | Schema validation (needs network for the CRD catalog) |
-| `make build OVERLAY=production`| Render one pmhme overlay to stdout                  |
 | `make scan`                    | trivy config scan of the cluster manifests          |
 | `make scan-images`             | CVE scan the images the repo's own apps run         |
 
@@ -77,7 +76,7 @@ the tag in a trailing comment; Renovate keeps the digests current.
 
 Two hooks are repo-specific:
 
-- **`kustomize-build`** — builds every overlay and base under `pmhme/`. A
+- **`kustomize-build`** — builds every kustomization under the cluster directory. A
   kustomization that does not build is a manifest ArgoCD cannot sync.
   `kind: Component` kustomizations are skipped: a component resolves against
   the overlay that includes it and is not buildable alone.
@@ -88,10 +87,6 @@ Two hooks are repo-specific:
 Both skip with a printed note when their binary is missing, so a checkout
 without kubectl still commits — CI does not skip. Install the tools or use
 the dev container.
-
-`yamlfmt` deliberately excludes `pmhme/overlays/*/kustomization.yaml`: Kargo
-rewrites those on every promotion in kyaml's indentless list style, so
-formatting them just produces a diff the next promotion flips back.
 
 ## Scanning
 

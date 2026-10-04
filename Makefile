@@ -49,11 +49,6 @@ kube-lint: ## kube-linter over the cluster manifests
 kubeconform: ## Schema-validate manifests against upstream + CRD catalog (needs network)
 	scripts/kubeconform.sh
 
-.PHONY: build
-build: ## Render one overlay to stdout, e.g. make build OVERLAY=production
-	@test -n "$(OVERLAY)" || { echo "error: OVERLAY is not set — e.g. make build OVERLAY=production" >&2; exit 1; }
-	kubectl kustomize $(CLUSTER_DIR)/argocd-apps-configuration/pmhme/overlays/$(OVERLAY)
-
 .PHONY: apps
 apps: ## List every registered ArgoCD application
 	@ls -1 $(CLUSTER_DIR)/argocd-apps
