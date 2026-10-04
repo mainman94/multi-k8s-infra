@@ -49,9 +49,30 @@ spec:
           config:
             path: ${{ vars.repoPath }}
             message: ${{ outputs['update-image'].commitMessage }}
+        # main only accepts pull requests, so the promotion lands as one: push a
+        # per-promotion branch, open the PR, let .github/workflows/kargo-automerge.yml
+        # merge it once the required checks are green, and wait for that.
         - uses: git-push
+          as: push
           config:
             path: ${{ vars.repoPath }}
+            targetBranch: kargo/${{ ctx.stage }}/${{ ctx.promotion }}
+        - uses: git-open-pr
+          as: open-pr
+          config:
+            repoURL: ${{ vars.gitRepo }}
+            provider: github
+            sourceBranch: ${{ outputs.push.branch }}
+            targetBranch: main
+            title: 'chore(kargo): promote ${{ ctx.stage }}'
+            description: Automated promotion by Kargo (project ${{ ctx.project }}, stage ${{ ctx.stage }}). Merged automatically once the required checks pass.
+        - uses: git-wait-for-pr
+          as: wait-for-pr
+          retry:
+            timeout: 30m0s
+          config:
+            repoURL: ${{ vars.gitRepo }}
+            prNumber: ${{ outputs['open-pr'].pr.id }}
         # (Optional, recommended) read back what prod overlay now contains
         - uses: yaml-parse
           as: overlay

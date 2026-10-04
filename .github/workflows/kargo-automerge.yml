@@ -1,0 +1,57 @@
+name: Kargo promotion auto-merge
+
+# Kargo cannot push to main (the ruleset requires a pull request and four
+# status checks), so each promotion opens a PR from a kargo/<stage>/<promotion>
+# branch. This enables auto-merge on it, so GitHub merges it as soon as the
+# required checks pass, and Kargo's git-wait-for-pr step carries on.
+#
+# Plain pull_request, not pull_request_target: the head branch must live in this
+# repository, so the token is the normal write-capable one for same-repo PRs and
+# the workflow never runs untrusted code (it only calls the API).
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  automerge:
+    name: Enable auto-merge for Kargo promotions
+    if: >
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      startsWith(github.event.pull_request.head.ref, 'kargo/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      # Promotions only touch image tags: the chart values file of a stage or
+      # the test/production overlay. Anything else in a kargo/ branch needs a
+      # human, so it is left alone (the PR stays open and Kargo times out).
+      - name: Check that only promotion files changed
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        with:
+          script: |
+            const allowed = [
+              /^eggenberg-talos-cluster-1\/argocd-apps-configuration\/pmhme-chart\/[^/]+\/values\.yaml$/,
+              /^eggenberg-talos-cluster-1\/argocd-apps-configuration\/pmhme\/overlays\/(test|production)\/kustomization\.yaml$/,
+            ];
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              per_page: 100,
+            });
+            const bad = files.filter((f) => !allowed.some((re) => re.test(f.filename)));
+            if (files.length === 0 || files.length > 2 || bad.length) {
+              core.setFailed(`not a plain promotion: ${bad.map((f) => f.filename).join(", ") || files.length + " files"}`);
+            }
+
+      - name: Enable auto-merge
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: gh pr merge --auto --squash "$PR_URL"
