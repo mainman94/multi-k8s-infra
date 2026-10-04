@@ -1,0 +1,25 @@
+# Keep one Keycloak pod serving during node drains (2 replicas).
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: keycloak
+spec:
+  minAvailable: 1
+  unhealthyPodEvictionPolicy: AlwaysAllow
+  selector:
+    matchLabels:
+      app: keycloak
+      app.kubernetes.io/managed-by: keycloak-operator
+---
+# Same for the CNPG cluster; the operator also manages its own PDB for the
+# primary, this one only protects against draining both instances at once.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: keycloak-postgres
+spec:
+  minAvailable: 1
+  unhealthyPodEvictionPolicy: AlwaysAllow
+  selector:
+    matchLabels:
+      cnpg.io/cluster: keycloak-postgres

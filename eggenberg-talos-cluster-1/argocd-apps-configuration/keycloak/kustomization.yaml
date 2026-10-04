@@ -1,0 +1,16 @@
+# Renovate bumps the tag in these URLs together (keep all three in sync).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: keycloak
+resources:
+  - https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/26.8.0/kubernetes/keycloaks.k8s.keycloak.org-v1.yml
+  - https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/26.8.0/kubernetes/keycloakrealmimports.k8s.keycloak.org-v1.yml
+  - https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/26.8.0/kubernetes/kubernetes.yml
+  - keycloak-db-externalsecret.yaml
+  - keycloak-admin-externalsecret.yaml
+  - keycloak-postgres.yaml
+  - keycloak.yaml
+  - keycloak-netpol.yaml
+  - keycloak-pdb.yaml
+patches:
+  - path: operator-hardening-patch.yaml

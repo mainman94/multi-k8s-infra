@@ -1,0 +1,29 @@
+# Upstream operator manifest ships no securityContext. The image runs as uid
+# 1000; Quarkus needs a writable /tmp, so the root fs goes read-only with an
+# emptyDir there.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak-operator
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: keycloak-operator
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}

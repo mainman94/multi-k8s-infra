@@ -1,0 +1,39 @@
+# CloudNativePG cluster for Keycloak: 1 primary + 1 streaming replica with
+# automatic failover. Primary service: keycloak-postgres-rw. Storage uses the
+# single-replica longhorn-cnpg class (redundancy is at the PG layer, see
+# cloudnative-pg/storageclass-longhorn-cnpg.yaml). Backups: Velero for now,
+# same as contact-postgres.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: keycloak-postgres
+  annotations:
+    # The CNPG CRDs come from the cloudnative-pg app; do not fail dry-run if it
+    # has not synced yet.
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  labels:
+    app: keycloak-postgres
+spec:
+  instances: 2
+  imageName: ghcr.io/cloudnative-pg/postgresql:18-minimal-trixie
+  bootstrap:
+    initdb:
+      database: keycloak
+      owner: keycloak
+      secret:
+        name: keycloak-db
+  storage:
+    storageClass: longhorn-cnpg
+    size: 5Gi
+  affinity:
+    enablePodAntiAffinity: true
+    topologyKey: kubernetes.io/hostname
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 512Mi
+  monitoring:
+    enablePodMonitor: false
