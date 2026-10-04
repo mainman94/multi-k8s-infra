@@ -36,28 +36,24 @@ spec:
                 path: ${{ vars.repoPath }}
         # Image tags live in the chart's values file; the chart version itself
         # is applied to the Application by argocd-update below.
-        - uses: helm-update-image
+        - uses: yaml-update
           as: update-image
           config:
             path: ${{ vars.repoPath }}/${{ vars.valuesFile }}
-            images:
-              - image: ghcr.io/mainman94/pmhme
-                key: web.image.tag
-                value: Tag
-              - image: ghcr.io/mainman94/contact-api
-                key: contactApi.image.tag
-                value: Tag
-              - image: ghcr.io/mainman94/notifier-telegram
-                key: notifierTelegram.image.tag
-                value: Tag
-              - image: ghcr.io/mainman94/notifier-email
-                key: notifierEmail.image.tag
-                value: Tag
+            updates:
+              - key: web.image.tag
+                value: ${{ imageFrom("ghcr.io/mainman94/pmhme").Tag }}
+              - key: contactApi.image.tag
+                value: ${{ imageFrom("ghcr.io/mainman94/contact-api").Tag }}
+              - key: notifierTelegram.image.tag
+                value: ${{ imageFrom("ghcr.io/mainman94/notifier-telegram").Tag }}
+              - key: notifierEmail.image.tag
+                value: ${{ imageFrom("ghcr.io/mainman94/notifier-email").Tag }}
         - uses: git-commit
           as: commit
           config:
             path: ${{ vars.repoPath }}
-            message: ${{ outputs['update-image'].commitMessage }}
+            message: 'chore(dev): pmhme ${{ imageFrom("ghcr.io/mainman94/pmhme").Tag }}, contact-api ${{ imageFrom("ghcr.io/mainman94/contact-api").Tag }}, chart ${{ chartFrom("oci://ghcr.io/mainman94/charts/pmhme").Version }}'
         - uses: git-push
           config:
             path: ${{ vars.repoPath }}
