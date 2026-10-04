@@ -1,0 +1,55 @@
+# Keycloak CR reconciled by the Keycloak Operator. TLS terminates at the Cilium
+# Gateway (auth.hauptmann.dev), so Keycloak serves plain HTTP on 8080 and trusts
+# the X-Forwarded-* headers (Cloudflare -> cilium-ingress -> Gateway). The
+# operator's own NetworkPolicy is off; keycloak-netpol.yaml (Cilium) owns it.
+# Service created by the operator: keycloak-service:8080.
+apiVersion: k8s.keycloak.org/v2alpha1
+kind: Keycloak
+metadata:
+  name: keycloak
+  annotations:
+    # The Keycloak CRD is applied by this same sync; skip dry-run until it exists.
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  instances: 2
+  db:
+    vendor: postgres
+    host: keycloak-postgres-rw
+    port: 5432
+    database: keycloak
+    usernameSecret:
+      name: keycloak-db
+      key: username
+    passwordSecret:
+      name: keycloak-db
+      key: password
+  bootstrapAdmin:
+    user:
+      secret: keycloak-bootstrap-admin
+  hostname:
+    hostname: https://auth.hauptmann.dev
+    strict: true
+  http:
+    httpEnabled: true
+  proxy:
+    headers: xforwarded
+  ingress:
+    enabled: false
+  networkPolicy:
+    enabled: false
+  resources:
+    requests:
+      cpu: 250m
+      memory: 1Gi
+    limits:
+      cpu: "1"
+      memory: 1536Mi
+  scheduling:
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: keycloak
+            app.kubernetes.io/managed-by: keycloak-operator

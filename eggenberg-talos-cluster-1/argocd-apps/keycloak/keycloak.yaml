@@ -1,0 +1,36 @@
+# Keycloak via the upstream Keycloak Operator (no Helm chart exists for it).
+# The kustomization pulls the operator CRDs + Deployment from the pinned
+# keycloak-k8s-resources tag and adds the Keycloak CR, its CNPG database and
+# the supporting policies/secrets from this directory. Operator, Keycloak and
+# Postgres share the `keycloak` namespace: the operator is namespace-scoped
+# (JOSDK_WATCH_CURRENT) and its upstream RBAC binds the `keycloak` namespace.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: keycloak
+  namespace: argocd
+  labels:
+    category: identity
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/mainman94/multi-k8s-infra
+    targetRevision: HEAD
+    path: "eggenberg-talos-cluster-1/argocd-apps-configuration/keycloak"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: keycloak
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    managedNamespaceMetadata:
+      labels:
+        # Keycloak pods are created by the operator without a seccomp profile,
+        # so restricted would reject them; baseline is the ceiling here.
+        pod-security.kubernetes.io/enforce: baseline
+        pod-security.kubernetes.io/audit: baseline
+        pod-security.kubernetes.io/warn: baseline
