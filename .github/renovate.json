@@ -17,5 +17,43 @@
   },
   "pre-commit": {
     "enabled": true
-  }
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "CNPG Cluster spec.imageName (not matched by the kubernetes manager)",
+      "managerFilePatterns": [
+        "**/*.yaml"
+      ],
+      "matchStrings": [
+        "imageName:\\s*(?<depName>[^:\\s@]+):(?<currentValue>[^@\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?"
+      ],
+      "datasourceTemplate": "docker"
+    }
+  ],
+  "packageRules": [
+    {
+      "matchPackageNames": [
+        "ghcr.io/cloudnative-pg/postgresql"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "automerge": false,
+      "labels": [
+        "postgres-major"
+      ]
+    },
+    {
+      "matchPackageNames": [
+        "ghcr.io/cloudnative-pg/postgresql"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest"
+      ],
+      "automerge": true
+    }
+  ]
 }
