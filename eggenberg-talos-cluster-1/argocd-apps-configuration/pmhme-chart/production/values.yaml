@@ -2,6 +2,9 @@
 # production stage. The image tags below are written by the Kargo `prod` stage
 # (yaml-update); do not hand-edit them.
 environment: production
+externalSecrets:
+  contactDb:
+    passwordProperty: POSTGRES_PASSWORD_PROD
 httpRoute:
   parentRef:
     name: public
