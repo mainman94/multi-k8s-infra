@@ -11,8 +11,8 @@ spec:
       value: ./repo
     - name: valuesFile
       value: eggenberg-talos-cluster-1/argocd-apps-configuration/pmhme-chart/test/values.yaml
-    - name: chartVersionFile
-      value: eggenberg-talos-cluster-1/argocd-apps-configuration/pmhme-chart/test/chart-version.yaml
+    - name: appFile
+      value: eggenberg-talos-cluster-1/argocd-apps/pmhme/pmhme-test.yaml
     - name: chartRepo
       value: ghcr.io/mainman94/charts
     - name: chartName
@@ -52,15 +52,17 @@ spec:
                 value: ${{ imageFrom("ghcr.io/mainman94/notifier-telegram").Tag }}
               - key: notifierEmail.image.tag
                 value: ${{ imageFrom("ghcr.io/mainman94/notifier-email").Tag }}
-        # Records the deployed chart version in git so a chart-only promotion
-        # still produces a diff (commit/open-pr would otherwise be skipped and
-        # wait-for-pr would fail on the missing PR id).
+        # The chart version is pinned in the Application manifest. Writing it
+        # here (not only via argocd-update) keeps git the source of truth: the
+        # app-of-apps self-heals the Application and would otherwise revert
+        # targetRevision to the old chart. It also guarantees a diff for a
+        # chart-only promotion, so commit/open-pr/wait-for-pr always run.
         - uses: yaml-update
           as: update-chart-version
           config:
-            path: ${{ vars.repoPath }}/${{ vars.chartVersionFile }}
+            path: ${{ vars.repoPath }}/${{ vars.appFile }}
             updates:
-              - key: chartVersion
+              - key: spec.sources.0.targetRevision
                 value: ${{ chartFrom("oci://ghcr.io/mainman94/charts/pmhme").Version }}
         - uses: git-commit
           as: commit
