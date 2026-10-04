@@ -3,7 +3,7 @@
 # the X-Forwarded-* headers (Cloudflare -> cilium-ingress -> Gateway). The
 # operator's own NetworkPolicy is off; keycloak-netpol.yaml (Cilium) owns it.
 # Service created by the operator: keycloak-service:8080.
-apiVersion: k8s.keycloak.org/v2alpha1
+apiVersion: k8s.keycloak.org/v2beta1
 kind: Keycloak
 metadata:
   name: keycloak
