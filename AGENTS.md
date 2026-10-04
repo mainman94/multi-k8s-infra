@@ -58,7 +58,7 @@ spec:
       path: "eggenberg-talos-cluster-1/argocd-apps-configuration/<name>"
 ```
 
-`pmhme` (custom apps) uses Kustomize instead: `base/` + `overlays/{dev,test,production}` + `components/`. Images bumped by argocd-image-updater / Kargo — do not hand-edit image tags in overlays unless asked.
+`pmhme` (custom apps) uses Kustomize instead: `base/` + `overlays/{test,production}` + `components/`. The **dev** stage already runs the Helm chart from `mainman94/portfolio` (`charts/pmhme`, published to `oci://ghcr.io/mainman94/charts/pmhme`): the Application is in `argocd-apps/pmhme/pmhme-dev.yaml`, its values in `argocd-apps-configuration/pmhme-chart/dev/values.yaml`. Images and the chart version are promoted by Kargo (`kargo/pmhme-portfolio`, stages dev → test → prod) — do not hand-edit image tags or the chart `targetRevision` unless asked.
 
 ## Automated checks
 
