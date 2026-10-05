@@ -14,7 +14,26 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
+  # Kargo's argocd-update owns the live pmhme chart version. Without this,
+  # self-heal reverts it to whatever commit app-of-apps last synced, so a
+  # promotion briefly ran new values on the old chart (2026-10-05). git still
+  # records the version (the promotion PR writes it) and seeds new Applications.
+  ignoreDifferences:
+    - group: argoproj.io
+      kind: Application
+      name: pmhme-portfolio-dev
+      jqPathExpressions: ['.spec.sources[0].targetRevision']
+    - group: argoproj.io
+      kind: Application
+      name: pmhme-portfolio-test
+      jqPathExpressions: ['.spec.sources[0].targetRevision']
+    - group: argoproj.io
+      kind: Application
+      name: pmhme-portfolio-prod
+      jqPathExpressions: ['.spec.sources[0].targetRevision']
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - RespectIgnoreDifferences=true
