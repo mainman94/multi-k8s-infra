@@ -15,7 +15,7 @@ metadata:
     app: keycloak-postgres
 spec:
   instances: 2
-  imageName: ghcr.io/cloudnative-pg/postgresql:18.6-minimal-trixie@sha256:4467d4cf7e502fbc29800b75d755ede477a765b25a506a58a0842a57a4bf42c9
+  imageName: ghcr.io/cloudnative-pg/postgresql:18.6-minimal-trixie@sha256:37ade18dbdddba430858c72725aceeec66f33fa5333e82ea1df4942f6c1c83a3
   bootstrap:
     initdb:
       database: keycloak
