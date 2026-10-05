@@ -26,6 +26,15 @@ contactApi:
   image:
     tag: 0.11.0
   otelServiceName: hauptmann-contact-api-dev
+  # Keycloak M2M test: PATCH /internal/contact/:id/status accepts a
+  # client-credentials token (realm and clients: homelab terraform/keycloak).
+  oidc:
+    enabled: true
+    issuerUrl: https://auth.hauptmann.dev/realms/homelab
+  internalAccess:
+    # Only pods labelled like this may reach the route (L7: PATCH only).
+    fromEndpoints:
+      - matchLabels: {app.kubernetes.io/component: m2m-client}
 notifierTelegram:
   image:
     tag: 0.4.1
