@@ -53,14 +53,19 @@ vmsingle:
     replicaCount: 1
     retentionPeriod: "3"
     resources:
+      # Requests track observed steady use (~300m / ~930Mi).
       requests:
-        cpu: 50m
-        memory: 256Mi
+        cpu: 300m
+        memory: 1Gi
       limits:
         # CFS quota throttles on burst, not average: CPUThrottlingHigh fired
-        # at ~500m limit despite low average usage.
-        cpu: 1000m
-        memory: 1Gi
+        # at ~500m limit despite low average usage. The limit also sets
+        # -search.maxConcurrentRequests (2 per CPU): at 1 CPU, vmalert's
+        # apiserver SLO rules held both slots for 10s+ and KEDA's 3s
+        # ScaledObject queries timed out, flipping the pmhme apps Degraded.
+        cpu: 2000m
+        # 1Gi was OOMKilled under the same rule load (2026-10-04).
+        memory: 2Gi
     storage:
       accessModes:
         - ReadWriteOnce

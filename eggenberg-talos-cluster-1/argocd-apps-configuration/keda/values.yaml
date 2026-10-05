@@ -51,3 +51,10 @@ prometheus:
     portName: metrics
     serviceMonitor:
       enabled: true
+# Default 3000ms is shorter than vmsingle's 10s queue wait
+# (-search.maxQueueDuration) when vmalert's rule load holds every query slot,
+# so contact-api's prometheus trigger timed out and its ScaledObject went
+# Ready=False (Argo CD Degraded). Fallback would not help: Argo CD marks
+# Fallback=True Degraded too.
+http:
+  timeout: 15000
