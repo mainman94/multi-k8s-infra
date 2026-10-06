@@ -54,6 +54,20 @@
         "digest"
       ],
       "automerge": true
+    },
+    {
+      "description": "Kargo promotes the pmhme chart through dev, test and prod; a Renovate PR would race it.",
+      "matchPackageNames": [
+        "ghcr.io/mainman94/charts/pmhme"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "OCI repoURL already ends in the chart name, so the argocd manager appends it twice.",
+      "matchPackageNames": [
+        "ghcr.io/spegel-org/helm-charts/spegel/spegel"
+      ],
+      "overridePackageName": "ghcr.io/spegel-org/helm-charts/spegel"
     }
   ]
 }
