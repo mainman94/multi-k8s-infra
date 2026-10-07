@@ -12,7 +12,7 @@ externalSecrets:
     passwordProperty: POSTGRES_PASSWORD_DEV
 web:
   image:
-    tag: 0.29.0
+    tag: 0.29.1
   config:
     STAGE: dev
     LOG_LEVEL: debug
