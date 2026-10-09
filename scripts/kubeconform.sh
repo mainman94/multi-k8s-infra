@@ -21,6 +21,12 @@ CLUSTER_DIR=${CLUSTER_DIR:-.}
 SKIP_KINDS=${SKIP_KINDS:-Kustomization,Component}
 
 CATALOG='https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
+# Fallback pinned to the catalog commit before datreeio/CRDs-catalog#988, whose
+# external-secrets.io schemas kubeconform 0.8.0 cannot compile ("could not find
+# schema for ClusterSecretStore"). kubeconform tries locations in order, so
+# this is only consulted when main's schema is missing or broken. Drop it once
+# main compiles again.
+CATALOG_PINNED='https://raw.githubusercontent.com/datreeio/CRDs-catalog/f3e4382095909ac60000da025f323ba44d4c738a/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
 
 if ! command -v kubeconform >/dev/null 2>&1; then
   echo "kubeconform: not on PATH — skipped." >&2
@@ -45,4 +51,5 @@ find "$CLUSTER_DIR" -type f \( -name '*.yaml' -o -name '*.yml' \) \
     -summary \
     -skip "$SKIP_KINDS" \
     -schema-location default \
-    -schema-location "$CATALOG"
+    -schema-location "$CATALOG" \
+    -schema-location "$CATALOG_PINNED"
