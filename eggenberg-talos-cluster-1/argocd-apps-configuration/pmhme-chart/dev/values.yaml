@@ -28,7 +28,7 @@ contactApi:
   otelServiceName: hauptmann-contact-api-dev
 notifierTelegram:
   image:
-    tag: 0.4.1
+    tag: 0.4.2
 notifierEmail:
   image:
-    tag: 0.4.1
+    tag: 0.4.2
