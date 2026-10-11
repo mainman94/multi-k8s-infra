@@ -12,7 +12,7 @@ externalSecrets:
     passwordProperty: POSTGRES_PASSWORD_TEST
 web:
   image:
-    tag: 0.29.3
+    tag: 0.29.4
   config:
     STAGE: test
     LOG_LEVEL: info
@@ -28,7 +28,7 @@ contactApi:
   otelServiceName: hauptmann-contact-api-test
 notifierTelegram:
   image:
-    tag: 0.4.2
+    tag: 0.4.3
 notifierEmail:
   image:
-    tag: 0.4.2
+    tag: 0.4.3
