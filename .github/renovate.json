@@ -29,6 +29,17 @@
         "imageName:\\s*(?<depName>[^:\\s@]+):(?<currentValue>[^@\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?"
       ],
       "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "Kustomize remote bases pinned to a commit SHA with the tag in a trailing comment (the kustomize manager only reads ?ref= as a version)",
+      "managerFilePatterns": [
+        "**/kustomization.yaml"
+      ],
+      "matchStrings": [
+        "github\\.com/(?<depName>[^/\\s]+/[^/\\s]+)//[^?\\s]*\\?ref=(?<currentDigest>[a-f0-9]{40})\\s*#\\s*(?<currentValue>\\S+)"
+      ],
+      "datasourceTemplate": "github-tags"
     }
   ],
   "packageRules": [
@@ -68,6 +79,16 @@
         "ghcr.io/spegel-org/helm-charts/spegel/spegel"
       ],
       "overridePackageName": "ghcr.io/spegel-org/helm-charts/spegel"
+    },
+    {
+      "description": "SHA-pinned remote base, bumped by the regex manager above; the kustomize manager would read the SHA as a version.",
+      "matchManagers": [
+        "kustomize"
+      ],
+      "matchDepNames": [
+        "keycloak/keycloak-k8s-resources"
+      ],
+      "enabled": false
     }
   ]
 }
