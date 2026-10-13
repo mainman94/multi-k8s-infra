@@ -12,6 +12,11 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   instances: 2
+  # Operator checks per update whether a rolling update is safe (patch releases)
+  # and only recreates when it is not. The default, RecreateOnImageChange, scales
+  # to zero on every image change.
+  update:
+    strategy: Auto
   db:
     vendor: postgres
     host: keycloak-postgres-rw
@@ -48,7 +53,7 @@ spec:
     topologySpreadConstraints:
       - maxSkew: 1
         topologyKey: kubernetes.io/hostname
-        whenUnsatisfiable: ScheduleAnyway
+        whenUnsatisfiable: DoNotSchedule
         labelSelector:
           matchLabels:
             app: keycloak

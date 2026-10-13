@@ -15,6 +15,11 @@ if ! command -v kubectl >/dev/null 2>&1; then
   exit 0
 fi
 
+# Inside a git hook, GIT_DIR/GIT_INDEX_FILE point at this repository; the git
+# clone kustomize runs for a remote base inherits them and checks out into
+# our index instead of its own. Drop every repo-local git variable.
+while IFS= read -r var; do unset "$var"; done < <(git rev-parse --local-env-vars)
+
 status=0
 built=0
 
