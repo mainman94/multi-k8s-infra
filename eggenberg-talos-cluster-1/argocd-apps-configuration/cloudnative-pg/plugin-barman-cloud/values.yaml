@@ -1,0 +1,9 @@
+# Barman Cloud plugin. The chart's defaults already run it non-root with a
+# read-only root fs and create its mTLS certificates via cert-manager; only
+# resources are unset (Kyverno pmhme-require-resource-requests).
+resources:
+  requests:
+    cpu: 10m
+    memory: 64Mi
+  limits:
+    memory: 256Mi

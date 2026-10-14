@@ -1,0 +1,87 @@
+# CNPG backup of keycloak-postgres to Cloudflare R2 (bucket pmhme-cnpg-backup,
+# EU jurisdiction; created by the homelab cloudflare stack, which also writes
+# the bucket-scoped key to OpenBao prod/cnpg-backup). WAL is archived
+# continuously, base backups run daily, retention 30 days: point-in-time
+# recovery to any moment in that window. Objects land under
+# s3://pmhme-cnpg-backup/keycloak-postgres/ (serverName = cluster name).
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: cnpg-backup-r2
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: openbao
+  target:
+    name: cnpg-backup-r2
+    creationPolicy: Owner
+  data:
+    - secretKey: ACCESS_KEY_ID
+      remoteRef:
+        conversionStrategy: Default
+        decodingStrategy: None
+        key: prod/cnpg-backup
+        metadataPolicy: None
+        property: ACCESS_KEY_ID
+    - secretKey: SECRET_ACCESS_KEY
+      remoteRef:
+        conversionStrategy: Default
+        decodingStrategy: None
+        key: prod/cnpg-backup
+        metadataPolicy: None
+        property: SECRET_ACCESS_KEY
+---
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: keycloak-r2
+  annotations:
+    # The ObjectStore CRD comes from the cloudnative-pg app (plugin chart).
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  retentionPolicy: "30d"
+  configuration:
+    destinationPath: s3://pmhme-cnpg-backup/
+    endpointURL: https://d726772d8736f94abb1f6b032476b367.eu.r2.cloudflarestorage.com
+    s3Credentials:
+      accessKeyId:
+        name: cnpg-backup-r2
+        key: ACCESS_KEY_ID
+      secretAccessKey:
+        name: cnpg-backup-r2
+        key: SECRET_ACCESS_KEY
+    wal:
+      compression: gzip
+    data:
+      compression: gzip
+  instanceSidecarConfiguration:
+    # boto3 >= 1.36 sends integrity checksums by default that non-AWS S3
+    # backends have rejected (Velero hit the same with B2). when_required
+    # restores the old behaviour; drop these once R2 is confirmed to accept them.
+    env:
+      - name: AWS_REQUEST_CHECKSUM_CALCULATION
+        value: when_required
+      - name: AWS_RESPONSE_CHECKSUM_VALIDATION
+        value: when_required
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        memory: 256Mi
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: keycloak-postgres-daily
+spec:
+  # Six fields, seconds first. 03:00, an hour after Velero's 02:00 run.
+  schedule: "0 0 3 * * *"
+  immediate: true
+  backupOwnerReference: self
+  cluster:
+    name: keycloak-postgres
+  method: plugin
+  pluginConfiguration:
+    name: barman-cloud.cloudnative-pg.io

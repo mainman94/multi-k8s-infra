@@ -1,6 +1,9 @@
 # CloudNativePG operator. Cluster-scoped; installs the postgresql.cnpg.io CRDs
 # consumed by the pmhme contact-postgres Cluster. Third source applies the
 # dedicated longhorn-cnpg StorageClass (single-owner cluster-scoped resource).
+# Fourth source is the Barman Cloud plugin (backups to object storage); it must
+# run in the operator's namespace, and its chart version tracks the plugin
+# release (0.8.1 = v0.15.1).
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -26,6 +29,12 @@ spec:
       directory:
         # Apply the StorageClass; the sibling values.yaml is a Helm input.
         include: "storageclass-longhorn-cnpg.yaml"
+    - repoURL: https://cloudnative-pg.io/charts
+      chart: plugin-barman-cloud
+      targetRevision: 0.8.1
+      helm:
+        valueFiles:
+          - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/cloudnative-pg/plugin-barman-cloud/values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: cnpg-system

@@ -121,6 +121,11 @@ spec:
         - ports:
             - port: "53"
               protocol: ANY
+          # Cilium learns the IPs behind toFQDNs names from DNS answers it
+          # proxies; without this rule the R2 egress below never matches.
+          rules:
+            dns:
+              - matchPattern: "*"
     - toEndpoints:
         - matchLabels:
             cnpg.io/cluster: keycloak-postgres
@@ -132,6 +137,13 @@ spec:
               protocol: TCP
     - toEntities:
         - kube-apiserver
+    # Barman Cloud sidecar: WAL archive + base backups to R2 (keycloak-backup.yaml).
+    - toFQDNs:
+        - matchName: d726772d8736f94abb1f6b032476b367.eu.r2.cloudflarestorage.com
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
 # ---------------------------------------------------------------------------
 # Reference only, not applied: the same rules as plain networking.k8s.io/v1
 # NetworkPolicies, for a CNI without CiliumNetworkPolicy. Translation gaps:
@@ -141,6 +153,8 @@ spec:
 #   kubelet through regardless, otherwise add an ipBlock with the node subnet.
 # - Entity "kube-apiserver" becomes an ipBlock of the control-plane IPs.
 # - Protocol ANY does not exist; DNS needs UDP and TCP rules.
+# - toFQDNs (R2 backup egress) has no equivalent; plain NetworkPolicy can only
+#   allow 443 to an ipBlock, and R2's IPs are not stable.
 # ---
 # apiVersion: networking.k8s.io/v1
 # kind: NetworkPolicy
