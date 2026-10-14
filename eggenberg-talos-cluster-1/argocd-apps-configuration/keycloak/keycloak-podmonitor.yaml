@@ -1,0 +1,26 @@
+# Scrape targets for vmagent. The VictoriaMetrics operator converts
+# PodMonitors into VMPodScrapes (CRD from prometheus-operator-crds).
+# CNPG's spec.monitoring.enablePodMonitor is deprecated, hence a manual one.
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: keycloak
+spec:
+  selector:
+    matchLabels:
+      app: keycloak
+      app.kubernetes.io/managed-by: keycloak-operator
+  podMetricsEndpoints:
+    - port: management
+      path: /metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: keycloak-postgres
+spec:
+  selector:
+    matchLabels:
+      cnpg.io/cluster: keycloak-postgres
+  podMetricsEndpoints:
+    - port: metrics

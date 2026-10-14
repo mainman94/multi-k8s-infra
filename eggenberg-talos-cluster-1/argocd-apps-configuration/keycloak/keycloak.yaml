@@ -55,3 +55,25 @@ spec:
           matchLabels:
             app: keycloak
             app.kubernetes.io/managed-by: keycloak-operator
+  # Prometheus metrics on the management port (9000, /metrics); scraped via
+  # keycloak-podmonitor.yaml.
+  additionalOptions:
+    - name: metrics-enabled
+      value: "true"
+  # The operator generates the pod without a securityContext. Merged into its
+  # pod template so the pods meet PSS restricted. No readOnlyRootFilesystem:
+  # the non-optimized image runs the Quarkus build on start and writes to
+  # /opt/keycloak.
+  unsupported:
+    podTemplate:
+      spec:
+        securityContext:
+          runAsNonRoot: true
+          seccompProfile:
+            type: RuntimeDefault
+        containers:
+          - securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                  - ALL

@@ -14,5 +14,6 @@ resources:
   - keycloak.yaml
   - keycloak-netpol.yaml
   - keycloak-pdb.yaml
+  - keycloak-podmonitor.yaml
 patches:
   - path: operator-hardening-patch.yaml
