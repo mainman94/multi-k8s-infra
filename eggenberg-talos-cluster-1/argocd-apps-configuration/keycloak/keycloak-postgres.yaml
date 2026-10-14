@@ -34,6 +34,9 @@ spec:
   # keycloak-backup.yaml.
   plugins:
     - name: barman-cloud.cloudnative-pg.io
+      # The CNPG webhook defaults this; written out so ArgoCD's diff does not
+      # show the defaulted field as a permanent change.
+      enabled: true
       isWALArchiver: true
       parameters:
         barmanObjectName: keycloak-r2
