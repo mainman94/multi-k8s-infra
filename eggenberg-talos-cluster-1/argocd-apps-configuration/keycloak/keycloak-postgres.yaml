@@ -30,6 +30,17 @@ spec:
       method: any
       number: 1
       dataDurability: preferred
+  # WAL archiving + base backups through the Barman Cloud plugin to R2, see
+  # keycloak-backup.yaml.
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: keycloak-r2
+  # Promote the already-updated replica, then restart the old primary, instead
+  # of restarting the primary in place: Keycloak loses writes for seconds, not
+  # for a full Postgres restart.
+  primaryUpdateMethod: switchover
   storage:
     storageClass: longhorn-cnpg
     size: 5Gi
