@@ -132,3 +132,151 @@ spec:
               protocol: TCP
     - toEntities:
         - kube-apiserver
+# ---------------------------------------------------------------------------
+# Reference only, not applied: the same rules as plain networking.k8s.io/v1
+# NetworkPolicies, for a CNI without CiliumNetworkPolicy. Translation gaps:
+# - Cilium entity "ingress" (Gateway Envoy) has no equivalent; select the
+#   ingress controller's namespace instead (traefik here as an example).
+# - Entity "host" (kubelet probes) has none either; most CNIs let the local
+#   kubelet through regardless, otherwise add an ipBlock with the node subnet.
+# - Entity "kube-apiserver" becomes an ipBlock of the control-plane IPs.
+# - Protocol ANY does not exist; DNS needs UDP and TCP rules.
+# ---
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: keycloak-netpol-k8s
+# spec:
+#   podSelector:
+#     matchLabels:
+#       app: keycloak
+#       app.kubernetes.io/managed-by: keycloak-operator
+#   policyTypes:
+#     - Ingress
+#     - Egress
+#   ingress:
+#     - from:
+#         - namespaceSelector:
+#             matchLabels:
+#               kubernetes.io/metadata.name: traefik
+#       ports:
+#         - port: 8080
+#           protocol: TCP
+#     - from:
+#         - namespaceSelector:
+#             matchLabels:
+#               kubernetes.io/metadata.name: victoria-metrics-k8s-stack
+#       ports:
+#         - port: 9000
+#           protocol: TCP
+#     - from:
+#         - podSelector:
+#             matchLabels:
+#               app: keycloak
+#               app.kubernetes.io/managed-by: keycloak-operator
+#       ports:
+#         - port: 7800
+#           protocol: TCP
+#   egress:
+#     - to:
+#         - namespaceSelector:
+#             matchLabels:
+#               kubernetes.io/metadata.name: kube-system
+#           podSelector:
+#             matchLabels:
+#               k8s-app: kube-dns
+#       ports:
+#         - port: 53
+#           protocol: UDP
+#         - port: 53
+#           protocol: TCP
+#     - to:
+#         - podSelector:
+#             matchLabels:
+#               cnpg.io/cluster: keycloak-postgres
+#       ports:
+#         - port: 5432
+#           protocol: TCP
+#     - to:
+#         - podSelector:
+#             matchLabels:
+#               app: keycloak
+#               app.kubernetes.io/managed-by: keycloak-operator
+#       ports:
+#         - port: 7800
+#           protocol: TCP
+# ---
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: keycloak-postgres-netpol-k8s
+# spec:
+#   podSelector:
+#     matchLabels:
+#       cnpg.io/cluster: keycloak-postgres
+#   policyTypes:
+#     - Ingress
+#     - Egress
+#   ingress:
+#     - from:
+#         - podSelector:
+#             matchLabels:
+#               app: keycloak
+#               app.kubernetes.io/managed-by: keycloak-operator
+#       ports:
+#         - port: 5432
+#           protocol: TCP
+#     - from:
+#         - podSelector:
+#             matchLabels:
+#               cnpg.io/cluster: keycloak-postgres
+#         - namespaceSelector:
+#             matchLabels:
+#               kubernetes.io/metadata.name: cnpg-system
+#       ports:
+#         - port: 5432
+#           protocol: TCP
+#         - port: 8000
+#           protocol: TCP
+#     - from:
+#         - namespaceSelector:
+#             matchLabels:
+#               kubernetes.io/metadata.name: victoria-metrics-k8s-stack
+#       ports:
+#         - port: 9187
+#           protocol: TCP
+#   egress:
+#     - to:
+#         - namespaceSelector:
+#             matchLabels:
+#               kubernetes.io/metadata.name: kube-system
+#           podSelector:
+#             matchLabels:
+#               k8s-app: kube-dns
+#       ports:
+#         - port: 53
+#           protocol: UDP
+#         - port: 53
+#           protocol: TCP
+#     - to:
+#         - podSelector:
+#             matchLabels:
+#               cnpg.io/cluster: keycloak-postgres
+#       ports:
+#         - port: 5432
+#           protocol: TCP
+#         - port: 8000
+#           protocol: TCP
+#     # kube-apiserver: Talos control-plane nodes (kubectl get endpointslice
+#     # -l kubernetes.io/service-name=kubernetes).
+#     - to:
+#         - ipBlock:
+#             cidr: 192.168.0.101/32
+#         - ipBlock:
+#             cidr: 192.168.0.53/32
+#         - ipBlock:
+#             cidr: 192.168.0.65/32
+#       ports:
+#         - port: 6443
+#           protocol: TCP
+---
