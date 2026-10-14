@@ -29,8 +29,10 @@ spec:
       - ServerSideApply=true
     managedNamespaceMetadata:
       labels:
-        # Keycloak pods are created by the operator without a seccomp profile,
-        # so restricted would reject them; baseline is the ceiling here.
+        # The Keycloak CR's podTemplate now adds the securityContext restricted
+        # needs. enforce stays baseline until the rolled pods show no restricted
+        # warnings (kubectl label --dry-run=server ns keycloak
+        # pod-security.kubernetes.io/enforce=restricted); then raise it.
         pod-security.kubernetes.io/enforce: baseline
-        pod-security.kubernetes.io/audit: baseline
-        pod-security.kubernetes.io/warn: baseline
+        pod-security.kubernetes.io/audit: restricted
+        pod-security.kubernetes.io/warn: restricted

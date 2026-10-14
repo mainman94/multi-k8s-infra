@@ -22,6 +22,14 @@ spec:
       owner: keycloak
       secret:
         name: keycloak-db
+  # Commits wait for one replica, so a failover loses no acknowledged
+  # writes. dataDurability: preferred falls back to async while the replica is
+  # down instead of blocking writes (2 instances, no spare standby).
+  postgresql:
+    synchronous:
+      method: any
+      number: 1
+      dataDurability: preferred
   storage:
     storageClass: longhorn-cnpg
     size: 5Gi
