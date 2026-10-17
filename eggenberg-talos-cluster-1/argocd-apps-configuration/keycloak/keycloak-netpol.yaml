@@ -1,7 +1,8 @@
 # Keycloak pods (operator labels: app=keycloak). Cilium identity "ingress" is
 # the Gateway's Envoy; kubelet probes arrive as "host" and hit only 9000. 7800
-# is the JGroups cluster port between the two replicas; 9000 is the
-# management/health/metrics port (vmagent scrapes it).
+# is the JGroups cluster port between the two replicas, 57800 its FD_SOCK2
+# failure-detection port (7800 + 50000); 9000 is the management/health/metrics
+# port (vmagent scrapes it).
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -39,6 +40,8 @@ spec:
         - ports:
             - port: "7800"
               protocol: TCP
+            - port: "57800"
+              protocol: TCP
   egress:
     - toEndpoints:
         - matchLabels:
@@ -62,6 +65,8 @@ spec:
       toPorts:
         - ports:
             - port: "7800"
+              protocol: TCP
+            - port: "57800"
               protocol: TCP
 ---
 apiVersion: cilium.io/v2
@@ -191,6 +196,8 @@ spec:
 #       ports:
 #         - port: 7800
 #           protocol: TCP
+#         - port: 57800
+#           protocol: TCP
 #   egress:
 #     - to:
 #         - namespaceSelector:
@@ -218,6 +225,8 @@ spec:
 #               app.kubernetes.io/managed-by: keycloak-operator
 #       ports:
 #         - port: 7800
+#           protocol: TCP
+#         - port: 57800
 #           protocol: TCP
 # ---
 # apiVersion: networking.k8s.io/v1
