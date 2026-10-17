@@ -39,12 +39,16 @@ spec:
     enabled: false
   networkPolicy:
     enabled: false
+  # The sizing guide warns that throttled pods perform significantly worse, and
+  # the non-optimized image runs the Quarkus build on every start, so the CPU
+  # limit leaves room for that burst.
+  # https://www.keycloak.org/high-availability/multi-cluster/concepts-memory-and-cpu-sizing
   resources:
     requests:
       cpu: 250m
       memory: 1Gi
     limits:
-      cpu: "1"
+      cpu: "2"
       memory: 1536Mi
   scheduling:
     topologySpreadConstraints:
@@ -60,6 +64,11 @@ spec:
   additionalOptions:
     - name: metrics-enabled
       value: "true"
+    # Only honour X-Forwarded-* from inside the pod network. The Gateway's Envoy
+    # connects from each node's Cilium ingress IP, allocated from the pod CIDR
+    # (10.244.0.0/16, Talos default); the CR has no field for this option.
+    - name: proxy-trusted-addresses
+      value: 10.244.0.0/16
   # The operator generates the pod without a securityContext. Merged into its
   # pod template so the pods meet PSS restricted. No readOnlyRootFilesystem:
   # the non-optimized image runs the Quarkus build on start and writes to
