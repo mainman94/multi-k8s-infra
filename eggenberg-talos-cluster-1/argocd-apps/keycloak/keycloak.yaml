@@ -29,10 +29,9 @@ spec:
       - ServerSideApply=true
     managedNamespaceMetadata:
       labels:
-        # The Keycloak CR's podTemplate now adds the securityContext restricted
-        # needs. enforce stays baseline until the rolled pods show no restricted
-        # warnings (kubectl label --dry-run=server ns keycloak
-        # pod-security.kubernetes.io/enforce=restricted); then raise it.
-        pod-security.kubernetes.io/enforce: baseline
+        # Keycloak (podTemplate), the operator (hardening patch), CNPG and the
+        # Barman Cloud sidecar all pass restricted (checked with kubectl label
+        # --dry-run=server ns keycloak pod-security.kubernetes.io/enforce=restricted).
+        pod-security.kubernetes.io/enforce: restricted
         pod-security.kubernetes.io/audit: restricted
         pod-security.kubernetes.io/warn: restricted

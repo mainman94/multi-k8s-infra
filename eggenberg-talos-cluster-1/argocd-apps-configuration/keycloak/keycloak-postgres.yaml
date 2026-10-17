@@ -47,10 +47,12 @@ spec:
   storage:
     storageClass: longhorn-cnpg
     size: 5Gi
+  # Memory request = limit, as the CNPG docs recommend: a Postgres pod that
+  # outgrows its request is the first one evicted under node memory pressure.
   resources:
     requests:
       cpu: 100m
-      memory: 256Mi
+      memory: 512Mi
     limits:
       cpu: "1"
       memory: 512Mi
