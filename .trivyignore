@@ -7,20 +7,9 @@
 # where coredns itself runs — there's no other namespace to put it in.
 KSV-0037
 
-# False positive: flags BLOG_REPO_REFRESH_MS (a plain integer, not a secret)
-# in pmhme/base/configmap.yaml. No real credential ever goes in this
-# ConfigMap — secrets are ExternalSecrets-backed.
-KSV-01010
-
-# Base manifests for contact-* (nats/valkey/mailpit/telegram-sink) deliberately
-# omit metadata.namespace so kustomize's overlay `namespace:` transformer can
-# set the real one (portfolio/-dev/-test) — see overlays/*/kustomization.yaml.
+# keycloak/operator-hardening-patch.yaml is a kustomize patch, not a resource:
+# it has no metadata.namespace because kustomization.yaml's `namespace:` sets it.
 KSV-0110
-
-# All contact-* (nats/valkey/mailpit/telegram-sink) images are docker.io,
-# pinned by digest for immutability — see the "Digest-pinned" comments next
-# to each image. There's no private registry for these upstream images.
-KSV-0125
 
 # vpa-admission-controller-patch (vertical-pod-autoscaler/rbac_fix.yaml)
 # needs get/list/watch/create/update/patch/delete on its own

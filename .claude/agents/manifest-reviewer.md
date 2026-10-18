@@ -19,7 +19,7 @@ Focus exclusively on `*.yaml` under `eggenberg-talos-cluster-1/`.
 - **securityContext**: privileged, runAsRoot, missing readOnlyRootFilesystem where feasible.
 - **Image tags**: hand-edited tags on apps managed by Kargo (see
   `pmhme-chart/` values + `kargo/`) — flag; those should flow through automation, not manual edits.
-- **Secrets**: any plaintext secret / credential / token inlined — must go through Infisical.
+- **Secrets**: any plaintext secret / credential / token inlined — must go through an ExternalSecret backed by OpenBao.
 - **ArgoCD Application shape**: 3-source pattern intact (chart + `ref: values` + config `path`),
   `syncPolicy.automated`, correct `namespace`, `CreateNamespace=true` when needed.
 - **Kustomize**: overlay references a resource/component that doesn't exist.

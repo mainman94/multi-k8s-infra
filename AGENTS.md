@@ -17,17 +17,13 @@ reaches `main` reaches the cluster, and `make preflight` is the last gate.
 | `make kustomize`               | Build every overlay and base                        |
 | `make kubeconform`             | Schema validation (needs network for the CRD catalog) |
 | `make scan`                    | trivy config scan of the cluster manifests          |
-| `make scan-images`             | CVE scan the images the repo's own apps run         |
 
 `.devcontainer/` provides helm; everything else comes from mise.
 
 **Tool versions live in `mise.toml` and nowhere else** — kubectl (which
 carries kustomize), kube-linter, kubeconform, python, prek, actionlint,
 shellcheck and trivy. The dev container's post-create runs `mise install`, and
-CI installs from the same file with `jdx/mise-action`. CI used to pin kubectl
-v1.34.1 and kube-linter v0.8.3 in workflow env blocks while the dev container
-installed `latest` of both, so a kustomize or lint behaviour change would land
-in CI first and nobody's local run. Renovate bumps the pins.
+CI installs from the same file with `jdx/mise-action`. Renovate bumps the pins.
 
 ## Layout (`eggenberg-talos-cluster-1/`)
 
@@ -57,7 +53,7 @@ spec:
       path: "eggenberg-talos-cluster-1/argocd-apps-configuration/<name>"
 ```
 
-`pmhme` (custom apps) uses Kustomize instead: `base/` + `overlays/{test,production}` + `components/`. The **dev** stage already runs the Helm chart from `mainman94/portfolio` (`charts/pmhme`, published to `oci://ghcr.io/mainman94/charts/pmhme`): the Application is in `argocd-apps/pmhme/pmhme-dev.yaml`, its values in `argocd-apps-configuration/pmhme-chart/dev/values.yaml`. Images and the chart version are promoted by Kargo (`kargo/pmhme-portfolio`, stages dev → test → prod) — do not hand-edit image tags or the chart `targetRevision` unless asked. `main` only accepts pull requests, so a Kargo promotion pushes a `kargo/<stage>/<promotion>` branch, opens a PR, and `.github/workflows/kargo-automerge.yml` enables auto-merge on it (only for the stage values file / test+production overlay); Kargo's `git-wait-for-pr` step then continues.
+`pmhme` (custom apps) runs the Helm chart from `mainman94/portfolio` (`charts/pmhme`, published to `oci://ghcr.io/mainman94/charts/pmhme`) in every stage: Applications in `argocd-apps/pmhme/pmhme-<stage>.yaml`, values in `argocd-apps-configuration/pmhme-chart/<stage>/values.yaml`. Images and the chart version are promoted by Kargo (`kargo/pmhme-portfolio`, stages dev → test → prod) — do not hand-edit image tags or the chart `targetRevision` unless asked. `main` only accepts pull requests, so a Kargo promotion pushes a `kargo/<stage>/<promotion>` branch, opens a PR, and `.github/workflows/kargo-automerge.yml` enables auto-merge on it (only for the stage values file and the Application's targetRevision line); Kargo's `git-wait-for-pr` step then continues.
 
 ## Automated checks
 
@@ -98,10 +94,6 @@ Two workflows, deliberately split:
 - **`ci.yml`** — the repo's own hooks, which is where the kustomize builds
   live. Nothing in CI checked those before, so a base or overlay that did not
   build reached `main` and ArgoCD found out first.
-- **`manifest-diff.yml`** — renders every kustomization at the base and at the
-  PR head and posts the difference as a PR comment. `preflight` proves the
-  overlays still build; this shows what merging would actually change in the
-  cluster, which is the thing a review should be reading.
 
 **kubeconform no longer passes on missing schemas.** It ran with
 `-ignore-missing-schemas` and an explicit `-skip InfisicalSecret,Warehouse,Cluster`,
@@ -121,15 +113,6 @@ static validator cannot. Write the documented default explicitly (that is what
 Locally, `make scan` adds a trivy config pass over the manifests — a
 different rule set from checkov, and worth running before a change that
 touches securityContext or RBAC.
-
-**Image CVE scanning is a local target, not a CI job.** `make scan-images`
-sweeps the ten images the repo's own apps run, taken from the rendered
-overlays rather than grepped out of sources, since an overlay's image
-transformers decide the final tag. Five of them live in the private Gitea
-registry behind Cloudflare, which only resolves from inside the network — a
-GitHub-hosted runner cannot pull them, so a CI job would fail on half its
-input. Helm-chart apps are not covered either: their images come from each
-chart's defaults, which are not in this repo.
 
 ## Agent tooling
 
@@ -159,10 +142,7 @@ renaming a job in `ci.yml` or `argocd-lint.yml` without updating the ruleset
 leaves every PR permanently `blocked` waiting for a check that no longer
 reports under that name.
 
-`manifest-diff.yml` and the checkov job are deliberately not required.
-`manifest-diff.yml` is path-filtered, and a required check from a path-filtered
-workflow never reports on a PR outside those paths — which blocks the PR
-forever rather than passing it.
+The checkov job is deliberately not required (soft_fail).
 
 ## Conventions
 

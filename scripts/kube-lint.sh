@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Run kube-linter over the cluster manifests, using .kube-linter.yaml.
-# Used by pre-commit, `make kube-lint` and scripts/preflight.sh.
+# Used by pre-commit and `make kube-lint`.
 set -uo pipefail
 
 CLUSTER_DIR=${CLUSTER_DIR:-eggenberg-talos-cluster-1}

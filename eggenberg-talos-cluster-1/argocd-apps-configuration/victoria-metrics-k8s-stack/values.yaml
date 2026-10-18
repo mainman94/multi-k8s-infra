@@ -6,7 +6,7 @@
 # fullnameOverride pins every CR to a predictable name ("vm"), so the
 # operator's generated Services are always vmsingle-vm / vmagent-vm /
 # vmalertmanager-vm — used directly by contact-api's KEDA prometheus
-# trigger (pmhme/base/keda.yaml) and Falco's alertmanager hostport.
+# trigger (in the pmhme chart) and Falco's alertmanager hostport.
 fullnameOverride: vm
 
 # Exposed at grafana.hauptmann.dev (see httproute.yaml + referencegrant.yaml
