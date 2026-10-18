@@ -15,7 +15,7 @@ httpRoute:
 web:
   replicaCount: 3
   image:
-    tag: 0.29.5
+    tag: 0.29.6
   config:
     STAGE: production
     LOG_LEVEL: warn
