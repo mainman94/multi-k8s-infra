@@ -32,10 +32,10 @@ grafana:
   resources:
     requests:
       cpu: 25m
-      memory: 128Mi
+      memory: 256Mi
     limits:
       cpu: 200m
-      memory: 256Mi
+      memory: 512Mi
 defaultDashboards:
   enabled: true
 
