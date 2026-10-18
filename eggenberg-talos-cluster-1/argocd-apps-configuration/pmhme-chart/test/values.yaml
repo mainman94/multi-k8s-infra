@@ -12,7 +12,7 @@ externalSecrets:
     passwordProperty: POSTGRES_PASSWORD_TEST
 web:
   image:
-    tag: 0.29.4
+    tag: 0.29.5
   config:
     STAGE: test
     LOG_LEVEL: info
@@ -24,11 +24,11 @@ web:
     UMAMI_WEBSITE_ID: ""
 contactApi:
   image:
-    tag: 0.11.1
+    tag: 0.11.2
   otelServiceName: hauptmann-contact-api-test
 notifierTelegram:
   image:
-    tag: 0.4.3
+    tag: 0.4.4
 notifierEmail:
   image:
-    tag: 0.4.3
+    tag: 0.4.4
