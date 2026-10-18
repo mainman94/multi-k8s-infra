@@ -4,7 +4,7 @@
 # `kind: Component` kustomizations are skipped: a component resolves against
 # the overlay that includes it and is not buildable on its own.
 #
-# Used by pre-commit, `make kustomize` and scripts/preflight.sh.
+# Used by pre-commit and `make kustomize`.
 set -uo pipefail
 
 CLUSTER_DIR=${CLUSTER_DIR:-eggenberg-talos-cluster-1}

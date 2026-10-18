@@ -92,7 +92,7 @@ Done. ArgoCD takes over from here.
 
 `make help` lists the rest; `make kubeconform` schema-validates against the
 upstream and CRD catalogs (needs network), `make scan` runs the trivy config
-scan, `make images` lists every image the repo's own apps actually run.
+scan.
 
 The custom app (`pmhme`) runs from its own Helm chart (published to `ghcr.io/mainman94/charts` by `mainman94/portfolio`) with one values file per stage in `argocd-apps-configuration/pmhme-chart/{dev,test,production}/`. Never `kubectl apply` app changes, and don't hand-edit image tags or the chart version managed by Kargo.
 
@@ -112,15 +112,8 @@ kind is a failure, not a skip, so a typo'd `apiVersion` cannot slip through as
 CRD is not in the catalog, add its schema location to `scripts/kubeconform.sh`
 rather than reaching for `-ignore-missing-schemas`.
 
-Two more workflows run but are deliberately **not** required, because both are
-path-filtered — a required check that never reports would block every PR that
-does not touch its paths:
-
-- `manifest-diff.yml` renders every overlay at the base and at the head of the
-  PR and posts the diff as a comment, so a Helm value change shows up as the
-  Kubernetes objects it actually produces. On a fork PR it renders but does not
-  comment.
-- `argocd-lint.yml` validates the ArgoCD Application definitions.
+The checkov job in `argocd-lint.yml` also runs but is deliberately **not**
+required (soft_fail).
 
 ## License and security
 

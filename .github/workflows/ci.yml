@@ -23,9 +23,7 @@ jobs:
           persist-credentials: false
 
       # kubectl (which carries kustomize), kube-linter, python, prek,
-      # actionlint and shellcheck, all at the versions in mise.toml — the same
-      # file the dev container installs from. These used to be pinned in this
-      # workflow while the dev container installed `latest`.
+      # actionlint and shellcheck, all at the versions in mise.toml.
       - uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5
 
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6

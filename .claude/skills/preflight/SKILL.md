@@ -16,6 +16,6 @@ Run repo validation and report failures concisely.
 
 ## What it checks
 
-- `prek run --all-files` — yamlfmt formatting + any other configured hooks.
-- `kube-linter lint` — if the binary is available (else skipped with a note).
-- `kubectl kustomize` build of every `overlays/*` and `base/` dir — catches broken Kustomize.
+`make preflight` is `prek run --all-files`: every hook in `.pre-commit-config.yaml`,
+including yamlfmt, gitleaks, actionlint/zizmor, `kube-linter` and `kustomize-build`
+(those two skip with a note when their binary is missing).

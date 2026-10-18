@@ -34,4 +34,4 @@ needed to register it** — no manual wiring.
 
 - Keep the 3-source pattern (chart + `ref: values` + config `path`) — see template.
 - Never pin image tags that Kargo manages.
-- Secrets go through Infisical, never inline.
+- Secrets go through External Secrets + OpenBao, never inline.
