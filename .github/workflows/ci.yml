@@ -24,7 +24,7 @@ jobs:
 
       # kubectl (which carries kustomize), kube-linter, python, prek,
       # actionlint and shellcheck, all at the versions in mise.toml.
-      - uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5
+      - uses: jdx/mise-action@fc42bcc7ddbf51124c30f95a877a0c5168a3bfde # v5
 
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
