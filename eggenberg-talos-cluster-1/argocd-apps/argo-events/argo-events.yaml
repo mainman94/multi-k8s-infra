@@ -6,7 +6,7 @@ metadata:
   labels:
     category: deployment
 spec:
-  project: default
+  project: homelab
   sources:
     - repoURL: https://argoproj.github.io/argo-helm
       chart: argo-events
@@ -15,7 +15,7 @@ spec:
         valueFiles:
           - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/argo-events/values.yaml
     - repoURL: https://github.com/mainman94/multi-k8s-infra
-      targetRevision: HEAD
+      targetRevision: main
       ref: values
   destination:
     server: https://kubernetes.default.svc

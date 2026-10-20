@@ -14,7 +14,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "-1"
 spec:
   # yamllint disable rule:line-length
-  project: default
+  project: homelab
   sources:
     # CRDs only (ServiceMonitor/PodMonitor/PrometheusRule/Probe) - no controller
     # pods. VictoriaMetrics' operator watches these and converts them into its
@@ -27,10 +27,10 @@ spec:
         valueFiles:
           - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/prometheus-operator-crds/values.yaml
     - repoURL: https://github.com/mainman94/multi-k8s-infra
-      targetRevision: HEAD
+      targetRevision: main
       ref: values
     - repoURL: https://github.com/mainman94/multi-k8s-infra
-      targetRevision: HEAD
+      targetRevision: main
       path: "eggenberg-talos-cluster-1/argocd-apps-configuration/prometheus-operator-crds"
   destination:
     server: https://kubernetes.default.svc

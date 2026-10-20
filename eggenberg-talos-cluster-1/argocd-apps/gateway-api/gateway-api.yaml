@@ -10,7 +10,7 @@ metadata:
     # cilium-gateway Gateway (sync-wave 10) reconcile. Negative wave = applied first.
     argocd.argoproj.io/sync-wave: "-5"
 spec:
-  project: default
+  project: homelab
   source:
     repoURL: https://github.com/kubernetes-sigs/gateway-api
     path: "config/crd/standard"

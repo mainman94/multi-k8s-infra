@@ -10,9 +10,9 @@ set -uo pipefail
 CLUSTER_DIR=${CLUSTER_DIR:-eggenberg-talos-cluster-1}
 
 if ! command -v kubectl >/dev/null 2>&1; then
-  echo "kustomize-build: kubectl not on PATH — skipped." >&2
-  echo "  Install kubectl, or open the repo in .devcontainer, to get this check." >&2
-  exit 0
+  echo "kustomize-build: kubectl not on PATH — install it." >&2
+  echo "  Install kubectl, or open the repo in .devcontainer, to run this check." >&2
+  exit 1
 fi
 
 # Inside a git hook, GIT_DIR/GIT_INDEX_FILE point at this repository; the git

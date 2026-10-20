@@ -72,6 +72,16 @@ jobs:
             );
             const tooManyFiles = files.length > 30;
 
+            // Every "needs a human" exit sets the same five outputs.
+            const manual = (reason, hardGate, docsReviewed, docsUrls) => {
+              core.setOutput("decision", "manual");
+              core.setOutput("reason", reason);
+              core.setOutput("risk", "n/a");
+              core.setOutput("hard_gate", hardGate);
+              core.setOutput("docs_reviewed", docsReviewed);
+              core.setOutput("docs_urls", docsUrls);
+            };
+
             // Hard gate: only manifest-like YAML updates from Renovate.
             if (badExt.length || forbiddenPaths.length || tooManyFiles) {
               const reason = [
@@ -79,12 +89,7 @@ jobs:
                 forbiddenPaths.length ? `forbidden paths: ${forbiddenPaths.join(", ")}` : "",
                 tooManyFiles ? `too many changed files: ${files.length}` : ""
               ].filter(Boolean).join(" | ");
-              core.setOutput("decision", "manual");
-              core.setOutput("reason", `Hard gate failed: ${reason}`);
-              core.setOutput("risk", "n/a");
-              core.setOutput("hard_gate", "failed");
-              core.setOutput("docs_reviewed", "0");
-              core.setOutput("docs_urls", "");
+              manual(`Hard gate failed: ${reason}`, "failed", "0", "");
               return;
             }
 
@@ -184,13 +189,10 @@ jobs:
               }
             }
 
+            const reviewedUrls = [...new Set(docSnippets.map((d) => d.url))].join("\n");
+
             if (requireReleaseNotes && docSnippets.length === 0) {
-              core.setOutput("decision", "manual");
-              core.setOutput("reason", "No readable release notes/docs found in PR body links");
-              core.setOutput("risk", "n/a");
-              core.setOutput("hard_gate", "passed");
-              core.setOutput("docs_reviewed", "0");
-              core.setOutput("docs_urls", docUrls.join("\n"));
+              manual("No readable release notes/docs found in PR body links", "passed", "0", docUrls.join("\n"));
               await core.summary
                 .addHeading("Renovate AI Decision")
                 .addTable([
@@ -210,30 +212,15 @@ jobs:
 
             // Optional AI step. If key is missing, fallback to manual for safety.
             if (provider === "openai" && !openaiKey) {
-              core.setOutput("decision", "manual");
-              core.setOutput("reason", "OPENAI_API_KEY missing");
-              core.setOutput("risk", "n/a");
-              core.setOutput("hard_gate", "passed");
-              core.setOutput("docs_reviewed", String(docSnippets.length));
-              core.setOutput("docs_urls", [...new Set(docSnippets.map((d) => d.url))].join("\n"));
+              manual("OPENAI_API_KEY missing", "passed", String(docSnippets.length), reviewedUrls);
               return;
             }
             if (provider === "openrouter" && !openrouterKey) {
-              core.setOutput("decision", "manual");
-              core.setOutput("reason", "OPENROUTER_API_KEY missing");
-              core.setOutput("risk", "n/a");
-              core.setOutput("hard_gate", "passed");
-              core.setOutput("docs_reviewed", String(docSnippets.length));
-              core.setOutput("docs_urls", [...new Set(docSnippets.map((d) => d.url))].join("\n"));
+              manual("OPENROUTER_API_KEY missing", "passed", String(docSnippets.length), reviewedUrls);
               return;
             }
             if (provider !== "openai" && provider !== "openrouter") {
-              core.setOutput("decision", "manual");
-              core.setOutput("reason", `Unsupported AI_PROVIDER: ${provider}`);
-              core.setOutput("risk", "n/a");
-              core.setOutput("hard_gate", "passed");
-              core.setOutput("docs_reviewed", String(docSnippets.length));
-              core.setOutput("docs_urls", [...new Set(docSnippets.map((d) => d.url))].join("\n"));
+              manual(`Unsupported AI_PROVIDER: ${provider}`, "passed", String(docSnippets.length), reviewedUrls);
               return;
             }
 
@@ -363,12 +350,7 @@ jobs:
                   failureDetails = `${providerName ? `provider=${providerName}; ` : ""}${message || ""}`.trim();
                 }
               } catch {}
-              core.setOutput("decision", "manual");
-              core.setOutput("reason", `AI call failed: ${failureStatus} ${failureDetails.slice(0, 300)}`);
-              core.setOutput("risk", "n/a");
-              core.setOutput("hard_gate", "passed");
-              core.setOutput("docs_reviewed", String(docSnippets.length));
-              core.setOutput("docs_urls", [...new Set(docSnippets.map((d) => d.url))].join("\n"));
+              manual(`AI call failed: ${failureStatus} ${failureDetails.slice(0, 300)}`, "passed", String(docSnippets.length), reviewedUrls);
               return;
             }
 
@@ -379,12 +361,7 @@ jobs:
             // fails, which reads as "the model ignored the JSON instruction"
             // and sends you looking in the wrong place. Name it directly.
             if (data?.choices?.[0]?.finish_reason === "length") {
-              core.setOutput("decision", "manual");
-              core.setOutput("reason", `AI response truncated at max_tokens=${maxTokens} (finish_reason=length); raise the AI_MAX_TOKENS variable`);
-              core.setOutput("risk", "n/a");
-              core.setOutput("hard_gate", "passed");
-              core.setOutput("docs_reviewed", String(docSnippets.length));
-              core.setOutput("docs_urls", [...new Set(docSnippets.map((d) => d.url))].join("\n"));
+              manual(`AI response truncated at max_tokens=${maxTokens} (finish_reason=length); raise the AI_MAX_TOKENS variable`, "passed", String(docSnippets.length), reviewedUrls);
               return;
             }
             const parseCandidates = [];
@@ -441,7 +418,7 @@ jobs:
             core.setOutput("risk", risk);
             core.setOutput("hard_gate", "passed");
             core.setOutput("docs_reviewed", String(docSnippets.length));
-            core.setOutput("docs_urls", [...new Set(docSnippets.map((d) => d.url))].join("\n"));
+            core.setOutput("docs_urls", reviewedUrls);
             core.setOutput("decision", decision);
 
             await core.summary

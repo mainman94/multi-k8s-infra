@@ -6,7 +6,7 @@ metadata:
   labels:
     category: infrastructure
 spec:
-  project: default
+  project: homelab
   sources:
     # yamllint disable rule:line-length
     - repoURL: https://community-charts.github.io/helm-charts
@@ -16,7 +16,7 @@ spec:
         valueFiles:
           - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/cloudflare-tunnel/values.yaml
     - repoURL: https://github.com/mainman94/multi-k8s-infra
-      targetRevision: HEAD
+      targetRevision: main
       ref: values
   # yamllint enable rule:line-length
   destination:

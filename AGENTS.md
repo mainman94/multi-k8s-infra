@@ -46,12 +46,14 @@ spec:
         valueFiles:
           - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/<name>/values.yaml
     - repoURL: https://github.com/mainman94/multi-k8s-infra
-      targetRevision: HEAD
+      targetRevision: main
       ref: values
     - repoURL: https://github.com/mainman94/multi-k8s-infra
-      targetRevision: HEAD
+      targetRevision: main
       path: "eggenberg-talos-cluster-1/argocd-apps-configuration/<name>"
 ```
+
+Every Application uses `project: homelab` (`argocd-apps/argocd-project/homelab.yaml`); only the root `app-of-app` stays on `default`. The project allows only the repos listed in its `sourceRepos` and the in-cluster server. **A new chart repo must be added to `sourceRepos` before its Application can sync.** Namespaces are open (`*`) on purpose. Our own repo is referenced as `targetRevision: main`, never `HEAD`.
 
 `pmhme` (custom apps) runs the Helm chart from `mainman94/portfolio` (`charts/pmhme`, published to `oci://ghcr.io/mainman94/charts/pmhme`) in every stage: Applications in `argocd-apps/pmhme/pmhme-<stage>.yaml`, values in `argocd-apps-configuration/pmhme-chart/<stage>/values.yaml`. Images and the chart version are promoted by Kargo (`kargo/pmhme-portfolio`, stages dev → test → prod) — do not hand-edit image tags or the chart `targetRevision` unless asked. `main` only accepts pull requests, so a Kargo promotion pushes a `kargo/<stage>/<promotion>` branch, opens a PR, and `.github/workflows/kargo-automerge.yml` enables auto-merge on it (only for the stage values file and the Application's targetRevision line); Kargo's `git-wait-for-pr` step then continues.
 
@@ -80,16 +82,15 @@ Two hooks are repo-specific:
   `.kube-linter.yaml` (which excludes `dangling-service`, a false positive for
   Rollouts-backed services).
 
-Both skip with a printed note when their binary is missing, so a checkout
-without kubectl still commits — CI does not skip. Install the tools or use
-the dev container.
+Both fail with a printed note when their binary is missing, so a green local
+run always means the check ran. Install the tools or use the dev container.
 
 ## Scanning
 
 Two workflows, deliberately split:
 
 - **`argocd-lint.yml`** — schema and security: kubeconform, kube-linter,
-  checkov (soft_fail). kubeconform runs `scripts/kubeconform.sh`, the same
+  checkov (fails the job; known false positives live in `.checkov.yaml`). kubeconform runs `scripts/kubeconform.sh`, the same
   thing `make kubeconform` runs, so the flags cannot drift between them.
 - **`ci.yml`** — the repo's own hooks, which is where the kustomize builds
   live. Nothing in CI checked those before, so a base or overlay that did not
@@ -142,7 +143,7 @@ renaming a job in `ci.yml` or `argocd-lint.yml` without updating the ruleset
 leaves every PR permanently `blocked` waiting for a check that no longer
 reports under that name.
 
-The checkov job is deliberately not required (soft_fail).
+The checkov job fails on findings but is deliberately not a required check.
 
 ## Conventions
 

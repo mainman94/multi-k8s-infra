@@ -6,7 +6,7 @@ metadata:
   labels:
     category: infrastructure
 spec:
-  project: default
+  project: homelab
   sources:
     - repoURL: https://charts.jetstack.io
       chart: cert-manager
@@ -15,11 +15,11 @@ spec:
         valueFiles:
           - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/cert-manager/values.yaml
     - repoURL: https://github.com/mainman94/multi-k8s-infra
-      targetRevision: HEAD
+      targetRevision: main
       ref: values
     - repoURL: https://github.com/mainman94/multi-k8s-infra/
       path: "eggenberg-talos-cluster-1/argocd-apps-configuration/cert-manager"
-      targetRevision: HEAD
+      targetRevision: main
       directory:
         # Apply the issuer + Certificate manifests; the sibling values.yaml is a
         # Helm input, not a manifest.

@@ -7,7 +7,7 @@ metadata:
     category: monitoring
 spec:
   # yamllint disable rule:line-length
-  project: default
+  project: homelab
   sources:
     - repoURL: https://opensource.ncsa.illinois.edu/charts/
       targetRevision: 1.7.3
@@ -16,10 +16,10 @@ spec:
         valueFiles:
           - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/uptime-kuma/values.yaml
     - repoURL: https://github.com/mainman94/multi-k8s-infra
-      targetRevision: HEAD
+      targetRevision: main
       ref: values
     - repoURL: https://github.com/mainman94/multi-k8s-infra
-      targetRevision: HEAD
+      targetRevision: main
       path: "eggenberg-talos-cluster-1/argocd-apps-configuration/uptime-kuma"
   destination:
     server: https://kubernetes.default.svc
