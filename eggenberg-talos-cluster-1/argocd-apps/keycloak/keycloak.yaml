@@ -12,10 +12,10 @@ metadata:
   labels:
     category: identity
 spec:
-  project: default
+  project: homelab
   source:
     repoURL: https://github.com/mainman94/multi-k8s-infra
-    targetRevision: HEAD
+    targetRevision: main
     path: "eggenberg-talos-cluster-1/argocd-apps-configuration/keycloak"
   destination:
     server: https://kubernetes.default.svc

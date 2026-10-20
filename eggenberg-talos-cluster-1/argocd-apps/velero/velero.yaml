@@ -6,7 +6,7 @@ metadata:
   labels:
     category: backup
 spec:
-  project: default
+  project: homelab
   sources:
     - repoURL: https://vmware-tanzu.github.io/helm-charts
       chart: velero
@@ -15,7 +15,7 @@ spec:
         valueFiles:
           - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/velero/values.yaml
     - repoURL: https://github.com/mainman94/multi-k8s-infra
-      targetRevision: HEAD
+      targetRevision: main
       ref: values
   destination:
     server: https://kubernetes.default.svc

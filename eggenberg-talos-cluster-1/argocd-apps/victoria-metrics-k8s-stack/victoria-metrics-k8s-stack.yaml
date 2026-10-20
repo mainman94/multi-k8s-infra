@@ -11,7 +11,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "1"
 spec:
   # yamllint disable rule:line-length
-  project: default
+  project: homelab
   sources:
     - repoURL: https://victoriametrics.github.io/helm-charts/
       targetRevision: 0.95.2
@@ -20,10 +20,10 @@ spec:
         valueFiles:
           - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/victoria-metrics-k8s-stack/values.yaml
     - repoURL: https://github.com/mainman94/multi-k8s-infra
-      targetRevision: HEAD
+      targetRevision: main
       ref: values
     - repoURL: https://github.com/mainman94/multi-k8s-infra
-      targetRevision: HEAD
+      targetRevision: main
       path: "eggenberg-talos-cluster-1/argocd-apps-configuration/victoria-metrics-k8s-stack"
   destination:
     server: https://kubernetes.default.svc

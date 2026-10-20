@@ -38,8 +38,11 @@ jobs:
           script: |
             const values = /^eggenberg-talos-cluster-1\/argocd-apps-configuration\/pmhme-chart\/[^/]+\/values\.yaml$/;
             const app = /^eggenberg-talos-cluster-1\/argocd-apps\/pmhme\/pmhme-[^/]+\.yaml$/;
-            const onlyTargetRevision = (patch) =>
-              patch.split("\n").filter((l) => /^[+-]/.test(l)).every((l) => /^[+-]\s+targetRevision: \S+$/.test(l));
+            // The Application also has a targetRevision for the values source
+            // (main); only the chart version may change, never a branch name.
+            const onlyChartVersion = (patch) =>
+              patch.split("\n").filter((l) => /^[+-]/.test(l)).every((l) =>
+                /^[+-]\s+targetRevision: \S+$/.test(l) && !/: (main|HEAD)$/.test(l));
             const files = await github.paginate(github.rest.pulls.listFiles, {
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -47,7 +50,7 @@ jobs:
               per_page: 100,
             });
             const bad = files.filter((f) =>
-              !(values.test(f.filename) || (app.test(f.filename) && f.patch && onlyTargetRevision(f.patch))));
+              !(values.test(f.filename) || (app.test(f.filename) && f.patch && onlyChartVersion(f.patch))));
             if (files.length === 0 || files.length > 2 || bad.length) {
               core.setFailed(`not a plain promotion: ${bad.map((f) => f.filename).join(", ") || files.length + " files"}`);
             }

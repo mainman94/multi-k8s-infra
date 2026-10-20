@@ -29,9 +29,9 @@ CATALOG='https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}
 CATALOG_PINNED='https://raw.githubusercontent.com/datreeio/CRDs-catalog/f3e4382095909ac60000da025f323ba44d4c738a/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
 
 if ! command -v kubeconform >/dev/null 2>&1; then
-  echo "kubeconform: not on PATH — skipped." >&2
+  echo "kubeconform: not on PATH — install it." >&2
   echo "  Run make tools (mise.toml pins it), or open the repo in .devcontainer." >&2
-  exit 0
+  exit 1
 fi
 
 # -strict rejects fields the schema does not define, which is what catches a
@@ -42,6 +42,7 @@ find "$CLUSTER_DIR" -type f \( -name '*.yaml' -o -name '*.yml' \) \
   -not -name 'values.yaml' \
   -not -name 'kustomization.yaml' \
   -not -name '.kube-linter.yaml' \
+  -not -name '.checkov.yaml' \
   -not -name '.pre-commit-config.yaml' \
   -not -name '*-patch.yaml' \
   -print0 | xargs -0 kubeconform \

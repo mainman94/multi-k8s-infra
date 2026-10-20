@@ -6,7 +6,7 @@ metadata:
   labels:
     category: monitoring
 spec:
-  project: default
+  project: homelab
   sources:
     - repoURL: https://kubernetes-sigs.github.io/metrics-server/
       chart: metrics-server
@@ -15,7 +15,7 @@ spec:
         valueFiles:
           - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/metrics-server/values.yaml
     - repoURL: https://github.com/mainman94/multi-k8s-infra
-      targetRevision: HEAD
+      targetRevision: main
       ref: values
   destination:
     server: https://kubernetes.default.svc

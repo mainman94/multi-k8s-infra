@@ -6,7 +6,7 @@ metadata:
   labels:
     category: storage
 spec:
-  project: default
+  project: homelab
   sources:
     - repoURL: https://charts.longhorn.io
       chart: longhorn
@@ -15,11 +15,11 @@ spec:
         valueFiles:
           - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/longhorn/values.yaml
     - repoURL: https://github.com/mainman94/multi-k8s-infra
-      targetRevision: HEAD
+      targetRevision: main
       ref: values
     - repoURL: https://github.com/mainman94/multi-k8s-infra/
       path: "eggenberg-talos-cluster-1/argocd-apps-configuration/longhorn"
-      targetRevision: HEAD
+      targetRevision: main
       directory:
         # Only the extra manifests; the sibling values.yaml is a Helm input.
         include: "networkpolicy-*.yaml"

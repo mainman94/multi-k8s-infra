@@ -112,8 +112,8 @@ kind is a failure, not a skip, so a typo'd `apiVersion` cannot slip through as
 CRD is not in the catalog, add its schema location to `scripts/kubeconform.sh`
 rather than reaching for `-ignore-missing-schemas`.
 
-The checkov job in `argocd-lint.yml` also runs but is deliberately **not**
-required (soft_fail).
+The checkov job in `argocd-lint.yml` fails on findings but is deliberately
+**not** required.
 
 ## License and security
 

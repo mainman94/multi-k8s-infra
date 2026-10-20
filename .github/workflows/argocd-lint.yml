@@ -58,5 +58,5 @@ jobs:
         with:
           directory: .
           framework: kubernetes
+          config_file: .checkov.yaml
           quiet: true
-          soft_fail: true

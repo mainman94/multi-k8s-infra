@@ -1,0 +1,12 @@
+# Config for the blocking checkov job in .github/workflows/argocd-lint.yml.
+# Every entry is a checked false positive, like .trivyignore.
+framework:
+  - kubernetes
+skip-path:
+  # A kustomize patch, not a full resource: the probes, limits, image and
+  # namespace checks all fail on the fragment but pass on the built Deployment.
+  - eggenberg-talos-cluster-1/argocd-apps-configuration/keycloak/operator-hardening-patch.yaml
+skip-check:
+  # The VPA admission controller manages its own webhook CA bundle; this
+  # mirrors upstream kubernetes/autoscaler RBAC (see .trivyignore KSV-0114).
+  - CKV_K8S_155

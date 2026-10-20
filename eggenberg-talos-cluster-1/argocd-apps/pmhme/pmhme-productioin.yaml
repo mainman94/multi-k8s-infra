@@ -12,7 +12,7 @@ metadata:
   annotations:
     kargo.akuity.io/authorized-stage: portfolio-kargo:prod
 spec:
-  project: default
+  project: homelab
   sources:
     - repoURL: ghcr.io/mainman94/charts
       chart: pmhme

@@ -10,7 +10,7 @@ metadata:
   labels:
     category: networking
 spec:
-  project: default
+  project: homelab
   sources:
     - repoURL: https://kubernetes-sigs.github.io/external-dns/
       chart: external-dns
@@ -19,7 +19,7 @@ spec:
         valueFiles:
           - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/external-dns/values.yaml
     - repoURL: https://github.com/mainman94/multi-k8s-infra
-      targetRevision: HEAD
+      targetRevision: main
       ref: values
   destination:
     server: https://kubernetes.default.svc

@@ -7,7 +7,7 @@ metadata:
     category: CATEGORY
 spec:
   # yamllint disable rule:line-length
-  project: default
+  project: homelab
   sources:
     - repoURL: CHART_REPO_URL
       targetRevision: CHART_VERSION
@@ -16,10 +16,10 @@ spec:
         valueFiles:
           - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/NAME/values.yaml
     - repoURL: https://github.com/mainman94/multi-k8s-infra
-      targetRevision: HEAD
+      targetRevision: main
       ref: values
     - repoURL: https://github.com/mainman94/multi-k8s-infra
-      targetRevision: HEAD
+      targetRevision: main
       path: "eggenberg-talos-cluster-1/argocd-apps-configuration/NAME"
   destination:
     server: https://kubernetes.default.svc

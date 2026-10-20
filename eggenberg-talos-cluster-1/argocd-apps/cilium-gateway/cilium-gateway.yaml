@@ -8,11 +8,11 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "10"
 spec:
-  project: default
+  project: homelab
   source:
     repoURL: https://github.com/mainman94/multi-k8s-infra
     path: "eggenberg-talos-cluster-1/argocd-apps-configuration/cilium-gateway"
-    targetRevision: HEAD
+    targetRevision: main
   destination:
     server: https://kubernetes.default.svc
     namespace: cilium
