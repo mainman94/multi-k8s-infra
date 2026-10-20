@@ -1,0 +1,28 @@
+# Rebalances pods after node reboots/upgrades: a drain piles everything onto
+# the nodes that stay schedulable and the scheduler never moves it back.
+kind: CronJob
+schedule: "*/30 * * * *"
+
+deschedulerPolicy:
+  profiles:
+    - name: default
+      pluginConfig:
+        - name: DefaultEvictor
+          args:
+            nodeFit: true
+        - name: LowNodeUtilization
+          args:
+            # Node is underutilized only if below ALL of these (% of requests).
+            thresholds:
+              cpu: 30
+              memory: 30
+              pods: 30
+            # Pods are evicted from nodes above ANY of these.
+            targetThresholds:
+              cpu: 50
+              memory: 50
+              pods: 50
+      plugins:
+        balance:
+          enabled:
+            - LowNodeUtilization
