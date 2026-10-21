@@ -1,3 +1,18 @@
+# kyverno baseline-pod-security. The zot image has no USER, so pin a uid; fsGroup
+# makes the existing registry PVC writable for it.
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  seccompProfile:
+    type: RuntimeDefault
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
 # Routed via Cilium Gateway HTTPRoute (see cilium-gateway/service_zot.yaml), not
 # the chart ingress. ClusterIP so only the Gateway reaches it.
 service:
