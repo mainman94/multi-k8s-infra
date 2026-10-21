@@ -36,6 +36,23 @@ grafana:
     limits:
       cpu: 200m
       memory: 512Mi
+  # Sidecars and init container need their own requests (kyverno require-resource-requests).
+  sidecar:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
+  initChownData:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 16Mi
+      limits:
+        cpu: 100m
+        memory: 64Mi
 defaultDashboards:
   enabled: true
 

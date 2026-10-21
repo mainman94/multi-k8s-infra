@@ -1,0 +1,38 @@
+# Privileged node/storage/CNI components cannot meet baseline-pod-security or
+# resource-requests (host access, root, writable fs by design). Exempting them
+# keeps PolicyReports meaningful for workloads that CAN comply. Only honoured
+# in the kyverno namespace (--exceptionNamespace). Keep scopes narrow.
+apiVersion: kyverno.io/v2
+kind: PolicyException
+metadata:
+  name: privileged-system-components
+  namespace: kyverno
+spec:
+  exceptions:
+    - policyName: pmhme-baseline-pod-security
+      ruleNames: ["*"]
+    - policyName: pmhme-require-resource-requests
+      ruleNames: ["*"]
+  match:
+    any:
+      # Whole namespaces: every workload is privileged infra.
+      - resources:
+          kinds: [Pod, Deployment, DaemonSet, StatefulSet, Job, CronJob]
+          namespaces: [longhorn-system, spegel, falco]
+      - resources:
+          kinds: [Pod, DaemonSet]
+          namespaces: [kube-system]
+          names: ["cilium", "cilium-?????", "cilium-envoy*"]
+      - resources:
+          kinds: [Pod, DaemonSet]
+          namespaces: [velero]
+          names: ["node-agent*"]
+      # Velero kopia/repo maintenance jobs are spawned by Velero; no chart values.
+      - resources:
+          kinds: [Pod, Job]
+          namespaces: [velero]
+          names: ["*-kopia-maintain-job-*", "repo-maintain-job-*"]
+      - resources:
+          kinds: [Pod, DaemonSet]
+          namespaces: [victoria-metrics-k8s-stack]
+          names: ["victoria-metrics-k8s-stack-prometheus-node-exporter*"]
