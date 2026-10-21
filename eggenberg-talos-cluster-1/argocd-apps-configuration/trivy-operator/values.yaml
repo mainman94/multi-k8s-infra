@@ -22,6 +22,20 @@ operator:
   builtInTrivyServer: true
 
 trivy:
+  server:
+    podSecurityContext:
+      runAsUser: 65534
+      runAsNonRoot: true
+      fsGroup: 65534
+      seccompProfile:
+        type: RuntimeDefault
+    securityContext:
+      privileged: false
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
   # Only report actionable severities.
   severity: "HIGH,CRITICAL"
   ignoreUnfixed: true
@@ -84,6 +98,12 @@ nodeCollector:
 
 serviceMonitor:
   enabled: true
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65534
+  seccompProfile:
+    type: RuntimeDefault
 
 # Operator controller. Memory scales with the number of scanned workloads (informer
 # cache + report objects) — 256Mi OOMKilled on a full-cluster scan, so give it headroom.
