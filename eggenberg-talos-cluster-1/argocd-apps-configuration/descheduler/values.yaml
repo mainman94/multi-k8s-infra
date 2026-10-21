@@ -3,6 +3,11 @@
 kind: CronJob
 schedule: "*/30 * * * *"
 
+# Chart default container context is already restrictive; only seccomp is missing.
+podSecurityContext:
+  seccompProfile:
+    type: RuntimeDefault
+
 deschedulerPolicy:
   profiles:
     - name: default
