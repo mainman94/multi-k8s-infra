@@ -1,4 +1,14 @@
 controller:
+  containerSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 9731
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
+    seccompProfile:
+      type: RuntimeDefault
   resources:
     requests:
       cpu: 10m
