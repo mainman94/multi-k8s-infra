@@ -75,7 +75,10 @@ podSecurityContext:
     type: RuntimeDefault
 containerSecurityContext:
   allowPrivilegeEscalation: false
-  readOnlyRootFilesystem: true
+  # Not read-only: repo-maintenance Jobs inherit this context and kopia must create
+  # its config dir under $HOME (/nonexistent for uid 65534) -> every maintenance
+  # job failed with "mkdir /nonexistent: read-only file system".
+  readOnlyRootFilesystem: false
   capabilities:
     drop:
       - ALL
