@@ -68,9 +68,10 @@ initContainers:
           - ALL
 
 # kyverno baseline-pod-security for the Velero server (node-agent is a PolicyException).
+# No runAsNonRoot/runAsUser: repo-maintenance Jobs inherit this pod context and kopia
+# creates its config dir under HOME=/nonexistent, which only root can mkdir
+# ("mkdir /nonexistent: permission denied" with uid 65534).
 podSecurityContext:
-  runAsNonRoot: true
-  runAsUser: 65534
   seccompProfile:
     type: RuntimeDefault
 containerSecurityContext:
