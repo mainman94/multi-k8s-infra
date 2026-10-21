@@ -1,3 +1,14 @@
+# Container-level securityContext for every Kargo workload (kyverno baseline-pod-security).
+global:
+  securityContext:
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
+    seccompProfile:
+      type: RuntimeDefault
 api:
   replicas: 1
   host: kargo.hauptmann.dev
