@@ -17,10 +17,14 @@ metadata:
     # Mutating the controllers' templates would show up as ArgoCD drift.
     pod-policies.kyverno.io/autogen-controllers: none
 spec:
+  # Kyverno defaults the next three fields server-side; stating them avoids ArgoCD drift.
+  validationFailureAction: Audit
+  emitWarning: false
   admission: true
   background: false
   rules:
     - name: add-seccomp-runtime-default
+      skipBackgroundRequests: true
       match:
         any:
           - resources:
