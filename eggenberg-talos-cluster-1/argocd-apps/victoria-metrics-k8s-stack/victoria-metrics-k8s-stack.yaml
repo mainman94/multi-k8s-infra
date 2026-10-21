@@ -28,6 +28,29 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: victoria-metrics-k8s-stack
+  # The chart renders a fresh random Grafana admin password and a fresh webhook CA
+  # on every `helm template`, so each render differed from live: perpetual drift
+  # and a Grafana rollout (checksum/secret annotation) on every sync. Ignore the
+  # generated values and keep what is in the cluster.
+  ignoreDifferences:
+    - kind: Secret
+      name: victoria-metrics-k8s-stack-grafana
+      jsonPointers:
+        - /data/admin-password
+    - group: apps
+      kind: Deployment
+      name: victoria-metrics-k8s-stack-grafana
+      jsonPointers:
+        - /spec/template/metadata/annotations/checksum~1secret
+    - kind: Secret
+      name: victoria-metrics-k8s-stack-victoria-metrics-operator-validation
+      jsonPointers:
+        - /data
+    - group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
+      name: victoria-metrics-k8s-stack-victoria-metrics-operator-admission
+      jqPathExpressions:
+        - .webhooks[].clientConfig.caBundle
   syncPolicy:
     managedNamespaceMetadata:
       labels:
@@ -42,4 +65,6 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      # Without this the ignored fields are still overwritten whenever a sync applies the resource.
+      - RespectIgnoreDifferences=true
     # yamllint enable rule:line-length
