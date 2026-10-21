@@ -1,5 +1,10 @@
 # Argo Workflows Server Configuration
 server:
+  securityContext:
+    # /tmp is an emptyDir mounted by the chart, so a read-only rootfs is safe.
+    readOnlyRootFilesystem: true
+    seccompProfile:
+      type: RuntimeDefault
   resources:
     requests:
       cpu: 10m
@@ -35,6 +40,9 @@ server:
       enabled: true
 # Controller Configuration
 controller:
+  securityContext:
+    seccompProfile:
+      type: RuntimeDefault
   metricsConfig:
     enabled: true
   serviceMonitor:
