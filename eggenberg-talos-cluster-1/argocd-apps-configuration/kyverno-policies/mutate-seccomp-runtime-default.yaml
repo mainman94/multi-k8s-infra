@@ -1,0 +1,44 @@
+# Defaults spec.securityContext.seccompProfile to RuntimeDefault on new Pods that
+# set none, so baseline-pod-security's require-seccomp-runtime-default passes
+# without patching every chart. Pods that already set a profile are untouched
+# (+() anchor). Existing Pods change on their next restart.
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: mutate-seccomp-runtime-default
+  annotations:
+    policies.kyverno.io/title: Default seccomp to RuntimeDefault
+    policies.kyverno.io/category: Pod Security Standards
+    policies.kyverno.io/description: >-
+      Adds seccompProfile RuntimeDefault to Pods without one. System namespaces
+      running privileged node components are excluded. Autogen is off so
+      Deployments/StatefulSets are not mutated (that would drift in ArgoCD);
+      only the Pods are.
+    # Mutating the controllers' templates would show up as ArgoCD drift.
+    pod-policies.kyverno.io/autogen-controllers: none
+spec:
+  admission: true
+  background: false
+  rules:
+    - name: add-seccomp-runtime-default
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - longhorn-system
+                - falco
+                - spegel
+                - velero
+                - kyverno
+      mutate:
+        patchStrategicMerge:
+          spec:
+            securityContext:
+              +(seccompProfile):
+                type: RuntimeDefault
