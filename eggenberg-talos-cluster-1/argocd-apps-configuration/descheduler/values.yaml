@@ -14,9 +14,9 @@ deschedulerPolicy:
           args:
             # Node is underutilized only if below ALL of these (% of requests).
             thresholds:
-              cpu: 30
-              memory: 30
-              pods: 30
+              cpu: 40
+              memory: 40
+              pods: 40
             # Pods are evicted from nodes above ANY of these.
             targetThresholds:
               cpu: 50
