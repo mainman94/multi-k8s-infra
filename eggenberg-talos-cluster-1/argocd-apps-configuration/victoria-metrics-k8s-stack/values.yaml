@@ -67,6 +67,8 @@ victoria-metrics-operator:
 
 vmsingle:
   spec:
+    # Operator-managed strict securityContext (kyverno baseline-pod-security).
+    useStrictSecurity: true
     replicaCount: 1
     retentionPeriod: "3"
     resources:
@@ -92,6 +94,8 @@ vmsingle:
 
 vmagent:
   spec:
+    # Operator-managed strict securityContext (kyverno baseline-pod-security).
+    useStrictSecurity: true
     resources:
       requests:
         cpu: 25m
@@ -167,6 +171,8 @@ kubeEtcd:
 # `alertmanager.config`, so the Discord webhook URL never lands in git.
 alertmanager:
   spec:
+    # Operator-managed strict securityContext (kyverno baseline-pod-security).
+    useStrictSecurity: true
     replicaCount: 1
     configSecret: vmalertmanager-config
     resources:
@@ -176,6 +182,11 @@ alertmanager:
       limits:
         cpu: 100m
         memory: 128Mi
+
+vmalert:
+  spec:
+    # Operator-managed strict securityContext (kyverno baseline-pod-security).
+    useStrictSecurity: true
 
 kube-state-metrics:
   resources:
