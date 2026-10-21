@@ -30,6 +30,10 @@ spec:
           - resources:
               kinds:
                 - Pod
+              # CREATE only: seccompProfile is immutable on a running Pod, so a mutation on
+              # UPDATE (e.g. GC removing a finalizer) is rejected and blocks the update.
+              operations:
+                - CREATE
       exclude:
         any:
           - resources:
