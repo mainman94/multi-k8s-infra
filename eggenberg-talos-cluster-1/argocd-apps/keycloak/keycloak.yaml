@@ -1,9 +1,8 @@
-# Keycloak via the upstream Keycloak Operator (no Helm chart exists for it).
-# The kustomization pulls the operator CRDs + Deployment from the pinned
-# keycloak-k8s-resources tag and adds the Keycloak CR, its CNPG database and
-# the supporting policies/secrets from this directory. Operator, Keycloak and
-# Postgres share the `keycloak` namespace: the operator is namespace-scoped
-# (JOSDK_WATCH_CURRENT) and its upstream RBAC binds the `keycloak` namespace.
+# Keycloak CR, CNPG database and supporting policies/secrets. The operator and
+# CRDs are installed by the `keycloak-operator` app into the same namespace; if
+# this app syncs first the Keycloak CR fails until the CRD exists, and the retry
+# below covers it. Postgres, Keycloak and the operator share the `keycloak`
+# namespace (labels and creation owned by keycloak-operator).
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -12,10 +11,10 @@ metadata:
   labels:
     category: identity
 spec:
-  project: homelab
+  project: default
   source:
     repoURL: https://github.com/mainman94/multi-k8s-infra
-    targetRevision: main
+    targetRevision: HEAD
     path: "eggenberg-talos-cluster-1/argocd-apps-configuration/keycloak"
   destination:
     server: https://kubernetes.default.svc
@@ -27,11 +26,9 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
-    managedNamespaceMetadata:
-      labels:
-        # Keycloak (podTemplate), the operator (hardening patch), CNPG and the
-        # Barman Cloud sidecar all pass restricted (checked with kubectl label
-        # --dry-run=server ns keycloak pod-security.kubernetes.io/enforce=restricted).
-        pod-security.kubernetes.io/enforce: restricted
-        pod-security.kubernetes.io/audit: restricted
-        pod-security.kubernetes.io/warn: restricted
+    retry:
+      limit: 10
+      backoff:
+        duration: 15s
+        factor: 2
+        maxDuration: 5m

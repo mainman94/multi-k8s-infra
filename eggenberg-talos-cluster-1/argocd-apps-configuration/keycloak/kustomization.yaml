@@ -1,13 +1,9 @@
-# Upstream operator install as a remote base, as documented at
-# https://www.keycloak.org/operator/installation (kubectl apply -k ...?ref=<tag>).
-# Pinned to the tag's commit SHA (a tag can be moved, a commit cannot); the
-# trailing comment is the tag. A regex manager in .github/renovate.json bumps
-# both together. Keep the `//`: it separates repo from path for Renovate.
+# Keycloak CR, its CNPG database and the supporting policies/secrets. The
+# operator and CRDs come from the separate `keycloak-operator` app.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: keycloak
 resources:
-  - github.com/keycloak/keycloak-k8s-resources//kubernetes?ref=999a1d4e23b74eab7704426058b535a9e2a416e3 # 26.8.1
   - keycloak-db-externalsecret.yaml
   - keycloak-admin-externalsecret.yaml
   - keycloak-postgres.yaml
@@ -16,5 +12,3 @@ resources:
   - keycloak-pdb.yaml
   - keycloak-podmonitor.yaml
   - keycloak-backup.yaml
-patches:
-  - path: operator-hardening-patch.yaml

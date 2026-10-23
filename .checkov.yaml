@@ -5,7 +5,7 @@ framework:
 skip-path:
   # A kustomize patch, not a full resource: the probes, limits, image and
   # namespace checks all fail on the fragment but pass on the built Deployment.
-  - eggenberg-talos-cluster-1/argocd-apps-configuration/keycloak/operator-hardening-patch.yaml
+  - eggenberg-talos-cluster-1/argocd-apps-configuration/keycloak-operator/operator-hardening-patch.yaml
 skip-check:
   # The VPA admission controller manages its own webhook CA bundle; this
   # mirrors upstream kubernetes/autoscaler RBAC (see .trivyignore KSV-0114).
