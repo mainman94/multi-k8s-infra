@@ -7,7 +7,7 @@
 # where coredns itself runs — there's no other namespace to put it in.
 KSV-0037
 
-# keycloak/operator-hardening-patch.yaml is a kustomize patch, not a resource:
+# keycloak-operator/operator-hardening-patch.yaml is a kustomize patch, not a resource:
 # it has no metadata.namespace because kustomization.yaml's `namespace:` sets it.
 KSV-0110
 

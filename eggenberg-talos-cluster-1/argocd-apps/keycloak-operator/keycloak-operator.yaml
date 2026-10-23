@@ -1,0 +1,36 @@
+# Keycloak Operator (CRDs + Deployment) from the pinned keycloak-k8s-resources
+# tag, split from the `keycloak` app so the operator and its CRDs can be
+# upgraded independently of the Keycloak CR. Shares the `keycloak` namespace:
+# the operator is namespace-scoped (JOSDK_WATCH_CURRENT) and its upstream RBAC
+# binds the `keycloak` namespace. This app owns the namespace and its PSS labels.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: keycloak-operator
+  namespace: argocd
+  labels:
+    category: identity
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/mainman94/multi-k8s-infra
+    targetRevision: HEAD
+    path: "eggenberg-talos-cluster-1/argocd-apps-configuration/keycloak-operator"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: keycloak
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    managedNamespaceMetadata:
+      labels:
+        # Keycloak (podTemplate), the operator (hardening patch), CNPG and the
+        # Barman Cloud sidecar all pass restricted (checked with kubectl label
+        # --dry-run=server ns keycloak pod-security.kubernetes.io/enforce=restricted).
+        pod-security.kubernetes.io/enforce: restricted
+        pod-security.kubernetes.io/audit: restricted
+        pod-security.kubernetes.io/warn: restricted
