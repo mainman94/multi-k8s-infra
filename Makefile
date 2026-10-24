@@ -27,6 +27,9 @@ hooks: ## Install the git pre-commit hook
 .PHONY: preflight
 preflight: lint ## Full gate: hooks + kube-linter + every kustomize build
 
+.PHONY: check
+check: preflight ## Alias for preflight, the common "am I done" verb
+
 .PHONY: lint
 lint: ## Run every pre-commit hook over the whole tree
 	prek run --all-files
