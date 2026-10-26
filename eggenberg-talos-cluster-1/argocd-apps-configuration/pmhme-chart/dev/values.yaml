@@ -12,7 +12,7 @@ externalSecrets:
     passwordProperty: POSTGRES_PASSWORD_DEV
 web:
   image:
-    tag: 0.31.1
+    tag: 0.31.2
   config:
     STAGE: dev
     LOG_LEVEL: debug
@@ -24,7 +24,7 @@ web:
     UMAMI_WEBSITE_ID: ""
 contactApi:
   image:
-    tag: 0.11.2
+    tag: 0.11.3
   otelServiceName: hauptmann-contact-api-dev
 notifierTelegram:
   image:
