@@ -55,7 +55,7 @@ initContainers:
     # ponytail: pinned to unreleased main build — only version that gates the
     # x-amz-tagging header (Backblaze B2 rejects it). Repin to the next tagged
     # release > v1.14.2 once one ships with the buildPutObjectInput fix.
-    image: velero/velero-plugin-for-aws:main@sha256:94f045ff86414eb6ab3f152a9a7704a265a5c36b4c1d316257416c1979c9d290
+    image: velero/velero-plugin-for-aws:main@sha256:49ecd8eae5eee9dbb5d979dc3c67cccbec70739a9991791042ed8c15332fcda7
     imagePullPolicy: IfNotPresent
     volumeMounts:
       - mountPath: /target
