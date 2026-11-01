@@ -26,7 +26,7 @@ contactApi:
     tag: 0.11.3
 notifierTelegram:
   image:
-    tag: 0.4.4
+    tag: 0.4.5
 notifierEmail:
   image:
-    tag: 0.4.4
+    tag: 0.4.5
