@@ -24,7 +24,7 @@ web:
     UMAMI_WEBSITE_ID: ""
 contactApi:
   image:
-    tag: 0.11.3
+    tag: 0.11.4
   otelServiceName: hauptmann-contact-api-dev
 notifierTelegram:
   image:
