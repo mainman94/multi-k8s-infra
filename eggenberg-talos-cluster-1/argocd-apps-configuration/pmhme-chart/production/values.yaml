@@ -15,7 +15,7 @@ httpRoute:
 web:
   replicaCount: 3
   image:
-    tag: 0.31.2
+    tag: 0.31.3
   config:
     STAGE: production
     LOG_LEVEL: warn
@@ -23,10 +23,10 @@ web:
     BLOG_REPO_CONTENT_PATH: ""
 contactApi:
   image:
-    tag: 0.11.3
+    tag: 0.11.5
 notifierTelegram:
   image:
-    tag: 0.4.5
+    tag: 0.4.6
 notifierEmail:
   image:
-    tag: 0.4.5
+    tag: 0.4.6
