@@ -10,7 +10,7 @@ spec:
   project: homelab
   sources:
     - repoURL: https://zotregistry.dev/helm-charts
-      targetRevision: 0.1.128
+      targetRevision: 0.1.130
       chart: zot
       helm:
         valueFiles:
