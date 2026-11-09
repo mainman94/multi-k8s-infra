@@ -1,6 +1,12 @@
 # Helm values for agent-workspace. The image tag follows the chart appVersion.
 agent:
   preset: claude-code
+  # Standing instructions, written to ~/.claude/CLAUDE.md and ~/.codex/AGENTS.md.
+  instructions: |
+    # Search tools
+    Prefer fast CLI tools over slow defaults: `rg` instead of `grep`, `fd`
+    instead of `find`, `bat` instead of `cat` for viewing, `jq` for JSON,
+    `ast-grep` for structural code search/rewrite.
 
 # Read-only view of the cluster (no Secrets). Raise deliberately, never by default.
 rbac:
