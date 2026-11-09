@@ -12,6 +12,16 @@ agent:
 rbac:
   profile: readonly
 
+# Claude Code managed settings (read-only, highest precedence): plugins the
+# workspace always has. ponytail keeps changes and answers small.
+claude:
+  managedSettings:
+    extraKnownMarketplaces:
+      ponytail:
+        source: {source: github, repo: DietrichGebert/ponytail}
+    enabledPlugins:
+      ponytail@ponytail: true
+
 # One-time `/login` after the first start; the session lives on this volume.
 persistence:
   enabled: true
