@@ -13,7 +13,7 @@ spec:
   sources:
     - repoURL: ghcr.io/mainman94/charts
       chart: agent-workspace
-      targetRevision: 0.1.1
+      targetRevision: 0.1.2
       helm:
         releaseName: agent
         valueFiles:
