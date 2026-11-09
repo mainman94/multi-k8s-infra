@@ -186,14 +186,17 @@ controller:
       portName: http-metrics
     serviceMonitor:
       enabled: true
-  # 7d peak: 883m/2748Mi (sync-heavy across ~29 apps). Sized above that peak.
+  # Was sized from a 7d peak of 883m/2748Mi across ~29 apps. At 37 apps a
+  # multi-app rollout reached the 3Gi limit (OOMKilled, 4 restarts, 2026-11-09)
+  # while pinned at the 1-core limit (906m). Raised with headroom; the nodes
+  # run at 25-50% CPU and 33-46% memory.
   resources:
     requests:
-      cpu: 200m
-      memory: 1536Mi
+      cpu: 500m
+      memory: 2Gi
     limits:
-      cpu: 1000m
-      memory: 3072Mi
+      cpu: 2000m
+      memory: 4Gi
 repoServer:
   metrics:
     enabled: true
