@@ -12,9 +12,11 @@ persistence:
   size: 10Gi
   storageClass: longhorn
 
-# Turn on after the first /login so the pod appears under claude.ai/code.
+# Shows the pod as an environment under claude.ai/code. The first start asks
+# `Enable Remote Control? (y/n)` once: kubectl exec -it <pod> -- tmux attach -t rc
 remoteControl:
-  enabled: false
+  enabled: true
+  name: homelab-workspace
 
 resources:
   requests:
