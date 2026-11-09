@@ -1,0 +1,25 @@
+# Helm values for agent-workspace. The image tag follows the chart appVersion.
+agent:
+  preset: claude-code
+
+# Read-only view of the cluster (no Secrets). Raise deliberately, never by default.
+rbac:
+  profile: readonly
+
+# One-time `/login` after the first start; the session lives on this volume.
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClass: longhorn
+
+# Turn on after the first /login so the pod appears under claude.ai/code.
+remoteControl:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "2"
+    memory: 2Gi

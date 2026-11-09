@@ -1,0 +1,38 @@
+# yamllint disable rule:line-length
+# Locked-down workspace pod for AI coding agents, from mainman94/k8s-agent-workspace
+# (chart published to GHCR on every v* tag).
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: agent-workspace
+  namespace: argocd
+  labels:
+    category: app
+spec:
+  project: homelab
+  sources:
+    - repoURL: ghcr.io/mainman94/charts
+      chart: agent-workspace
+      targetRevision: 0.1.0
+      helm:
+        releaseName: agent
+        valueFiles:
+          - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/agent-workspace/values.yaml
+    - repoURL: https://github.com/mainman94/multi-k8s-infra
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: agent-workspace
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: restricted
+        pod-security.kubernetes.io/audit: restricted
+        pod-security.kubernetes.io/warn: restricted
+        # yamllint enable rule:line-length
