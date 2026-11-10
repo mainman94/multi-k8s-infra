@@ -31,7 +31,7 @@ spec:
         include: "storageclass-longhorn-cnpg.yaml"
     - repoURL: https://cloudnative-pg.io/charts
       chart: plugin-barman-cloud
-      targetRevision: 0.8.1
+      targetRevision: 0.9.0
       helm:
         valueFiles:
           - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/cloudnative-pg/plugin-barman-cloud/values.yaml
