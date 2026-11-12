@@ -63,7 +63,7 @@ spec:
                       args:
                         - |
                           echo "Purging Cloudflare cache for rollout: {{inputs.parameters.rollout-name}} in namespace: {{inputs.parameters.rollout-namespace}}"
-                          curl -X POST "https://api.cloudflare.com/client/v4/zones/${CF_ZONE_ID}/purge_cache" \
+                          curl --fail-with-body -X POST "https://api.cloudflare.com/client/v4/zones/${CF_ZONE_ID}/purge_cache" \
                             -H "Authorization: Bearer ${CF_API_TOKEN}" \
                             -H "Content-Type: application/json" \
                             --data '{"purge_everything":true}'

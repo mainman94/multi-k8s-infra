@@ -27,7 +27,7 @@ spec:
               protocol: UDP
     - fromEndpoints:
         - matchLabels:
-            io.kubernetes.pod.namespace: monitoring
+            io.kubernetes.pod.namespace: victoria-metrics-k8s-stack
       toPorts:
         - ports:
             - port: "9090"

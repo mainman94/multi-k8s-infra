@@ -29,7 +29,6 @@ spec:
     - https://charts.jetstack.io
     - https://charts.longhorn.io
     - https://cloudnative-pg.io/charts
-    - https://community-charts.github.io/helm-charts
     - https://falcosecurity.github.io/charts
     - https://helm.cilium.io/
     - https://kedacore.github.io/charts

@@ -10,6 +10,11 @@ permissions:
 
 jobs:
   evaluate-and-automerge:
+    # A new push must cancel the run still judging the previous commit, or that
+    # run can merge code it never saw.
+    concurrency:
+      group: renovate-gate-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
     # SECURITY: pull_request_target runs with write perms + secrets. Require the
     # PR branch to live in THIS repo (not a fork) — only a writer can push a
     # renovate/ branch here, so a fork PR can't spoof the branch name to get
@@ -387,34 +392,18 @@ jobs:
             }
 
             if (!parsed) {
-              const lower = trimmedOutput.toLowerCase();
-              let inferredRisk = "medium";
-              if (onlyVersionBumps) inferredRisk = "low";
-              else if (/\bhigh risk\b|\brisk[:=\s-]*high\b/.test(lower)) inferredRisk = "high";
-              else if (/\blow risk\b|\brisk[:=\s-]*low\b/.test(lower)) inferredRisk = "low";
-              else if (/\bmedium risk\b|\brisk[:=\s-]*medium\b/.test(lower)) inferredRisk = "medium";
-
-              const fallbackSummary = trimmedOutput
-                ? `Non-JSON AI output parsed heuristically: ${trimmedOutput.slice(0, 180)}`
-                : "Non-JSON AI output parsed heuristically";
-              const summary = onlyVersionBumps
-                ? "Non-JSON AI output; deterministic diff check found version-only changes"
-                : fallbackSummary;
-              const flags = ["non_json_ai_output"];
-              if (onlyVersionBumps) flags.push("version_only_diff");
-              parsed = { risk: inferredRisk, summary, flags };
-              core.warning(`AI parse fallback used. parse_error=${parseError}`);
+              core.warning(`AI output was not JSON. parse_error=${parseError}`);
+              manual(`AI output was not JSON: ${trimmedOutput.slice(0, 180)}`, "passed", String(docSnippets.length), reviewedUrls);
+              return;
             }
 
             const risk = parsed.risk || "medium";
             const summary = parsed.summary || "No summary";
             const flags = Array.isArray(parsed.flags) ? parsed.flags : [];
-            // A heuristic risk guessed from the diff is not an AI review. Merging
-            // on it would auto-merge exactly the PRs where the model failed to
-            // answer, so an unparseable response always goes to manual.
-            const aiAnswered = !flags.includes("non_json_ai_output");
-            const decision = risk === "low" && aiAnswered ? "automerge" : "manual";
-            core.setOutput("reason", `AI risk=${risk}; ${summary}${flags.length ? `; flags=${flags.join(", ")}` : ""}`);
+            // The model reads attacker-influenced release notes, so it can be talked
+            // into "low". The deterministic diff check has to agree as well.
+            const decision = risk === "low" && onlyVersionBumps ? "automerge" : "manual";
+            core.setOutput("reason", `AI risk=${risk}; version-only diff=${onlyVersionBumps}; ${summary}${flags.length ? `; flags=${flags.join(", ")}` : ""}`);
             core.setOutput("risk", risk);
             core.setOutput("hard_gate", "passed");
             core.setOutput("docs_reviewed", String(docSnippets.length));
@@ -471,9 +460,9 @@ jobs:
               body
             });
 
-      # A manual decision must block auto-merge, not the human merge button.
-      # The required check therefore succeeds after cancelling any auto-merge
-      # request that may have been enabled before this evaluation ran.
+      # A manual decision must block auto-merge, not the human merge button,
+      # so the job succeeds after cancelling any auto-merge request enabled
+      # before this evaluation ran. (This job is not a required check.)
       - name: Require manual merge
         if: steps.evaluate.outputs.decision == 'manual'
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
@@ -520,6 +509,8 @@ jobs:
             const repo = context.repo.repo;
             const pullNumber = context.payload.pull_request.number;
             const prNodeId = context.payload.pull_request.node_id;
+            // The commit the gate judged. GitHub refuses the merge if the head moved.
+            const headSha = context.payload.pull_request.head.sha;
             const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
             const maxAttempts = 6;
             let lastMessage = "";
@@ -532,22 +523,24 @@ jobs:
                 owner,
                 repo,
                 pull_number: pullNumber,
-                merge_method: "squash"
+                merge_method: "squash",
+                sha: headSha
               });
             }
 
             for (let attempt = 1; attempt <= maxAttempts; attempt++) {
               try {
                 await github.graphql(
-                  `mutation($pullRequestId: ID!) {
+                  `mutation($pullRequestId: ID!, $expectedHeadOid: GitObjectID!) {
                     enablePullRequestAutoMerge(input: {
                       pullRequestId: $pullRequestId,
-                      mergeMethod: SQUASH
+                      mergeMethod: SQUASH,
+                      expectedHeadOid: $expectedHeadOid
                     }) {
                       pullRequest { number }
                     }
                   }`,
-                  { pullRequestId: prNodeId }
+                  { pullRequestId: prNodeId, expectedHeadOid: headSha }
                 );
                 core.info(`Auto-merge enabled (attempt ${attempt}/${maxAttempts}).`);
                 return;

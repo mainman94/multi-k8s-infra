@@ -97,6 +97,9 @@ spec:
         message: "readOnlyRootFilesystem must be set to true."
         pattern:
           spec:
+            =(initContainers):
+              - securityContext:
+                  readOnlyRootFilesystem: "true"
             containers:
               - securityContext:
                   readOnlyRootFilesystem: "true"
@@ -113,6 +116,11 @@ spec:
         message: "Containers must drop ALL Linux capabilities."
         pattern:
           spec:
+            =(initContainers):
+              - securityContext:
+                  capabilities:
+                    drop:
+                      - ALL
             containers:
               - securityContext:
                   capabilities:
