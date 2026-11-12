@@ -12,6 +12,17 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   instances: 2
+  # Pre-built, optimized image from mainman94/keycloak-build (FULLSTACKS
+  # keycloak-image-builder): PostgreSQL, health and metrics are baked in at
+  # build time, so `start --optimized` skips the Quarkus build on every start.
+  # Build-time options (db vendor, health, metrics, features) come from the
+  # image; changing them needs a new image, not an additionalOptions entry.
+  # Keep the image's Keycloak version equal to the operator's
+  # (keycloak-operator/kustomization.yaml) and never move it backwards: the
+  # database schema does not support downgrades.
+  # Keycloak 26.8.2, built from keycloak-build e558c6e.
+  image: ghcr.io/mainman94/keycloak:e558c6eb0cbc8330654e15fd2a4b0806ab5f2649@sha256:c1ea487f5d55f1393c70f9c4d6b80df3f010dccb4eb0e274f5167ec224cf93ca
+  startOptimized: true
   # Operator checks per update whether a rolling update is safe (patch releases)
   # and only recreates when it is not. The default, RecreateOnImageChange, scales
   # to zero on every image change.
@@ -39,16 +50,17 @@ spec:
     enabled: false
   networkPolicy:
     enabled: false
-  # The sizing guide warns that throttled pods perform significantly worse, and
-  # the non-optimized image runs the Quarkus build on every start, so the CPU
-  # limit leaves room for that burst.
+  # The sizing guide warns that throttled pods perform significantly worse.
+  # The optimized image no longer runs the Quarkus build on start, so the
+  # limit only covers JVM warm-up and login bursts; one core is plenty for a
+  # homelab realm. Raise it again if startup or logins get throttled.
   # https://www.keycloak.org/high-availability/multi-cluster/concepts-memory-and-cpu-sizing
   resources:
     requests:
       cpu: 250m
       memory: 1Gi
     limits:
-      cpu: "2"
+      cpu: "1"
       memory: 1536Mi
   scheduling:
     topologySpreadConstraints:
@@ -59,20 +71,22 @@ spec:
           matchLabels:
             app: keycloak
             app.kubernetes.io/managed-by: keycloak-operator
-  # Prometheus metrics on the management port (9000, /metrics); scraped via
+  # Prometheus metrics on the management port (9000, /metrics) are built into
+  # the image (metrics-enabled is a build-time option); scraped via
   # keycloak-podmonitor.yaml.
   additionalOptions:
-    - name: metrics-enabled
-      value: "true"
     # Only honour X-Forwarded-* from inside the pod network. The Gateway's Envoy
     # connects from each node's Cilium ingress IP, allocated from the pod CIDR
     # (10.244.0.0/16, Talos default); the CR has no field for this option.
     - name: proxy-trusted-addresses
       value: 10.244.0.0/16
   # The operator generates the pod without a securityContext. Merged into its
-  # pod template so the pods meet PSS restricted. No readOnlyRootFilesystem:
-  # the non-optimized image runs the Quarkus build on start and writes to
-  # /opt/keycloak.
+  # pod template so the pods meet PSS restricted. The pod template is the
+  # operator's base: it only edits the first container and adds volumes for
+  # TLS, truststores and a cache ConfigMap (none used here), so the volumes
+  # below survive. With the optimized image nothing writes to /opt/keycloak
+  # except data/ (tmp files, transaction logs), and the JVM needs /tmp, so the
+  # root filesystem is read-only and those two get an emptyDir each.
   unsupported:
     podTemplate:
       spec:
@@ -83,6 +97,19 @@ spec:
         containers:
           - securityContext:
               allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
               capabilities:
                 drop:
                   - ALL
+            volumeMounts:
+              - name: tmp
+                mountPath: /tmp
+              - name: keycloak-data
+                mountPath: /opt/keycloak/data
+        volumes:
+          - name: tmp
+            emptyDir:
+              sizeLimit: 256Mi
+          - name: keycloak-data
+            emptyDir:
+              sizeLimit: 256Mi
