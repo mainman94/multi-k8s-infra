@@ -25,11 +25,11 @@ jobs:
        startsWith(github.event.pull_request.head.ref, 'renovate/'))
     runs-on: ubuntu-latest
     steps:
-      # Base commit, not the PR head: the gate code must come from main, so a
+      # Base branch, not the PR head: the gate code must come from main, so a
       # PR cannot rewrite the rules that judge it.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          ref: ${{ github.event.pull_request.base.sha }}
+          ref: ${{ github.event.pull_request.base.ref }}
           persist-credentials: false
           sparse-checkout: .github/scripts
 
