@@ -80,12 +80,16 @@ spec:
       validate:
         allowExistingViolations: true
         message: "An explicit image tag or digest is required ('latest' is not allowed)."
-        pattern:
-          spec:
-            =(initContainers):
-              - image: "*:*"
-            containers:
-              - image: "*:*"
+        # A wildcard cannot tell `registry:5000/app` (port, no tag) from
+        # `app:1.0`; the regex checks for a tag or digest after the last `/`.
+        foreach:
+          - list: "request.object.spec.[ephemeralContainers, initContainers, containers][]"
+            deny:
+              conditions:
+                any:
+                  - key: "{{ regex_match('^.+(:[^/:@]+|@sha256:[a-f0-9]{64})$', '{{element.image}}') }}"
+                    operator: Equals
+                    value: false
     - name: disallow-latest-tag
       skipBackgroundRequests: true
       match:
