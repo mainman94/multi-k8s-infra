@@ -20,8 +20,9 @@ spec:
   # Keep the image's Keycloak version equal to the operator's
   # (keycloak-operator/kustomization.yaml) and never move it backwards: the
   # database schema does not support downgrades.
-  # Keycloak 26.8.2, built from keycloak-build e558c6e.
-  image: ghcr.io/mainman94/keycloak:e558c6eb0cbc8330654e15fd2a4b0806ab5f2649@sha256:c1ea487f5d55f1393c70f9c4d6b80df3f010dccb4eb0e274f5167ec224cf93ca
+  # Keycloak 26.8.2, built from keycloak-build 801a2f4 (adds the `homelab`
+  # login theme; realms opt in via login_theme in homelab/terraform/keycloak).
+  image: ghcr.io/mainman94/keycloak:801a2f4016b67d52f440b878d23d630693a2a1df@sha256:5758545c557ccedfa6c61922a26deed1b9394e7a16a8356897055caf1ba780f4
   startOptimized: true
   # Operator checks per update whether a rolling update is safe (patch releases)
   # and only recreates when it is not. The default, RecreateOnImageChange, scales
