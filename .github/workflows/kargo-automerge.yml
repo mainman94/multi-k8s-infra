@@ -28,6 +28,14 @@ jobs:
       contents: write
       pull-requests: write
     steps:
+      # Base commit, not the PR head: the gate code must come from main, so a
+      # kargo/ PR cannot rewrite the rules that judge it.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+
       # Promotions only touch the image tags in a stage's chart values file and
       # the chart targetRevision in its Application manifest. The Application
       # may change nothing but that line. Anything else in a kargo/ branch needs
@@ -36,24 +44,15 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
-            const values = /^eggenberg-talos-cluster-1\/argocd-apps-configuration\/pmhme-chart\/[^/]+\/values\.yaml$/;
-            const app = /^eggenberg-talos-cluster-1\/argocd-apps\/pmhme\/pmhme-[^/]+\.yaml$/;
-            // The Application also has a targetRevision for the values source
-            // (main); only the chart version may change, never a branch name.
-            const onlyChartVersion = (patch) =>
-              patch.split("\n").filter((l) => /^[+-]/.test(l)).every((l) =>
-                /^[+-]\s+targetRevision: \S+$/.test(l) && !/: (main|HEAD)$/.test(l));
+            const gate = require("./.github/scripts/merge-gate.js");
             const files = await github.paginate(github.rest.pulls.listFiles, {
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: context.payload.pull_request.number,
               per_page: 100,
             });
-            const bad = files.filter((f) =>
-              !(values.test(f.filename) || (app.test(f.filename) && f.patch && onlyChartVersion(f.patch))));
-            if (files.length === 0 || files.length > 2 || bad.length) {
-              core.setFailed(`not a plain promotion: ${bad.map((f) => f.filename).join(", ") || files.length + " files"}`);
-            }
+            const rejected = gate.kargoRejects(files);
+            if (rejected) core.setFailed(`not a plain promotion: ${rejected}`);
 
       - name: Enable auto-merge
         env:

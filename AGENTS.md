@@ -69,7 +69,12 @@ earns its place here because of `renovate-ai-automerge.yml`: a
 `pull_request_target` workflow holding write permissions. Its ignore, with the
 reasoning, is in `.github/zizmor.yml` — that workflow never checks the PR out
 and gates on the head branch living in this repository, which is what makes
-the trigger safe. Every action reference is pinned to a **commit SHA** with
+the trigger safe.
+
+The rules both bot gates decide by live in `.github/scripts/merge-gate.js`,
+tested by `merge-gate.test.js` (the `merge-gate-tests` hook). Both workflows
+load the file from the **base** commit, never the PR's copy, so a PR cannot
+loosen the rules that judge it. Every action reference is pinned to a **commit SHA** with
 the tag in a trailing comment; Renovate keeps the digests current.
 
 Two hooks are repo-specific:
