@@ -1,0 +1,211 @@
+# The Docker host behind every route whose backend is not in the cluster.
+# One selector-less Service and one manual EndpointSlice: the host IP lives
+# here and nowhere else. An HTTPRoute picks its app by Service port; Cilium
+# maps that to the EndpointSlice port of the same name.
+#
+# New app on the Docker host: add its port to both lists below (same name in
+# both) and a service_<app>.yaml with an HTTPRoute to docker-host:<port>.
+apiVersion: v1
+kind: Service
+metadata:
+  name: docker-host
+  namespace: cilium
+spec:
+  ports:
+    - name: audiobookshelf
+      port: 30067
+      targetPort: 30067
+      protocol: TCP
+    - name: bambuddy
+      port: 30669
+      targetPort: 30669
+      protocol: TCP
+    - name: bazarr
+      port: 30068
+      targetPort: 30068
+      protocol: TCP
+    - name: dockhand
+      port: 30328
+      targetPort: 30328
+      protocol: TCP
+    - name: firefly-iii
+      port: 30666
+      targetPort: 30666
+      protocol: TCP
+    - name: gitea
+      port: 30008
+      targetPort: 30008
+      protocol: TCP
+    - name: home-assistant
+      port: 30672
+      targetPort: 30672
+      protocol: TCP
+    - name: jellyfin
+      port: 30013
+      targetPort: 30013
+      protocol: TCP
+    - name: jellystat
+      port: 30176
+      targetPort: 30176
+      protocol: TCP
+    - name: linkding
+      port: 30044
+      targetPort: 30044
+      protocol: TCP
+    - name: navidrome
+      port: 30043
+      targetPort: 30043
+      protocol: TCP
+    - name: opencloud
+      port: 30980
+      targetPort: 30980
+      protocol: TCP
+    - name: opencloud-collabora
+      port: 30982
+      targetPort: 30982
+      protocol: TCP
+    - name: opencloud-wopi
+      port: 30981
+      targetPort: 30981
+      protocol: TCP
+    - name: opengym
+      port: 30781
+      targetPort: 30781
+      protocol: TCP
+    - name: paperless
+      port: 30070
+      targetPort: 30070
+      protocol: TCP
+    - name: pocketid
+      port: 30411
+      targetPort: 30411
+      protocol: TCP
+    - name: radarr
+      port: 30025
+      targetPort: 30025
+      protocol: TCP
+    - name: seerr
+      port: 30357
+      targetPort: 30357
+      protocol: TCP
+    - name: sonarr
+      port: 30113
+      targetPort: 30113
+      protocol: TCP
+    - name: super-intelligence-mcp
+      port: 30678
+      targetPort: 30678
+      protocol: TCP
+    - name: swiparr
+      port: 4321
+      targetPort: 4321
+      protocol: TCP
+    - name: umami
+      port: 30060
+      targetPort: 30060
+      protocol: TCP
+    - name: vault
+      port: 30020
+      targetPort: 30020
+      protocol: TCP
+    - name: vaultwarden
+      port: 30032
+      targetPort: 30032
+      protocol: TCP
+    - name: wealthfolio
+      port: 30673
+      targetPort: 30673
+      protocol: TCP
+---
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: docker-host-1
+  namespace: cilium
+  labels:
+    kubernetes.io/service-name: docker-host
+    endpointslice.kubernetes.io/managed-by: argocd
+addressType: IPv4
+ports:
+  - name: audiobookshelf
+    port: 30067
+    protocol: TCP
+  - name: bambuddy
+    port: 30669
+    protocol: TCP
+  - name: bazarr
+    port: 30068
+    protocol: TCP
+  - name: dockhand
+    port: 30328
+    protocol: TCP
+  - name: firefly-iii
+    port: 30666
+    protocol: TCP
+  - name: gitea
+    port: 30008
+    protocol: TCP
+  - name: home-assistant
+    port: 30672
+    protocol: TCP
+  - name: jellyfin
+    port: 30013
+    protocol: TCP
+  - name: jellystat
+    port: 30176
+    protocol: TCP
+  - name: linkding
+    port: 30044
+    protocol: TCP
+  - name: navidrome
+    port: 30043
+    protocol: TCP
+  - name: opencloud
+    port: 30980
+    protocol: TCP
+  - name: opencloud-collabora
+    port: 30982
+    protocol: TCP
+  - name: opencloud-wopi
+    port: 30981
+    protocol: TCP
+  - name: opengym
+    port: 30781
+    protocol: TCP
+  - name: paperless
+    port: 30070
+    protocol: TCP
+  - name: pocketid
+    port: 30411
+    protocol: TCP
+  - name: radarr
+    port: 30025
+    protocol: TCP
+  - name: seerr
+    port: 30357
+    protocol: TCP
+  - name: sonarr
+    port: 30113
+    protocol: TCP
+  - name: super-intelligence-mcp
+    port: 30678
+    protocol: TCP
+  - name: swiparr
+    port: 4321
+    protocol: TCP
+  - name: umami
+    port: 30060
+    protocol: TCP
+  - name: vault
+    port: 30020
+    protocol: TCP
+  - name: vaultwarden
+    port: 30032
+    protocol: TCP
+  - name: wealthfolio
+    port: 30673
+    protocol: TCP
+endpoints:
+  - addresses:
+      - 192.168.0.129
+    conditions: {}

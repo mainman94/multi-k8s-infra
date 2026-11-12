@@ -1,36 +1,3 @@
-apiVersion: v1
-kind: Service
-metadata:
-  name: bazarr-external
-  namespace: cilium
-  labels:
-    app.kubernetes.io/name: bazarr
-spec:
-  ports:
-    - port: 30068
-      targetPort: 30068
-      protocol: TCP
-      name: http
----
-apiVersion: discovery.k8s.io/v1
-kind: EndpointSlice
-metadata:
-  name: bazarr-external-1
-  namespace: cilium
-  labels:
-    app.kubernetes.io/name: bazarr
-    kubernetes.io/service-name: bazarr-external
-    endpointslice.kubernetes.io/managed-by: argocd
-addressType: IPv4
-ports:
-  - name: http
-    protocol: TCP
-    port: 30068
-endpoints:
-  - addresses:
-      - 192.168.0.129
-    conditions: {}
----
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -44,5 +11,5 @@ spec:
     - bazarr.hauptmann.dev
   rules:
     - backendRefs:
-        - name: bazarr-external
+        - name: docker-host
           port: 30068
