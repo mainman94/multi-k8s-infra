@@ -22,6 +22,8 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      # New docker-host Service and routes first, old *-external Services last.
+      - PruneLast=true
     managedNamespaceMetadata:
       labels:
         pod-security.kubernetes.io/enforce: restricted
