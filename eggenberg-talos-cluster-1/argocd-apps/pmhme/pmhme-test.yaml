@@ -16,7 +16,7 @@ spec:
   sources:
     - repoURL: ghcr.io/mainman94/charts
       chart: pmhme
-      targetRevision: 0.3.0
+      targetRevision: 0.4.0
       helm:
         releaseName: pmhme
         valueFiles:
