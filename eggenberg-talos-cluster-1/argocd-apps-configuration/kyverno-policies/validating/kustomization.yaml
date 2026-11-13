@@ -1,0 +1,7 @@
+# The checks that are Audit everywhere and Deny in clean namespaces. Written
+# once here; ../enforce builds the Deny copies from this directory.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - baseline-pod-security.yaml
+  - require-resource-requests.yaml

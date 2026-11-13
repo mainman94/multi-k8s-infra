@@ -1,0 +1,38 @@
+# Image hygiene, Deny cluster-wide: 0 violations across the cluster (all
+# images already pinned), so blocking a :latest or untagged image is safe.
+apiVersion: policies.kyverno.io/v1
+kind: ValidatingPolicy
+metadata:
+  name: pmhme-disallow-latest-tag
+  annotations:
+    policies.kyverno.io/title: Disallow Latest Tag
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >-
+      Images must use an explicit tag or digest, never :latest or an untagged reference, so deployments are reproducible. Enforced cluster-wide.
+spec:
+  validationActions: [Deny]
+  evaluation:
+    background:
+      enabled: true
+  autogen:
+    podControllers:
+      controllers: [deployments, statefulsets, daemonsets, jobs, cronjobs]
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: [v1]
+        operations: [CREATE, UPDATE]
+        resources: [pods]
+  variables:
+    - name: images
+      expression: >-
+        (object.spec.containers + object.spec.?initContainers.orValue([]) +
+        object.spec.?ephemeralContainers.orValue([])).map(c, c.image)
+  validations:
+    # A tag or digest after the last `/`: a wildcard like *:* cannot tell
+    # registry:5000/app (port, no tag) from app:1.0.
+    - message: An explicit image tag or digest is required.
+      expression: variables.images.all(i, i.matches('^.+(:[^/:@]+|@sha256:[a-f0-9]{64})$'))
+    - message: Using a mutable ':latest' tag is not allowed; pin a version or digest.
+      expression: variables.images.all(i, !i.endsWith(':latest'))
