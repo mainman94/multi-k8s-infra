@@ -27,3 +27,6 @@ shellcheck = "0.11.0"
 
 # `make scan`.
 trivy = "0.76.2"
+
+# The merge-gate tests (.github/scripts, run by pre-commit).
+node = "24.22.3"

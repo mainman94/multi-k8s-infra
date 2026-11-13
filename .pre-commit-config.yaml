@@ -88,6 +88,15 @@ repos:
         files: ^eggenberg-talos-cluster-1/argocd-apps-configuration/
         pass_filenames: false
 
+      # The bot merge gates decide from these rules, so a broken regex would
+      # show up as a bad merge or a stuck bot. Tests run on every touch.
+      - id: merge-gate-tests
+        name: merge gate tests (node --test)
+        entry: node --test .github/scripts/merge-gate.test.js
+        language: system
+        files: ^\.github/(scripts|workflows)/
+        pass_filenames: false
+
       - id: kube-linter
         name: kube-linter (workload best practices)
         entry: scripts/kube-lint.sh

@@ -25,6 +25,14 @@ jobs:
        startsWith(github.event.pull_request.head.ref, 'renovate/'))
     runs-on: ubuntu-latest
     steps:
+      # Base branch, not the PR head: the gate code must come from main, so a
+      # PR cannot rewrite the rules that judge it.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+
       - name: Evaluate PR risk (rules + AI)
         id: evaluate
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
@@ -46,6 +54,7 @@ jobs:
           OPENROUTER_MODEL: ${{ vars.OPENROUTER_MODEL || 'openai/gpt-4.1-mini' }}
         with:
           script: |
+            const gate = require("./.github/scripts/merge-gate.js");
             const pr = context.payload.pull_request;
             const owner = context.repo.owner;
             const repo = context.repo.repo;
@@ -63,19 +72,7 @@ jobs:
             });
 
             const changedPaths = files.map((f) => f.filename);
-            const badExt = changedPaths.filter((p) => !p.endsWith(".yaml") && !p.endsWith(".yml"));
-            // .pre-commit-config.yaml passes the YAML-only check above but pins
-            // hooks that execute arbitrary code in CI, so a bump there is the
-            // same class of change as a workflow edit, not a manifest bump.
-            const forbiddenPaths = changedPaths.filter((p) =>
-              p.startsWith(".github/") ||
-              p === ".pre-commit-config.yaml" ||
-              p.endsWith(".md") ||
-              p.endsWith(".sh") ||
-              p.endsWith(".json") ||
-              p.endsWith(".tf")
-            );
-            const tooManyFiles = files.length > 30;
+            const { badExt, forbidden: forbiddenPaths, tooMany: tooManyFiles } = gate.renovateHardGate(changedPaths);
 
             // Every "needs a human" exit sets the same five outputs.
             const manual = (reason, hardGate, docsReviewed, docsUrls) => {
@@ -102,23 +99,7 @@ jobs:
               .map((f) => `FILE: ${f.filename}\n${f.patch || ""}`)
               .join("\n\n---\n\n")
               .slice(0, 50000);
-            const diffLines = files
-              .flatMap((f) => (f.patch || "").split("\n"))
-              .filter((line) =>
-                (line.startsWith("+") || line.startsWith("-")) &&
-                !line.startsWith("+++") &&
-                !line.startsWith("---")
-              );
-            const versionLinePatterns = [
-              /^[+-]\s*-?\s*(version|appversion|tag|imagetag|targetrevision|digest)\s*:\s*["']?[^"'\s]+["']?\s*$/i,
-              /^[+-]\s*image\s*:\s*[^"'\s]+:[^"'\s]+["']?\s*$/i
-            ];
-            const riskyChangePattern = /(clusterrole|clusterrolebinding|rolebinding|serviceaccount|networkpolicy|ingress|hostnetwork|privileged|allowprivilegeescalation|capabilities|securitycontext|runasuser|runasnonroot|podsecurity|webhook|rbac)/i;
-            const hasRiskySignals = diffLines.some((line) => riskyChangePattern.test(line.slice(1)));
-            const nonVersionLines = diffLines.filter(
-              (line) => !versionLinePatterns.some((pattern) => pattern.test(line))
-            );
-            const onlyVersionBumps = diffLines.length > 0 && nonVersionLines.length === 0 && !hasRiskySignals;
+            const onlyVersionBumps = gate.onlyVersionBumps(files.map((f) => f.patch));
 
             // These URLs come out of the PR body, so they are attacker-chosen text
             // as far as this job is concerned, and the job fetches them from a
