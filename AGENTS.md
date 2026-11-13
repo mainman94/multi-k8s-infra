@@ -136,14 +136,16 @@ invoked deliberately.
 
 ## Merge requirements
 
-Three checks are required on a pull request: `pre-commit`,
-`Schema Validation (kubeconform)` and `Best Practices (kube-linter)`. The names
+Four checks are required on a pull request: `pre-commit`,
+`Schema Validation (kubeconform)`, `Best Practices (kube-linter)` and
+`Security Scan (checkov)`. The names
 are the **job names** — the ruleset in the `homelab` repo matches on those, so
 renaming a job in `ci.yml` or `argocd-lint.yml` without updating the ruleset
 leaves every PR permanently `blocked` waiting for a check that no longer
 reports under that name.
 
-The checkov job fails on findings but is deliberately not a required check.
+The bot merge gates (`renovate-ai-automerge.yml`, `kargo-automerge.yml`) are
+not required checks, so each one must switch auto-merge off itself when it rejects.
 
 ## Conventions
 

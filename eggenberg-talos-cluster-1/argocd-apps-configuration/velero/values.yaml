@@ -103,7 +103,7 @@ schedules:
         - kube-public
         - kube-system
         - kube-apiserver
-        - monitoring
+        - victoria-metrics-k8s-stack
         - trivy-system
         - portfolio-dev
         - portfolio-test

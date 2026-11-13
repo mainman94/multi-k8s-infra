@@ -82,6 +82,8 @@ spec:
         message: "An explicit image tag or digest is required ('latest' is not allowed)."
         pattern:
           spec:
+            =(initContainers):
+              - image: "*:*"
             containers:
               - image: "*:*"
     - name: disallow-latest-tag
@@ -96,5 +98,7 @@ spec:
         message: "Using a mutable ':latest' tag is not allowed; pin a version or digest."
         pattern:
           spec:
+            =(initContainers):
+              - image: "!*:latest"
             containers:
               - image: "!*:latest"

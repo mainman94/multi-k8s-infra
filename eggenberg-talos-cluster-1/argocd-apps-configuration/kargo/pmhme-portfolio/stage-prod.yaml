@@ -12,7 +12,7 @@ spec:
     - name: valuesFile
       value: eggenberg-talos-cluster-1/argocd-apps-configuration/pmhme-chart/production/values.yaml
     - name: appFile
-      value: eggenberg-talos-cluster-1/argocd-apps/pmhme/pmhme-productioin.yaml
+      value: eggenberg-talos-cluster-1/argocd-apps/pmhme/pmhme-production.yaml
     - name: chartRepo
       value: ghcr.io/mainman94/charts
     - name: chartName

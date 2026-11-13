@@ -18,7 +18,6 @@ Everything's managed through Git. Push a change, ArgoCD deploys it. Simple.
 │   ├── argocd-apps-configuration/     # Helm values
 │   └── bootstrap/                     # Initial cluster setup (Cilium, ArgoCD)
 ├── scripts/                           # What `make` and CI both run
-├── docs/                              # Design specs and plans
 ├── Makefile                           # `make help` lists every target
 └── mise.toml                          # The toolchain — one source of truth
 ```
@@ -27,7 +26,6 @@ Everything's managed through Git. Push a change, ArgoCD deploys it. Simple.
 
 **Networking & ingress**
 - **Cilium & Cilium Gateway** - CNI (kube-proxy replacement), Gateway API, L2 announcements, SPIRE mTLS, Hubble
-- **Cloudflare Tunnel** - External access (`*.hauptmann.dev`)
 - **Cert-Manager** - SSL certificates
 - **ExternalDNS** - Cloudflare DNS records driven by Gateway API HTTPRoutes
 
@@ -65,7 +63,7 @@ The cluster is provisioned using Talos Linux. Ensure your `talosconfig` is corre
 ```bash
 helm install argocd oci://ghcr.io/argoproj/argo-helm/argo-cd \
   --namespace argocd \
-  --version 10.2.0 \
+  --version 10.18.0 \
   -f eggenberg-talos-cluster-1/bootstrap/argocd/values.yaml \
   --create-namespace
 ```
@@ -73,7 +71,7 @@ helm install argocd oci://ghcr.io/argoproj/argo-helm/argo-cd \
 ### Bootstrap Apps
 
 ```bash
-kubectl apply -f eggenberg-talos-cluster-1/app-of-app/app-of-apps.yaml
+kubectl apply -f eggenberg-talos-cluster-1/app-of-app/app-of-app.yaml
 ```
 
 Done. ArgoCD takes over from here.
@@ -98,22 +96,20 @@ The custom app (`pmhme`) runs from its own Helm chart (published to `ghcr.io/mai
 
 ### What a pull request runs
 
-Three checks must pass before a PR can merge:
+Four checks must pass before a PR can merge:
 
 | Check | What it catches |
 | --- | --- |
 | `pre-commit` | yamlfmt, shellcheck/shfmt, gitleaks, actionlint + zizmor over the workflows |
 | `Schema Validation (kubeconform)` | manifests that no longer match their (C)RD schema |
 | `Best Practices (kube-linter)` | missing resource limits, root containers, and friends |
+| `Security Scan (checkov)` | security misconfigurations (known false positives in `.checkov.yaml`) |
 
 kubeconform runs `-strict` **without** `-ignore-missing-schemas`: an unknown
 kind is a failure, not a skip, so a typo'd `apiVersion` cannot slip through as
 "no schema found". CRDs come from the datree CRDs-catalog. If a new operator's
 CRD is not in the catalog, add its schema location to `scripts/kubeconform.sh`
 rather than reaching for `-ignore-missing-schemas`.
-
-The checkov job in `argocd-lint.yml` fails on findings but is deliberately
-**not** required.
 
 ## License and security
 

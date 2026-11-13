@@ -60,3 +60,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PR_URL: ${{ github.event.pull_request.html_url }}
         run: gh pr merge --auto --squash "$PR_URL"
+
+      # Auto-merge set by an earlier, clean push stays on after a bad push.
+      # This job is not a required check, so switch it off explicitly.
+      - name: Disable auto-merge on a failed check
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: gh pr merge --disable-auto "$PR_URL" || echo "auto-merge was not enabled"

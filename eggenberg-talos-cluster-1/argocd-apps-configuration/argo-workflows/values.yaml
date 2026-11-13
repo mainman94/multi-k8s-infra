@@ -63,7 +63,7 @@ extraObjects:
       name: argo-workflows-default-sa
       namespace: argocd
       annotations:
-        workflows.argoproj.io/rbac-rule: "true"
+        workflows.argoproj.io/rbac-rule: "'homelab' in groups"
         workflows.argoproj.io/rbac-rule-precedence: "100"
   # Token Secret for Default ServiceAccount (required since K8s 1.24)
   - apiVersion: v1
