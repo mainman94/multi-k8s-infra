@@ -25,7 +25,6 @@ web:
 contactApi:
   image:
     tag: 0.11.7
-  otelServiceName: hauptmann-contact-api-test
 notifierTelegram:
   image:
     tag: 0.4.8
