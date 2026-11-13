@@ -5,20 +5,14 @@ metadata:
   namespace: portfolio-kargo
 spec:
   vars:
-    - name: gitRepo
-      value: https://github.com/mainman94/multi-k8s-infra
-    - name: repoPath
-      value: ./repo
     - name: valuesFile
       value: eggenberg-talos-cluster-1/argocd-apps-configuration/pmhme-chart/dev/values.yaml
     - name: appFile
       value: eggenberg-talos-cluster-1/argocd-apps/pmhme/pmhme-dev.yaml
-    - name: chartRepo
-      value: ghcr.io/mainman94/charts
-    - name: chartName
-      value: pmhme
     - name: appName
       value: pmhme-portfolio-dev
+    - name: baseUrl
+      value: https://dev.hauptmann.dev
   requestedFreight:
     - origin:
         kind: Warehouse
@@ -30,99 +24,8 @@ spec:
   promotionTemplate:
     spec:
       steps:
-        - uses: git-clone
-          config:
-            repoURL: ${{ vars.gitRepo }}
-            checkout:
-              - branch: main
-                path: ${{ vars.repoPath }}
-        # Image tags live in the chart's values file; the chart version itself
-        # is applied to the Application by argocd-update below.
-        - uses: yaml-update
-          as: update-image
-          config:
-            path: ${{ vars.repoPath }}/${{ vars.valuesFile }}
-            updates:
-              - key: web.image.tag
-                value: ${{ imageFrom("ghcr.io/mainman94/pmhme").Tag }}
-              - key: contactApi.image.tag
-                value: ${{ imageFrom("ghcr.io/mainman94/contact-api").Tag }}
-              - key: notifierTelegram.image.tag
-                value: ${{ imageFrom("ghcr.io/mainman94/notifier-telegram").Tag }}
-              - key: notifierEmail.image.tag
-                value: ${{ imageFrom("ghcr.io/mainman94/notifier-email").Tag }}
-        # The chart version is pinned in the Application manifest. Writing it
-        # here (not only via argocd-update) keeps git the source of truth: the
-        # app-of-apps self-heals the Application and would otherwise revert
-        # targetRevision to the old chart. It also guarantees a diff for a
-        # chart-only promotion, so commit/open-pr/wait-for-pr always run.
-        - uses: yaml-update
-          as: update-chart-version
-          config:
-            path: ${{ vars.repoPath }}/${{ vars.appFile }}
-            updates:
-              - key: spec.sources.0.targetRevision
-                value: ${{ chartFrom("oci://ghcr.io/mainman94/charts/pmhme").Version }}
-        - uses: git-commit
-          as: commit
-          config:
-            path: ${{ vars.repoPath }}
-            message: 'chore(dev): pmhme ${{ imageFrom("ghcr.io/mainman94/pmhme").Tag }}, contact-api ${{ imageFrom("ghcr.io/mainman94/contact-api").Tag }}, chart ${{ chartFrom("oci://ghcr.io/mainman94/charts/pmhme").Version }}'
-        # main only accepts pull requests, so the promotion lands as one: push a
-        # per-promotion branch, open the PR, let .github/workflows/kargo-automerge.yml
-        # merge it once the required checks are green, and wait for that.
-        - uses: git-push
-          as: push
-          config:
-            path: ${{ vars.repoPath }}
-            targetBranch: kargo/${{ ctx.stage }}/${{ ctx.promotion }}
-        - uses: git-open-pr
-          as: open-pr
-          config:
-            repoURL: ${{ vars.gitRepo }}
-            provider: github
-            sourceBranch: ${{ outputs.push.branch }}
-            targetBranch: main
-            title: 'chore(kargo): promote ${{ ctx.stage }}'
-            description: Automated promotion by Kargo (project ${{ ctx.project }}, stage ${{ ctx.stage }}). Merged automatically once the required checks pass.
-        # Re-promoting Freight that main already has leaves no diff, so open-pr
-        # is skipped and has no PR to wait for.
-        - if: ${{ status('open-pr') != 'Skipped' }}
-          uses: git-wait-for-pr
-          as: wait-for-pr
-          retry:
-            timeout: 30m0s
-          config:
-            repoURL: ${{ vars.gitRepo }}
-            prNumber: ${{ outputs['open-pr'].pr.id }}
-        - uses: argocd-update
-          as: argo
-          config:
-            apps:
-              - name: ${{ vars.appName }}
-                namespace: argocd
-                sources:
-                  - repoURL: ${{ vars.chartRepo }}
-                    chart: ${{ vars.chartName }}
-                    desiredRevision: ${{ chartFrom("oci://ghcr.io/mainman94/charts/pmhme").Version }}
-                    updateTargetRevision: true
-                  - repoURL: ${{ vars.gitRepo }}
-        - uses: http
-          as: smoke-http-200
-          retry:
-            timeout: 15m0s
-          config:
-            method: GET
-            url: https://dev.hauptmann.dev/
-            successExpression: response.status == 200
-        - uses: http
-          as: version-check
-          retry:
-            timeout: 15m0s
-          config:
-            method: GET
-            url: https://dev.hauptmann.dev/version
-            successExpression: response.status == 200 && response.body.version == '${{ imageFrom("ghcr.io/mainman94/pmhme").Tag }}'
+        - task:
+            name: pmhme-promote
   verification:
     analysisTemplates:
       - name: pmhme-portfolio-http-check
