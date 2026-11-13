@@ -1,0 +1,35 @@
+# The ../validating checks again, as Deny, only in namespaces whose reports are
+# verified clean. Add a namespace once `kubectl get polr -n <ns>` shows no
+# failures for these policies. Background is off: ../validating already
+# reports for every namespace, including these.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../validating
+nameSuffix: -enforce
+patches:
+  - target:
+      kind: ValidatingPolicy
+    patch: |-
+      - op: replace
+        path: /spec/validationActions
+        value: [Deny]
+      - op: replace
+        path: /spec/evaluation/background/enabled
+        value: false
+      - op: add
+        path: /spec/matchConstraints/namespaceSelector
+        value:
+          matchExpressions:
+            - key: kubernetes.io/metadata.name
+              operator: In
+              values:
+                - portfolio
+                - portfolio-dev
+                - portfolio-test
+                - cert-manager
+                - external-secrets
+                - keda
+                - external-dns
+                - cnpg-system
+                - kyverno

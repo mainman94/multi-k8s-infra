@@ -1,0 +1,13 @@
+# Kyverno policies (policies.kyverno.io CEL types; Kyverno 1.20 no longer
+# enforces the legacy kyverno.io ClusterPolicy). This directory is built with
+# kustomize, so every manifest must be listed here or ArgoCD ignores it.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  # Audit in every namespace, with background reports.
+  - validating
+  # The same checks as Deny, only in namespaces verified clean.
+  - enforce
+  - disallow-latest-tag.yaml
+  - mutate-seccomp-runtime-default.yaml
+  - policy-exceptions.yaml

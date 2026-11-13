@@ -1,9 +1,9 @@
 # Defaults spec.securityContext.seccompProfile to RuntimeDefault on new Pods that
-# set none, so baseline-pod-security's require-seccomp-runtime-default passes
-# without patching every chart. Pods that already set a profile are untouched
-# (+() anchor). Existing Pods change on their next restart.
-apiVersion: kyverno.io/v1
-kind: ClusterPolicy
+# set none, so baseline-pod-security's seccomp check passes without patching
+# every chart. Pods that already set a profile are untouched (matchConditions).
+# Existing Pods change on their next restart.
+apiVersion: policies.kyverno.io/v1
+kind: MutatingPolicy
 metadata:
   name: mutate-seccomp-runtime-default
   annotations:
@@ -11,42 +11,33 @@ metadata:
     policies.kyverno.io/category: Pod Security Standards
     policies.kyverno.io/description: >-
       Adds seccompProfile RuntimeDefault to Pods without one. System namespaces
-      running privileged node components are excluded. Autogen is off so
-      Deployments/StatefulSets are not mutated (that would drift in ArgoCD);
-      only the Pods are.
-    # Mutating the controllers' templates would show up as ArgoCD drift.
-    pod-policies.kyverno.io/autogen-controllers: none
+      running privileged node components are excluded. Only Pods are mutated,
+      never Deployments/StatefulSets (that would drift in ArgoCD).
 spec:
-  # Kyverno defaults the next three fields server-side; stating them avoids ArgoCD drift.
-  validationFailureAction: Audit
-  emitWarning: false
-  admission: true
-  background: false
-  rules:
-    - name: add-seccomp-runtime-default
-      skipBackgroundRequests: true
-      match:
-        any:
-          - resources:
-              kinds:
-                - Pod
-              # CREATE only: seccompProfile is immutable on a running Pod, so a mutation on
-              # UPDATE (e.g. GC removing a finalizer) is rejected and blocks the update.
-              operations:
-                - CREATE
-      exclude:
-        any:
-          - resources:
-              namespaces:
-                - kube-system
-                - longhorn-system
-                - falco
-                - spegel
-                - velero
-                - kyverno
-      mutate:
-        patchStrategicMerge:
-          spec:
-            securityContext:
-              +(seccompProfile):
-                type: RuntimeDefault
+  # Pods only: mutating the controllers' templates would show up as ArgoCD drift.
+  autogen:
+    podControllers:
+      controllers: []
+  matchConstraints:
+    resourceRules:
+      # CREATE only: seccompProfile is immutable on a running Pod, so a mutation on
+      # UPDATE (e.g. GC removing a finalizer) is rejected and blocks the update.
+      - apiGroups: [""]
+        apiVersions: [v1]
+        operations: [CREATE]
+        resources: [pods]
+    namespaceSelector:
+      matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: NotIn
+          values: [kube-system, longhorn-system, falco, spegel, velero, kyverno]
+  # Only Pods without a profile; an explicit one (Localhost, Unconfined) stays.
+  matchConditions:
+    - name: no-seccomp-profile
+      expression: "!has(object.spec.securityContext) || !has(object.spec.securityContext.seccompProfile)"
+  mutations:
+    - patchType: ApplyConfiguration
+      applyConfiguration:
+        expression: >-
+          Object{spec: Object.spec{securityContext: Object.spec.securityContext{
+          seccompProfile: Object.spec.securityContext.seccompProfile{type: "RuntimeDefault"}}}}

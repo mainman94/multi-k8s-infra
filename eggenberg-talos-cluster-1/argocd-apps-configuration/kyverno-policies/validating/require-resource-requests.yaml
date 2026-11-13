@@ -1,0 +1,31 @@
+# Every container must request CPU and memory. Audit here, for every
+# namespace; ../enforce turns it into Deny for namespaces whose reports are clean.
+apiVersion: policies.kyverno.io/v1
+kind: ValidatingPolicy
+metadata:
+  name: pmhme-require-resource-requests
+  annotations:
+    policies.kyverno.io/title: Require Resource Requests
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >-
+      Every container must declare CPU and memory requests so the scheduler can place it and autoscalers (KEDA/VPA) have a baseline. Audit globally, Enforced in clean namespaces.
+spec:
+  validationActions: [Audit]
+  evaluation:
+    background:
+      enabled: true
+  autogen:
+    podControllers:
+      controllers: [deployments, statefulsets, daemonsets, jobs, cronjobs]
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: [v1]
+        operations: [CREATE, UPDATE]
+        resources: [pods]
+  validations:
+    - message: CPU and memory requests are required on every container.
+      expression: >-
+        object.spec.containers.all(c,
+        c.?resources.?requests[?'cpu'].hasValue() && c.?resources.?requests[?'memory'].hasValue())

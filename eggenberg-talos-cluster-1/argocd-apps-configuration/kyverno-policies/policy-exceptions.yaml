@@ -2,37 +2,29 @@
 # resource-requests (host access, root, writable fs by design). Exempting them
 # keeps PolicyReports meaningful for workloads that CAN comply. Only honoured
 # in the kyverno namespace (--exceptionNamespace). Keep scopes narrow.
-apiVersion: kyverno.io/v2
+# None of these namespaces is on the enforce/ list, so the -enforce copies of
+# the policies need no entry here.
+apiVersion: policies.kyverno.io/v1
 kind: PolicyException
 metadata:
   name: privileged-system-components
   namespace: kyverno
 spec:
-  exceptions:
-    - policyName: pmhme-baseline-pod-security
-      ruleNames: ["*"]
-    - policyName: pmhme-require-resource-requests
-      ruleNames: ["*"]
-  match:
-    any:
-      # Whole namespaces: every workload is privileged infra.
-      - resources:
-          kinds: [Pod, Deployment, DaemonSet, StatefulSet, Job, CronJob]
-          namespaces: [longhorn-system, spegel, falco]
-      - resources:
-          kinds: [Pod, DaemonSet]
-          namespaces: [kube-system]
-          names: ["cilium", "cilium-?????", "cilium-envoy*"]
-      - resources:
-          kinds: [Pod, DaemonSet]
-          namespaces: [velero]
-          names: ["node-agent*"]
-      # Velero kopia/repo maintenance jobs are spawned by Velero; no chart values.
-      - resources:
-          kinds: [Pod, Job]
-          namespaces: [velero]
-          names: ["*-kopia-maintain-job-*", "repo-maintain-job-*"]
-      - resources:
-          kinds: [Pod, DaemonSet]
-          namespaces: [victoria-metrics-k8s-stack]
-          names: ["victoria-metrics-k8s-stack-prometheus-node-exporter*"]
+  policyRefs:
+    - name: pmhme-baseline-pod-security
+      kind: ValidatingPolicy
+    - name: pmhme-require-resource-requests
+      kind: ValidatingPolicy
+  matchConditions:
+    # At admission a controller-made Pod has only generateName (e.g. "cilium-"),
+    # so names are matched on name or generateName.
+    - name: privileged-infra
+      expression: >-
+        [object.metadata.?name.orValue(''), object.metadata.?generateName.orValue('')].exists(n,
+        object.metadata.namespace in ['longhorn-system', 'spegel', 'falco'] ||
+        (object.metadata.namespace == 'kube-system' &&
+        (n == 'cilium' || n == 'cilium-' || n.matches('^cilium-[a-z0-9]{5}$') || n.startsWith('cilium-envoy'))) ||
+        (object.metadata.namespace == 'velero' &&
+        (n.startsWith('node-agent') || n.contains('-kopia-maintain-job-') || n.startsWith('repo-maintain-job-'))) ||
+        (object.metadata.namespace == 'victoria-metrics-k8s-stack' &&
+        n.startsWith('victoria-metrics-k8s-stack-prometheus-node-exporter')))

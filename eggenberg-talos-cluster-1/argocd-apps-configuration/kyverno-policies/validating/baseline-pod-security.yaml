@@ -1,0 +1,51 @@
+# Baseline pod security, one CEL validation per control so each reads clearly
+# in PolicyReports. Audit here, for every namespace; ../enforce turns it into
+# Deny for namespaces whose reports are clean.
+apiVersion: policies.kyverno.io/v1
+kind: ValidatingPolicy
+metadata:
+  name: pmhme-baseline-pod-security
+  annotations:
+    policies.kyverno.io/title: Baseline Pod Security
+    policies.kyverno.io/category: Pod Security Standards
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >-
+      Baseline hardening for workloads: no privilege escalation, run as non-root, read-only root filesystem, all Linux capabilities dropped, RuntimeDefault seccomp profile. Audit globally, Enforced in clean namespaces.
+spec:
+  validationActions: [Audit]
+  evaluation:
+    background:
+      enabled: true
+  # The legacy ClusterPolicy auto-generated its rules for these controllers too.
+  autogen:
+    podControllers:
+      controllers: [deployments, statefulsets, daemonsets, jobs, cronjobs]
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: [v1]
+        operations: [CREATE, UPDATE]
+        resources: [pods]
+  variables:
+    # containers + initContainers: what the legacy rules checked.
+    - name: containers
+      expression: object.spec.containers + object.spec.?initContainers.orValue([])
+    # + ephemeral containers, as disallow-privilege-escalation did.
+    - name: allContainers
+      expression: variables.containers + object.spec.?ephemeralContainers.orValue([])
+  validations:
+    # Unset means allowed in Kubernetes, hence the default of true.
+    - message: allowPrivilegeEscalation must be set to false.
+      expression: variables.allContainers.all(c, c.?securityContext.?allowPrivilegeEscalation.orValue(true) == false)
+    - message: runAsNonRoot must be true (pod or every container).
+      expression: >-
+        object.spec.?securityContext.?runAsNonRoot.orValue(false) ||
+        object.spec.containers.all(c, c.?securityContext.?runAsNonRoot.orValue(false))
+    - message: readOnlyRootFilesystem must be set to true.
+      expression: variables.containers.all(c, c.?securityContext.?readOnlyRootFilesystem.orValue(false))
+    - message: Containers must drop ALL Linux capabilities.
+      expression: variables.containers.all(c, 'ALL' in c.?securityContext.?capabilities.?drop.orValue([]))
+    - message: seccompProfile.type must be RuntimeDefault (pod or every container).
+      expression: >-
+        object.spec.?securityContext.?seccompProfile.?type.orValue('') == 'RuntimeDefault' ||
+        object.spec.containers.all(c, c.?securityContext.?seccompProfile.?type.orValue('') == 'RuntimeDefault')
