@@ -12,7 +12,7 @@ externalSecrets:
     passwordProperty: POSTGRES_PASSWORD_TEST
 web:
   image:
-    tag: 0.31.5
+    tag: 0.31.6
   config:
     STAGE: test
     LOG_LEVEL: info
@@ -24,10 +24,10 @@ web:
     UMAMI_WEBSITE_ID: ""
 contactApi:
   image:
-    tag: 0.11.7
+    tag: 0.11.8
 notifierTelegram:
   image:
-    tag: 0.4.8
+    tag: 0.4.9
 notifierEmail:
   image:
-    tag: 0.4.8
+    tag: 0.4.9
