@@ -22,7 +22,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d # v5
+      - uses: jdx/mise-action@v5
 
       # The flags live in the script, so `make kubeconform` and this job
       # cannot drift apart. It runs -strict and without
@@ -39,7 +39,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d # v5
+      - uses: jdx/mise-action@v5
 
       # Same script and pinned version as pre-commit and `make kube-lint`.
       - name: Run kube-linter

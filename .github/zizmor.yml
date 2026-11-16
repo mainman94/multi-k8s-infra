@@ -14,3 +14,10 @@ rules:
       # requires the head branch to live in this repository, so a fork PR
       # cannot reach the merge path at all.
       - renovate-ai-automerge.yml
+  unpinned-uses:
+    config:
+      policies:
+        # Floating major tag on purpose: a digest pin makes Renovate open a PR
+        # for every patch release. Everything else stays hash-pinned.
+        jdx/mise-action: ref-pin
+        "*": hash-pin
