@@ -44,6 +44,11 @@
   ],
   "packageRules": [
     {
+      "description": "jdx/mise-action stays on the floating major tag (@v5) instead of a digest pin: the digest churns on every patch release and floods the PR queue.",
+      "matchPackageNames": ["jdx/mise-action"],
+      "pinDigests": false
+    },
+    {
       "matchPackageNames": [
         "ghcr.io/cloudnative-pg/postgresql"
       ],
