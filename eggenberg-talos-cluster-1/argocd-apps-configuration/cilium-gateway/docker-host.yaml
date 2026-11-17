@@ -80,9 +80,17 @@ spec:
       port: 30411
       targetPort: 30411
       protocol: TCP
+    - name: prowlarr
+      port: 30696
+      targetPort: 30696
+      protocol: TCP
     - name: radarr
       port: 30025
       targetPort: 30025
+      protocol: TCP
+    - name: sabnzbd
+      port: 30670
+      targetPort: 30670
       protocol: TCP
     - name: seerr
       port: 30357
@@ -178,8 +186,14 @@ ports:
   - name: pocketid
     port: 30411
     protocol: TCP
+  - name: prowlarr
+    port: 30696
+    protocol: TCP
   - name: radarr
     port: 30025
+    protocol: TCP
+  - name: sabnzbd
+    port: 30670
     protocol: TCP
   - name: seerr
     port: 30357
