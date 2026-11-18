@@ -16,7 +16,7 @@ spec:
   sources:
     - repoURL: https://cloudnative-pg.io/charts
       chart: cloudnative-pg
-      targetRevision: 0.29.1
+      targetRevision: 0.29.2
       helm:
         valueFiles:
           - $values/eggenberg-talos-cluster-1/argocd-apps-configuration/cloudnative-pg/values.yaml
