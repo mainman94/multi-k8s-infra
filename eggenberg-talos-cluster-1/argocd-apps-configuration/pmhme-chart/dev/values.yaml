@@ -31,3 +31,8 @@ notifierTelegram:
 notifierEmail:
   image:
     tag: 0.4.10
+# PostgreSQL 19 in dev first: CNPG runs an offline pg_upgrade when the major
+# version goes up. Promote to test/prod once dev is healthy, then move this
+# into the chart default.
+postgres:
+  imageName: ghcr.io/cloudnative-pg/postgresql:19.0-minimal-trixie@sha256:28f6604b4e142cadd8b0154ae82a5541e321d6f33b27fc5a054ced3dde53e6e8
