@@ -35,4 +35,4 @@ notifierEmail:
 # version goes up. Promote to test/prod once dev is healthy, then move this
 # into the chart default.
 postgres:
-  imageName: ghcr.io/cloudnative-pg/postgresql:19.0-minimal-trixie@sha256:28f6604b4e142cadd8b0154ae82a5541e321d6f33b27fc5a054ced3dde53e6e8
+  imageName: ghcr.io/cloudnative-pg/postgresql:19.0-minimal-trixie@sha256:12688a494f25aa0b7e1e3cd1800abe85b427fd1a09c991668a48162e3431a2af
