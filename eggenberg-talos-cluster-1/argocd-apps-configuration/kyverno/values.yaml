@@ -1,11 +1,32 @@
 # Kyverno Helm chart values.
 # https://github.com/kyverno/kyverno/tree/main/charts/kyverno
 #
-# Single-node homelab: one replica per controller (no HA). The admission
-# controller is the enforcement path; background/reports/cleanup run the async
-# policy report and cleanup work. Resource requests kept modest.
+# The admission controller is the enforcement path and runs HA; background/
+# reports/cleanup run async policy report and cleanup work and stay at one
+# replica. Resource requests kept modest.
+#
+# Why HA: the ValidatingPolicy webhooks are cluster-wide and failurePolicy=Fail.
+# With one replica, evicting it during a node drain rejected every pod creation
+# outside kube-system/kyverno until it came back, so evicted replicas elsewhere
+# (e.g. Longhorn csi-attacher) couldn't be recreated and their PDBs blocked the
+# Talos upgrade drains too.
 admissionController:
-  replicas: 1
+  replicas: 3
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+    # A crash-looping replica must not block a drain on its own.
+    unhealthyPodEvictionPolicy: AlwaysAllow
+  # One per node. ScheduleAnyway: a cordoned node still counts as a domain, so
+  # DoNotSchedule would leave an evicted replica Pending for the whole drain.
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/component: admission-controller
+          app.kubernetes.io/instance: kyverno
   resources:
     requests:
       cpu: 100m
