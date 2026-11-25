@@ -8,9 +8,12 @@ defaultSettings:
   # node keeps two instance-managers (old + new) and double the CPU request.
   # 1 = live-upgrade one volume per node at a time; old IMs drain and go away.
   concurrentAutomaticEngineUpgradePerNodeLimit: "1"
-  # Evict the last replica off a draining node instead of blocking the drain
-  # forever — lets `talosctl upgrade` finish without manually deleting pods.
-  nodeDrainPolicy: block-for-eviction-if-contains-last-replica
+  # Let the drain proceed once a node's replicas are stopped. The last-replica
+  # policies deadlock on longhorn-cnpg's single-replica volumes (redundancy is
+  # at the PG layer): the replica can't be evicted while CNPG has it attached,
+  # so the instance-manager PDB stays at 0 and the Talos upgrade drain times
+  # out. In-place upgrades keep the data on the node's disk across the reboot.
+  nodeDrainPolicy: allow-if-replica-is-stopped
   detachManuallyAttachedVolumesWhenCordoned: true
 persistence:
   defaultClass: true
