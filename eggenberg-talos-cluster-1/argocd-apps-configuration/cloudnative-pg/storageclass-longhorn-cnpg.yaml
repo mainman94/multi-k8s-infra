@@ -14,5 +14,13 @@ reclaimPolicy: Delete
 volumeBindingMode: Immediate
 parameters:
   numberOfReplicas: "1"
+  # Keep the single replica on the node running the CNPG pod. Without it the
+  # replica can land on another node; draining that node then has to stop a
+  # running last replica, which nodeDrainPolicy rightly refuses, and the Talos
+  # upgrade drain deadlocks. best-effort, not strict-local: Longhorn can't move
+  # existing volumes to strict-local, and that would pin pods to one node.
+  # Parameters are immutable: after merging, `kubectl delete sc longhorn-cnpg`
+  # once and let ArgoCD recreate it (existing PVs are unaffected).
+  dataLocality: "best-effort"
   staleReplicaTimeout: "30"
   fsType: "ext4"
