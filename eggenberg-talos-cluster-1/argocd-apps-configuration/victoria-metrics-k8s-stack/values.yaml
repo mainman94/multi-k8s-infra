@@ -76,7 +76,8 @@ vmsingle:
     # Operator-managed strict securityContext (kyverno baseline-pod-security).
     useStrictSecurity: true
     replicaCount: 1
-    retentionPeriod: "3"
+    # Unit-less values are months. ~0.3 GB/day, so 1 month is ~9 GB.
+    retentionPeriod: "1"
     resources:
       # Requests track observed steady use (~300m / ~930Mi).
       requests:
@@ -96,7 +97,7 @@ vmsingle:
         - ReadWriteOnce
       resources:
         requests:
-          storage: 20Gi
+          storage: 40Gi
 
 vmagent:
   spec:
