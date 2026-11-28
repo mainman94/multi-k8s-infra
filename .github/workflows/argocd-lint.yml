@@ -54,7 +54,7 @@ jobs:
           persist-credentials: false
 
       - name: Run checkov
-        uses: bridgecrewio/checkov-action@83b08f51b20950f791f5caadcc92e336b371eb12 # v12
+        uses: bridgecrewio/checkov-action@b782b35c8411ff565b881fba67ceebdb426d7dc4 # v12
         with:
           directory: .
           framework: kubernetes
